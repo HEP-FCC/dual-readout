@@ -1,0 +1,16 @@
+#This macro can not be executed standalone
+/vis/disable
+/run/numberOfThreads 1
+/run/initialize
+/run/verbose 1
+
+/WGR16/generator/theta -0.0372899
+/WGR16/generator/phi 0.0174533
+/WGR16/generator/y0 -3.142
+/WGR16/generator/z0 -4.7135
+/WGR16/generator/randx 10.
+/WGR16/generator/randy 10.
+
+/gun/particle e-
+/gun/energy 20 GeV
+/run/beamOn 2
