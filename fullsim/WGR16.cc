@@ -70,10 +70,12 @@ int main(int argc,char** argv) {
   #endif
 
   G4int seed = 0;
+  G4String hepMCpath;
   // Binning of wavelength & timing should be integers
   G4int wavBin = 60; // 900nm to 300nm
   G4int timeBin = 300; // 100hps to 700hps (h=10^2)
   if (argc > 2) seed = atoi(argv[2]);
+  if (argc > 3) hepMCpath = argv[3];
 
   CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
   CLHEP::HepRandom::setTheSeed(seed);
@@ -99,7 +101,7 @@ int main(int argc,char** argv) {
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization
-  runManager->SetUserInitialization(new WGR16ActionInitialization(seed,wavBin,timeBin));
+  runManager->SetUserInitialization(new WGR16ActionInitialization(seed,wavBin,timeBin,hepMCpath));
 
   // Visualization manager construction
   #ifdef G4VIS_USE

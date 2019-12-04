@@ -33,63 +33,48 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 
-#ifndef WGR16PrimaryGeneratorAction_h
-#define WGR16PrimaryGeneratorAction_h 1
-
-#include "G4VUserPrimaryGeneratorAction.hh"
-#include "globals.hh"
-#include "G4ThreeVector.hh"
-
-class G4ParticleGun;
-class G4GenericMessenger;
-class G4Event;
-class G4ParticleDefinition;
-
-class WGR16PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
-public:
-  WGR16PrimaryGeneratorAction();
-  virtual ~WGR16PrimaryGeneratorAction();
-
-  virtual void GeneratePrimaries(G4Event*);
-
-  void SetTheta(G4double theta) { fTheta = theta; }
-  G4double GetTheta() const { return fTheta; }
-
-  void SetPhi(G4double phi) { fPhi = phi; }
-
-  void SetY0(G4double y0) { fY_0 = y0; }
-  void SetZ0(G4double z0) { fZ_0 = z0; }
-
-  void SetRandX(G4double randx) { fRandX = randx; }
-  void SetRandY(G4double randy) { fRandY = randy; }
-
-private:
-  void DefineCommands();
-
-  G4ParticleGun* fParticleGun;
-  G4GenericMessenger* fMessenger;
-  G4ParticleDefinition* fElectron;
-  G4ParticleDefinition* fPositron;
-  G4ParticleDefinition* fMuon;
-  G4ParticleDefinition* fPion;
-  G4ParticleDefinition* fKaon;
-  G4ParticleDefinition* fProton;
-  G4ParticleDefinition* fOptGamma;
-
-  G4double fTheta;
-  G4double fPhi;
-  G4double fRandX;
-  G4double fRandY;
-
-  G4double y;
-  G4double fY_0;
-  G4double z;
-  G4double fZ_0;
-
-  G4ThreeVector org;
-  G4ThreeVector direction;
-};
+#include "WGR16ActionInitialization.hh"
+#include "WGR16PrimaryGeneratorAction.hh"
+#include "WGR16RunAction.hh"
+#include "WGR16EventAction.hh"
+#include "WGR16SteppingAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif
+using namespace std;
+WGR16ActionInitialization::WGR16ActionInitialization(int seed, G4int wavBin, G4int timeBin, G4String hepMCpath)
+: G4VUserActionInitialization()
+{
+  fSeed = seed;
+  fWavBin = wavBin;
+  fTimeBin = timeBin;
+  fHepMCpath = hepMCpath;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+WGR16ActionInitialization::~WGR16ActionInitialization() {}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void WGR16ActionInitialization::BuildForMaster() const {
+  WGR16EventAction* eventAction = new WGR16EventAction(fWavBin,fTimeBin);
+  SetUserAction(new WGR16RunAction(eventAction,fSeed,fWavBin,fTimeBin));
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void WGR16ActionInitialization::Build() const {
+  G4cout << "Primary Generator Action Started" << G4endl;
+  SetUserAction(new WGR16PrimaryGeneratorAction(fSeed,fHepMCpath));
+  G4cout << "Initialize Event Action" << G4endl;
+  WGR16EventAction* eventAction = new WGR16EventAction(fWavBin,fTimeBin);
+  SetUserAction(eventAction);
+  G4cout << "Initialize Run Action" << G4endl;
+
+  SetUserAction(new WGR16RunAction(eventAction,fSeed,fWavBin,fTimeBin));
+
+  SetUserAction(new WGR16SteppingAction(eventAction));
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

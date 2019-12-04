@@ -1,0 +1,9 @@
+#This macro can not be executed standalone
+/vis/disable
+/run/numberOfThreads 1
+/run/verbose 1
+/run/initialize
+
+/WGR16/hepMC/verbose 1
+
+/run/beamOn 2

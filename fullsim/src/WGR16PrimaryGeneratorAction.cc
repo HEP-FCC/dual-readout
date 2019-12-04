@@ -36,7 +36,6 @@
 #include "WGR16PrimaryGeneratorAction.hh"
 
 #include "G4Event.hh"
-#include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4GenericMessenger.hh"
@@ -46,18 +45,19 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 using namespace std;
-WGR16PrimaryGeneratorAction::WGR16PrimaryGeneratorAction()
-: G4VUserPrimaryGeneratorAction(),
-  fParticleGun(0), fMessenger(0),
-  fElectron(0), fPositron(0), fMuon(0), fPion(0), fKaon(0), fProton(0),fOptGamma(0)
+WGR16PrimaryGeneratorAction::WGR16PrimaryGeneratorAction(G4int seed, G4String hepMCpath)
+: G4VUserPrimaryGeneratorAction()
 {
+  fSeed = seed;
+  fHepMCpath = hepMCpath;
   fTheta = -0.01111;
   fPhi = 0.;
   fRandX = 10.*mm;
   fRandY = 10.*mm;
   fY_0 = 0.;
   fZ_0 = 0.;
-  fParticleGun  = new G4ParticleGun(1);
+  fParticleGun = new G4ParticleGun(1);
+  fHepMCAscii = new HepMCG4AsciiReader(fSeed,fHepMCpath);
 
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4String particleName;
@@ -77,24 +77,29 @@ WGR16PrimaryGeneratorAction::WGR16PrimaryGeneratorAction()
 
 WGR16PrimaryGeneratorAction::~WGR16PrimaryGeneratorAction() {
   delete fParticleGun;
+  delete fHepMCAscii;
   delete fMessenger;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void WGR16PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
-  y = (G4UniformRand()-0.5)*fRandX + fY_0;//- 3.142*cm;//
-  z = (G4UniformRand()-0.5)*fRandY + fZ_0;//- 4.7135*cm;//10x10 mm^2
-  org.set(0,y,z);
+  if (fHepMCpath.empty()) {
+    y = (G4UniformRand()-0.5)*fRandX + fY_0;//- 3.142*cm;//
+    z = (G4UniformRand()-0.5)*fRandY + fZ_0;//- 4.7135*cm;//10x10 mm^2
+    org.set(0,y,z);
 
-  fParticleGun->SetParticlePosition(org); // http://www.apc.univ-paris7.fr/~franco/g4doxy/html/classG4VPrimaryGenerator.html
+    fParticleGun->SetParticlePosition(org); // http://www.apc.univ-paris7.fr/~franco/g4doxy/html/classG4VPrimaryGenerator.html
 
-  direction.setREtaPhi(1.,0.,0.);
-  direction.rotateY(fTheta);
-  direction.rotateZ(fPhi);
+    direction.setREtaPhi(1.,0.,0.);
+    direction.rotateY(fTheta);
+    direction.rotateZ(fPhi);
 
-  fParticleGun->SetParticleMomentumDirection(direction);
-  fParticleGun->GeneratePrimaryVertex(event);
+    fParticleGun->SetParticleMomentumDirection(direction);
+    fParticleGun->GeneratePrimaryVertex(event);
+  } else {
+    fHepMCAscii->GeneratePrimaryVertex(event);
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

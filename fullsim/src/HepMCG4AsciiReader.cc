@@ -2,10 +2,9 @@
 //// <CEPC>                                                        ////
 //// Wedge Geometry for Dual-reaout calorimter                     ////
 ////                                                               ////
-//// Original Author: Mr.Jo Hyunsuk, Kyunpook National University  ////
-////                  Sanghyun Ko, Seoul National University       ////
-//// E-Mail: hyunsuk.jo@cern.ch	                                   ////
-////         sang.hyun.ko@cern.ch                                  ////
+//// Original Author: Sanghyun Ko, Seoul National University       ////
+////                                                               ////
+//// E-Mail: sang.hyun.ko@cern.ch                                  ////
 ////                                                               ////
 ///////////////////////////////////////////////////////////////////////
 //
@@ -32,48 +31,48 @@
 // * use  in  resulting  scientific  publications,  and indicate your *
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
+//
 
-#include "WGR16ActionInitialization.hh"
-#include "WGR16PrimaryGeneratorAction.hh"
-#include "WGR16RunAction.hh"
-#include "WGR16EventAction.hh"
-#include "WGR16SteppingAction.hh"
+#include "HepMCG4AsciiReader.hh"
+#include "G4GenericMessenger.hh"
+
+#include <iostream>
+#include <fstream>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-using namespace std;
-WGR16ActionInitialization::WGR16ActionInitialization(int seed, G4int wavBin, G4int timeBin)
-: G4VUserActionInitialization()
+HepMCG4AsciiReader::HepMCG4AsciiReader(G4int seed, G4String hepMCpath)
+: verbose(0), fMessenger(0), fSeed(seed), fHepMCpath(hepMCpath)
 {
-  fSeed = seed;
-  fWavBin = wavBin;
-  fTimeBin = timeBin;
+  DefineCommands();
+  Initialize();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-WGR16ActionInitialization::~WGR16ActionInitialization() {}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void WGR16ActionInitialization::BuildForMaster() const {
-  WGR16EventAction* eventAction = new WGR16EventAction(fWavBin,fTimeBin);
-  SetUserAction(new WGR16RunAction(eventAction,fSeed,fWavBin,fTimeBin));
+HepMCG4AsciiReader::~HepMCG4AsciiReader() {
+  delete asciiInput;
+  delete fMessenger;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void WGR16ActionInitialization::Build() const {
-  G4cout << "Primary Generator Action Started" << G4endl;
-  SetUserAction(new WGR16PrimaryGeneratorAction());
-  G4cout << "Initialize Event Action" << G4endl;
-  WGR16EventAction* eventAction = new WGR16EventAction(fWavBin,fTimeBin);
-  SetUserAction(eventAction);
-  G4cout << "Initialize Run Action" << G4endl;
-
-  SetUserAction(new WGR16RunAction(eventAction,fSeed,fWavBin,fTimeBin));
-
-  SetUserAction(new WGR16SteppingAction(eventAction));
+void HepMCG4AsciiReader::Initialize() {
+  fHepMCpath += "_"+std::to_string(fSeed)+".dat";
+  asciiInput = new HepMC3::ReaderAsciiHepMC2(fHepMCpath.c_str());
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+HepMC3::GenEvent* HepMCG4AsciiReader::GenerateHepMCEvent() {
+  HepMC3::GenEvent* evt = new HepMC3::GenEvent(HepMC3::Units::MEV,HepMC3::Units::MM);
+  asciiInput->read_event(*evt);
+  if( asciiInput->failed() ) return 0;
+  if( verbose>0 ) HepMC3::Print::listing(*evt);;
+
+  return evt;
+}
+
+void HepMCG4AsciiReader::DefineCommands() {
+  fMessenger = new G4GenericMessenger(this, "/WGR16/hepMC/", "HepMC IO control");
+
+  G4GenericMessenger::Command& verboseCmd = fMessenger->DeclareMethod("verbose",&HepMCG4AsciiReader::SetVerboseLevel,"verbose level");
+  verboseCmd.SetParameterName("verbose",true);
+  verboseCmd.SetDefaultValue("0");
+}

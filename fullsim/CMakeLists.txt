@@ -8,13 +8,11 @@ project(WGR16)
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
 # to build a batch mode only executable
 #
-option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
+option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" OFF)
 if(WITH_GEANT4_UIVIS)
-#find_package(Geant4 REQUIRED ui_tcsh vis_opengl_x11)
 find_package(Geant4 REQUIRED ui_all vis_all)
-#find_package(Geant4 REQUIRED ui_all vis_opengl_x11)
 else()
-  find_package(Geant4 REQUIRED)
+find_package(Geant4 REQUIRED)
 endif()
 
 
@@ -25,11 +23,18 @@ endif()
 include(${Geant4_USE_FILE})
 
 #----------------------------------------------------------------------------
+# Find HepMC (required package)
+#
+set(HEPMC_INCLUDE_DIR "$ENV{HEPMC_INCLUDE_DIR}")
+set(HEPMC_LIBRARIES "$ENV{HEPMC_LIBRARIES}")
+
+#----------------------------------------------------------------------------
 # Locate sources and headers for this project
 # NB: headers are included so they will show up in IDEs
 #
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include 
-                    ${Geant4_INCLUDE_DIR})
+                    ${Geant4_INCLUDE_DIR}
+                    ${HEPMC_INCLUDE_DIR})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
@@ -37,7 +42,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(WGR16 WGR16.cc ${sources} ${headers})
-target_link_libraries(WGR16 ${Geant4_LIBRARIES})
+target_link_libraries(WGR16 ${Geant4_LIBRARIES} ${HEPMC_LIBRARIES})
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -52,15 +57,16 @@ set(WGR16_SCRIPTS
   init_vis.mac 
   run_ele.mac 
   run_pi.mac 
+  run_hepmc.mac
   vis.mac
-  )
+)
 
 foreach(_script ${WGR16_SCRIPTS})
   configure_file(
     ${PROJECT_SOURCE_DIR}/${_script}
     ${PROJECT_BINARY_DIR}/${_script}
     COPYONLY
-    )
+  )
 endforeach()
 
 #----------------------------------------------------------------------------

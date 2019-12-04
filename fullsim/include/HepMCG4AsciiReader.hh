@@ -2,10 +2,9 @@
 //// <CEPC>                                                        ////
 //// Wedge Geometry for Dual-reaout calorimter                     ////
 ////                                                               ////
-//// Original Author: Mr.Jo Hyunsuk, Kyunpook National University  ////
-////                  Sanghyun Ko, Seoul National University       ////
-//// E-Mail: hyunsuk.jo@cern.ch	                                   ////
-////         sang.hyun.ko@cern.ch                                  ////
+//// Original Author: Sanghyun Ko, Seoul National University       ////
+////                                                               ////
+//// E-Mail: sang.hyun.ko@cern.ch                                  ////
 ////                                                               ////
 ///////////////////////////////////////////////////////////////////////
 //
@@ -32,26 +31,43 @@
 // * use  in  resulting  scientific  publications,  and indicate your *
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
+//
 
-#ifndef WGR16ActionInitialization_h
-#define WGR16ActionInitialization_h 1
+#ifndef HEPMC_G4_ASCII_READER_H
+#define HEPMC_G4_ASCII_READER_H
 
-#include "G4VUserActionInitialization.hh"
-#include "globals.hh"
+#include "HepMCG4Interface.hh"
+#include "HepMC3/ReaderAsciiHepMC2.h"
+#include "HepMC3/Units.h"
+#include "HepMC3/Print.h"
 
-class WGR16ActionInitialization : public G4VUserActionInitialization {
+class G4GenericMessenger;
+
+class HepMCG4AsciiReader : public HepMCG4Interface {
+protected:
+  HepMC3::ReaderAsciiHepMC2* asciiInput;
+
+  G4int verbose;
+
+  virtual HepMC3::GenEvent* GenerateHepMCEvent();
+
 public:
-  WGR16ActionInitialization(int seed, G4int wavBin, G4int timeBin);
-  virtual ~WGR16ActionInitialization();
+  HepMCG4AsciiReader(G4int seed, G4String hepMCpath);
+  ~HepMCG4AsciiReader();
 
-  virtual void BuildForMaster() const;
-  virtual void Build() const;
+  // set/get methods
+  void SetVerboseLevel(G4int i) { verbose = i; }
+  G4int GetVerboseLevel() const { return verbose; }
+
+  // methods...
+  void Initialize();
+
 private:
-  int fSeed;
-  G4int fWavBin;
-  G4int fTimeBin;
-};
+  void DefineCommands();
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+  G4GenericMessenger* fMessenger;
+  G4int fSeed;
+  G4String fHepMCpath;
+};
 
 #endif
