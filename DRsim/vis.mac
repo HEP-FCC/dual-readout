@@ -1,5 +1,3 @@
-#
-#
 # Set verbosity
 #
 /control/verbose 2
@@ -38,7 +36,7 @@
 #/vis/viewer/set/style wireframe
 #
 # Draw coordinate axes:
-#/vis/scene/add/axes 0 0 0 1 m
+/vis/scene/add/axes 0 0 0 1 m
 #
 # Draw smooth trajectories at end of event, showing trajectory points
 # as markers 2 pixels wide:
@@ -49,7 +47,7 @@
 # (if too many tracks cause core dump => /tracking/storeTrajectory 0)
 #
 # Draw hits at end of event:
-#/vis/scene/add/hits
+/vis/scene/add/hits
 #
 # To draw only gammas:
 #/vis/filtering/trajectories/create/particleFilter
@@ -63,6 +61,8 @@
 # For example, to select colour by particle ID:
 #/vis/modeling/trajectories/create/drawByParticleID
 #/vis/modeling/trajectories/drawByParticleID-0/set e- blue
+/vis/modeling/trajectories/create/drawByParticleID
+/vis/modeling/trajectories/drawByParticleID-0/set opticalphoton cyan
 #
 # To superimpose all of the events from a given run:
 #/vis/scene/endOfEventAction accumulate
@@ -76,4 +76,4 @@
 #
 # Set visualization to accumulate events into one picture
 #
-/vis/scene/endOfEventAction accumulate
+#/vis/scene/endOfEventAction accumulate

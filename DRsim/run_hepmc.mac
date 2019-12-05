@@ -4,6 +4,6 @@
 /run/verbose 1
 /run/initialize
 
-/WGR16/hepMC/verbose 1
+/DRsim/hepMC/verbose 1
 
 /run/beamOn 2

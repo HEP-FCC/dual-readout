@@ -1,43 +1,8 @@
-///////////////////////////////////////////////////////////////////////
-//// <CEPC>                                                        ////
-//// Wedge Geometry for Dual-reaout calorimter                     ////
-////                                                               ////
-//// Original Author: Mr.Jo Hyunsuk, Kyunpook National University  ////
-////                  Sanghyun Ko, Seoul National University       ////
-//// E-Mail: hyunsuk.jo@cern.ch	                                   ////
-////         sang.hyun.ko@cern.ch                                  ////
-////                                                               ////
-///////////////////////////////////////////////////////////////////////
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-
-#include "WGR16PMTSD.hh"
-#include "WGR16DetectorConstruction.hh"
-#include "WGR16MagneticField.hh"
-#include "WGR16CellParameterisation.hh"
-#include "WGR16FilterParameterisation.hh"
+#include "DRsimPMTSD.hh"
+#include "DRsimDetectorConstruction.hh"
+#include "DRsimMagneticField.hh"
+#include "DRsimCellParameterisation.hh"
+#include "DRsimFilterParameterisation.hh"
 #include "G4FieldManager.hh"
 #include "G4TransportationManager.hh"
 #include "G4Mag_UsualEqRhs.hh"
@@ -92,14 +57,10 @@
 #include "dimensionE.hh"
 using namespace std;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+G4ThreadLocal DRsimMagneticField* DRsimDetectorConstruction::fMagneticField = 0;
+G4ThreadLocal G4FieldManager* DRsimDetectorConstruction::fFieldMgr = 0;
 
-G4ThreadLocal WGR16MagneticField* WGR16DetectorConstruction::fMagneticField = 0;
-G4ThreadLocal G4FieldManager* WGR16DetectorConstruction::fFieldMgr = 0;
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-WGR16DetectorConstruction::WGR16DetectorConstruction()
+DRsimDetectorConstruction::DRsimDetectorConstruction()
 : G4VUserDetectorConstruction(),
   fMessenger(0), fScoringVolume(0)
 {
@@ -147,9 +108,7 @@ WGR16DetectorConstruction::WGR16DetectorConstruction()
   visAttrGreen->SetVisibility(true);
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-WGR16DetectorConstruction::~WGR16DetectorConstruction() {
+DRsimDetectorConstruction::~DRsimDetectorConstruction() {
   delete fMessenger;
 
   delete visAttrOrange;
@@ -158,9 +117,7 @@ WGR16DetectorConstruction::~WGR16DetectorConstruction() {
   delete visAttrGreen;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-G4VPhysicalVolume* WGR16DetectorConstruction::Construct() {
+G4VPhysicalVolume* DRsimDetectorConstruction::Construct() {
   G4cout << "Detector construct start" << G4endl;
 
   G4GeometryManager::GetInstance()->OpenGeometry();
@@ -432,33 +389,31 @@ G4VPhysicalVolume* WGR16DetectorConstruction::Construct() {
   return worldPhysical;
 }
 
-	//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void WGR16DetectorConstruction::ConstructSDandField()
+void DRsimDetectorConstruction::ConstructSDandField()
 {
   G4SDManager* SDman = G4SDManager::GetSDMpointer();
   G4String PMTName = "SiPMSD";
 
   for(int i=0;i<NbOfBarrel;i++){
-    PMTSDBR[i] = new WGR16PMTSD("BR"+std::to_string(i),"BRC"+std::to_string(i));
+    PMTSDBR[i] = new DRsimPMTSD("BR"+std::to_string(i),"BRC"+std::to_string(i));
     SDman->AddNewDetector(PMTSDBR[i]);
     PMTcathLogicalBR[i]->SetSensitiveDetector(PMTSDBR[i]);
   }
 
   for(int i=0;i<NbOfBarrel;i++){
-    PMTSDBL[i] = new WGR16PMTSD("BL"+std::to_string(i),"BLC"+std::to_string(i));
+    PMTSDBL[i] = new DRsimPMTSD("BL"+std::to_string(i),"BLC"+std::to_string(i));
     SDman->AddNewDetector(PMTSDBL[i]);
     PMTcathLogicalBL[i]->SetSensitiveDetector(PMTSDBL[i]);
   }
 
   for(int i=0;i<NbOfEndcap;i++){
-    PMTSDER[i] = new WGR16PMTSD("ER"+std::to_string(i),"ERC"+std::to_string(i));
+    PMTSDER[i] = new DRsimPMTSD("ER"+std::to_string(i),"ERC"+std::to_string(i));
     SDman->AddNewDetector(PMTSDER[i]);
     PMTcathLogicalER[i]->SetSensitiveDetector(PMTSDER[i]);
   }
 
   for(int i=0;i<NbOfEndcap;i++){
-    PMTSDEL[i] = new WGR16PMTSD("EL"+std::to_string(i),"ELC"+std::to_string(i));
+    PMTSDEL[i] = new DRsimPMTSD("EL"+std::to_string(i),"ELC"+std::to_string(i));
     SDman->AddNewDetector(PMTSDEL[i]);
     PMTcathLogicalEL[i]->SetSensitiveDetector(PMTSDEL[i]);
   }
@@ -466,7 +421,7 @@ void WGR16DetectorConstruction::ConstructSDandField()
   G4cout << "Ended construct SD" << G4endl;
 }
 
-void WGR16DetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[], G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]) {
+void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[], G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]) {
 
   for(int i=0;i<NbOfBarrel;i++) {
     thetaofcenter = fulltheta + deltatheta_barrel[i]/2.;
@@ -502,7 +457,7 @@ void WGR16DetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
     G4VSolid* PMTcellSolid = new G4Box("PMTcellSolid",1.2/2.*mm,1.2/2.*mm,PMTT/2.);
     PMTcellLogical[i] = new G4LogicalVolume(PMTcellSolid,Glass,"PMTcellLogical");
 
-    WGR16CellParameterisation* PMTcellParam = new WGR16CellParameterisation(numx,numy);
+    DRsimCellParameterisation* PMTcellParam = new DRsimCellParameterisation(numx,numy);
     G4PVParameterised* PMTcellPhysical = new G4PVParameterised("PMTcellPhysical",PMTcellLogical[i],SiPMlayerLogical,kXAxis,numx*numy,PMTcellParam);
 
     G4VSolid* PMTcathSolid = new G4Box("PMTcathSolid",1.2/2.*mm,1.2/2.*mm,0.01/2.*mm);
@@ -513,7 +468,7 @@ void WGR16DetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
     G4VSolid* filterSolid = new G4Box("filterSolid",1.2/2.*mm,1.2/2.*mm,filterT/2.);
     PMTfilterLogical[i] = new G4LogicalVolume(filterSolid,filter,"PMTfilterLogical");
 
-    WGR16FilterParameterisation* filterParam = new WGR16FilterParameterisation(numx,numy);
+    DRsimFilterParameterisation* filterParam = new DRsimFilterParameterisation(numx,numy);
     G4PVParameterised* filterPhysical = new G4PVParameterised("filterPhysical",PMTfilterLogical[i],filterlayerLogical,kXAxis,numx*numy/2,filterParam);
     new G4LogicalBorderSurface("filterSurf",filterPhysical,PMTcellPhysical,filterSurf);
 
@@ -524,7 +479,7 @@ void WGR16DetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
   }
 }
 
-void WGR16DetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[], G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]) {
+void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[], G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]) {
 
   for(int i=0;i<NbOfEndcap;i++) {
     thetaofcenter = fulltheta + lastdeltatheta/2.;
@@ -559,7 +514,7 @@ void WGR16DetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
     G4VSolid* PMTcellSolid = new G4Box("PMTcellSolid",1.2/2.*mm,1.2/2.*mm,PMTT/2.);
     PMTcellLogical[i] = new G4LogicalVolume(PMTcellSolid,Glass,"PMTcellLogical");
 
-    WGR16CellParameterisation* PMTcellParam = new WGR16CellParameterisation(numx,numy);
+    DRsimCellParameterisation* PMTcellParam = new DRsimCellParameterisation(numx,numy);
     G4PVParameterised* PMTcellPhysical = new G4PVParameterised("PMTcellPhysical",PMTcellLogical[i],SiPMlayerLogical,kXAxis,numx*numy,PMTcellParam);
 
     G4VSolid* PMTcathSolid = new G4Box("PMTcathSolid",1.2/2.*mm,1.2/2.*mm,0.01/2.*mm);
@@ -570,7 +525,7 @@ void WGR16DetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
     G4VSolid* filterSolid = new G4Box("filterSolid",1.2/2.*mm,1.2/2.*mm,filterT/2.);
     PMTfilterLogical[i] = new G4LogicalVolume(filterSolid,filter,"PMTfilterLogical");
 
-    WGR16FilterParameterisation* filterParam = new WGR16FilterParameterisation(numx,numy);
+    DRsimFilterParameterisation* filterParam = new DRsimFilterParameterisation(numx,numy);
     G4PVParameterised* filterPhysical = new G4PVParameterised("filterPhysical",PMTfilterLogical[i],filterlayerLogical,kXAxis,numx*numy/2,filterParam);
     new G4LogicalBorderSurface("filterSurf",filterPhysical,PMTcellPhysical,filterSurf);
 
@@ -581,9 +536,7 @@ void WGR16DetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
   }
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void WGR16DetectorConstruction::ConstructMaterials() {
+void DRsimDetectorConstruction::ConstructMaterials() {
   G4NistManager* nistManager = G4NistManager::Instance();
 
   // Vacuum "Galactic"
@@ -594,13 +547,9 @@ void WGR16DetectorConstruction::ConstructMaterials() {
   G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void DRsimDetectorConstruction::DefineCommands() {}
 
-void WGR16DetectorConstruction::DefineCommands() {}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void WGR16DetectorConstruction::fiberBarrel(G4int i, G4double deltatheta_,G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]) {
+void DRsimDetectorConstruction::fiberBarrel(G4int i, G4double deltatheta_,G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]) {
 
   fFiberX.clear();
   fFiberY.clear();
@@ -659,7 +608,7 @@ void WGR16DetectorConstruction::fiberBarrel(G4int i, G4double deltatheta_,G4Logi
   }
 }
 
-void WGR16DetectorConstruction::fiberEndcap(G4int i, G4double deltatheta_, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]) {
+void DRsimDetectorConstruction::fiberEndcap(G4int i, G4double deltatheta_, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]) {
 
   fFiberX.clear();
   fFiberY.clear();

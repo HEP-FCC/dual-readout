@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------
 # Setup the project
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-project(WGR16)
+project(DRsim)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -32,7 +32,7 @@ set(HEPMC_LIBRARIES "$ENV{HEPMC_LIBRARIES}")
 # Locate sources and headers for this project
 # NB: headers are included so they will show up in IDEs
 #
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
                     ${Geant4_INCLUDE_DIR}
                     ${HEPMC_INCLUDE_DIR})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
@@ -41,27 +41,27 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
-add_executable(WGR16 WGR16.cc ${sources} ${headers})
-target_link_libraries(WGR16 ${Geant4_LIBRARIES} ${HEPMC_LIBRARIES})
+add_executable(DRsim DRsim.cc ${sources} ${headers})
+target_link_libraries(DRsim ${Geant4_LIBRARIES} ${HEPMC_LIBRARIES})
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build B5. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.
 #
-set(WGR16_SCRIPTS
+set(DRsim_SCRIPTS
   icons.mac
   gui.mac
   run.png
-  init.mac 
-  init_vis.mac 
-  run_ele.mac 
-  run_pi.mac 
+  init.mac
+  init_vis.mac
+  run_ele.mac
+  run_pi.mac
   run_hepmc.mac
   vis.mac
 )
 
-foreach(_script ${WGR16_SCRIPTS})
+foreach(_script ${DRsim_SCRIPTS})
   configure_file(
     ${PROJECT_SOURCE_DIR}/${_script}
     ${PROJECT_BINARY_DIR}/${_script}
@@ -73,10 +73,9 @@ endforeach()
 # Add program to the project targets
 # (this avoids the need of typing the program name after make)
 #
-#add_custom_target(WGR16 DEPENDS exampleB)
+#add_custom_target(DRsim DEPENDS exampleB)
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
-install(TARGETS WGR16 DESTINATION bin)
-
+install(TARGETS DRsim DESTINATION bin)
