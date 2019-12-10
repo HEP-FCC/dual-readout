@@ -1,5 +1,5 @@
-#ifndef HEPMC_G4_INTERFACE_H
-#define HEPMC_G4_INTERFACE_H
+#ifndef HEPMC_G4_INTERFACE_h
+#define HEPMC_G4_INTERFACE_h 1
 
 #include "G4VPrimaryGenerator.hh"
 #include "HepMC3/GenEvent.h"

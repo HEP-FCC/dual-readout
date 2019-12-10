@@ -1,5 +1,5 @@
-#ifndef HEPMC_G4_ASCII_READER_H
-#define HEPMC_G4_ASCII_READER_H
+#ifndef HEPMC_G4_ASCII_READER_h
+#define HEPMC_G4_ASCII_READER_h 1
 
 #include "HepMCG4Interface.hh"
 #include "HepMC3/ReaderAsciiHepMC2.h"
