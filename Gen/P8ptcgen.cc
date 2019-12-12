@@ -9,6 +9,7 @@
 #include "fastjet/PseudoJet.hh"
 
 #include "P8ptcgun.h"
+#include "fastjetInterface.h"
 
 #include <iostream>
 
@@ -42,6 +43,7 @@ int main(int argc, char* argv[]) {
 
   // Specify file where HepMC events will be stored.
   HepMC3::WriterRootTree rootOutput(argv[2]);
+  fastjetInterface fjInterface;
 
   // Generator.
   Pythia pythia;
@@ -67,6 +69,7 @@ int main(int argc, char* argv[]) {
   // Initialization.
   pythia.init();
 
+  fjInterface.init(rootOutput.m_tree);
   P8ptcgun ptcgun(idGun, eeGun, theta, 0.);
 
   // FastJet
@@ -134,6 +137,7 @@ int main(int argc, char* argv[]) {
     sortedJets    = fastjet::sorted_by_pt(inclusiveJets);
 
     // Write the HepMC event to file. Done with it.
+    fjInterface.writeJets(sortedJets);
     rootOutput.write_event(*hepmcevt);
     delete hepmcevt;
 
