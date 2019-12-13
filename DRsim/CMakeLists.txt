@@ -24,8 +24,7 @@ include(${Geant4_USE_FILE})
 #----------------------------------------------------------------------------
 # Find HepMC (required package)
 #
-set(HEPMC_INCLUDE_DIR "$ENV{HEPMC_INCLUDE_DIR}")
-set(HEPMC_LIBRARIES "$ENV{HEPMC_LIBRARIES}")
+set(HEPMC_DIR "$ENV{HEPMC_DIR}")
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
@@ -34,7 +33,7 @@ set(HEPMC_LIBRARIES "$ENV{HEPMC_LIBRARIES}")
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${Geant4_INCLUDE_DIR}
-  ${HEPMC_INCLUDE_DIR}
+  ${HEPMC_DIR}/include
 )
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
@@ -43,7 +42,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(DRsim DRsim.cc ${sources} ${headers})
-target_link_libraries(DRsim ${Geant4_LIBRARIES} ${HEPMC_LIBRARIES})
+target_link_libraries(DRsim ${Geant4_LIBRARIES} ${HEPMC_DIR}/lib/libHepMC3.so)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
