@@ -1,24 +1,24 @@
-#ifndef HEPMC_G4_ASCII_READER_h
-#define HEPMC_G4_ASCII_READER_h 1
+#ifndef HEPMC_G4_READER_h
+#define HEPMC_G4_READER_h 1
 
 #include "HepMCG4Interface.hh"
-#include "HepMC3/ReaderAsciiHepMC2.h"
+#include "HepMC3/ReaderRootTree.h"
 #include "HepMC3/Units.h"
 #include "HepMC3/Print.h"
 
 class G4GenericMessenger;
 
-class HepMCG4AsciiReader : public HepMCG4Interface {
+class HepMCG4Reader : public HepMCG4Interface {
 protected:
-  HepMC3::ReaderAsciiHepMC2* asciiInput;
+  HepMC3::ReaderRootTree* reader;
 
   G4int verbose;
 
   virtual HepMC3::GenEvent* GenerateHepMCEvent();
 
 public:
-  HepMCG4AsciiReader(G4int seed, G4String hepMCpath);
-  ~HepMCG4AsciiReader();
+  HepMCG4Reader(G4int seed, G4String hepMCpath);
+  ~HepMCG4Reader();
 
   void SetVerboseLevel(G4int i) { verbose = i; }
   G4int GetVerboseLevel() const { return verbose; }

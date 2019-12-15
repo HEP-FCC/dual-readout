@@ -10,11 +10,11 @@
 #include "G4SystemOfUnits.hh"
 
 HepMCG4Interface::HepMCG4Interface()
-  : hepmcEvent(0)
+  : fHepmcEvent(0)
 {}
 
 HepMCG4Interface::~HepMCG4Interface() {
-  delete hepmcEvent;
+  delete fHepmcEvent;
 }
 
 G4bool HepMCG4Interface::CheckVertexInsideWorld(const G4ThreeVector& pos) const {
@@ -71,15 +71,15 @@ HepMC3::GenEvent* HepMCG4Interface::GenerateHepMCEvent()
 void HepMCG4Interface::GeneratePrimaryVertex(G4Event* anEvent)
 {
   // delete previous event object
-  delete hepmcEvent;
+  delete fHepmcEvent;
 
   // generate next event
-  hepmcEvent = GenerateHepMCEvent();
-  if(!hepmcEvent) {
+  fHepmcEvent = GenerateHepMCEvent();
+  if(!fHepmcEvent) {
     G4cout << "HepMCInterface: no generated particles. run terminated..."
            << G4endl;
     G4RunManager::GetRunManager()->AbortRun();
     return;
   }
-  HepMC2G4(hepmcEvent, anEvent);
+  HepMC2G4(fHepmcEvent, anEvent);
 }

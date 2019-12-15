@@ -14,9 +14,9 @@ protected:
   // Note that the life of HepMC event object must be handled by users.
   // In the default implementation, a current HepMC event will be
   // deleted at GeneratePrimaryVertex() in the next event.
-  HepMC3::GenEvent* hepmcEvent; // (care for single event case only)
+  HepMC3::GenEvent* fHepmcEvent; // (care for single event case only)
 
-  // We  have to take care for the position of primaries because
+  // We have to take care for the position of primaries because
   // primary vertices outside the world voulme give rise to G4Execption.
   // If the default implementation is not adequate, an alternative
   // can be implemented in your own class.
@@ -40,6 +40,6 @@ public:
   virtual void GeneratePrimaryVertex(G4Event* anEvent);
 };
 
-inline HepMC3::GenEvent* HepMCG4Interface::GetHepMCGenEvent() const { return hepmcEvent; }
+inline HepMC3::GenEvent* HepMCG4Interface::GetHepMCGenEvent() const { return fHepmcEvent; }
 
 #endif

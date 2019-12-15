@@ -1,15 +1,13 @@
 #ifndef DRsimPrimaryGeneratorAction_h
 #define DRsimPrimaryGeneratorAction_h 1
 
+#include "HepMCG4Reader.hh"
+
 #include "globals.hh"
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4ParticleGun.hh"
 #include "G4ThreeVector.hh"
 
-#include "HepMCG4AsciiReader.hh"
-
-class G4VPrimaryGenerator;
-class G4ParticleGun;
 class G4GenericMessenger;
 class G4Event;
 class G4ParticleDefinition;
@@ -17,6 +15,7 @@ class G4ParticleDefinition;
 class DRsimPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
 public:
   DRsimPrimaryGeneratorAction(G4int seed, G4String hepMCpath);
+  DRsimPrimaryGeneratorAction();
   virtual ~DRsimPrimaryGeneratorAction();
 
   virtual void GeneratePrimaries(G4Event*);
@@ -35,16 +34,17 @@ public:
 private:
   void DefineCommands();
 
+  static HepMCG4Reader* sHepMCreader;
+
   G4int fSeed;
   G4String fHepMCpath;
   G4ParticleGun* fParticleGun;
-  HepMCG4AsciiReader* fHepMCAscii;
   G4GenericMessenger* fMessenger;
   G4ParticleDefinition* fElectron;
   G4ParticleDefinition* fPositron;
   G4ParticleDefinition* fMuon;
   G4ParticleDefinition* fPion;
-  G4ParticleDefinition* fKaon;
+  G4ParticleDefinition* fKaon0L;
   G4ParticleDefinition* fProton;
   G4ParticleDefinition* fOptGamma;
 
@@ -53,13 +53,11 @@ private:
   G4double fRandX;
   G4double fRandY;
 
-  G4double y;
   G4double fY_0;
-  G4double z;
   G4double fZ_0;
 
-  G4ThreeVector org;
-  G4ThreeVector direction;
+  G4ThreeVector fOrg;
+  G4ThreeVector fDirection;
 };
 
 #endif

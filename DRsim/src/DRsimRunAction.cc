@@ -1,11 +1,7 @@
-#include "DRsimDetectorConstruction.hh"
 #include "DRsimRunAction.hh"
-#include "DRsimEventAction.hh"
 #include "DRsimPrimaryGeneratorAction.hh"
-#include "G4Run.hh"
-#include "G4UnitsTable.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4RunManager.hh"
+#include "DRsimDetectorConstruction.hh"
+#include "DRsimEventAction.hh"
 
 #include <vector>
 using namespace std;

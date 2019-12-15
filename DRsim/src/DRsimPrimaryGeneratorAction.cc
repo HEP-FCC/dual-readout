@@ -5,15 +5,34 @@
 #include "G4ParticleDefinition.hh"
 #include "G4GenericMessenger.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4AutoLock.hh"
 #include "Randomize.hh"
 #include <cmath>
+
+namespace { G4Mutex DRsimPrimaryGeneratorMutex = G4MUTEX_INITIALIZER; }
+HepMCG4Reader* DRsimPrimaryGeneratorAction::sHepMCreader = 0;
 
 using namespace std;
 DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4String hepMCpath)
 : G4VUserPrimaryGeneratorAction()
 {
-  fSeed = seed;
   fHepMCpath = hepMCpath;
+  fSeed = seed;
+
+  if (fHepMCpath.empty()) {
+    DRsimPrimaryGeneratorAction();
+  } else {
+    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
+    fHepMCpath = hepMCpath;
+    if (!sHepMCreader) sHepMCreader = new HepMCG4Reader(fSeed,fHepMCpath);
+
+    DefineCommands();
+  }
+}
+
+DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction()
+: G4VUserPrimaryGeneratorAction()
+{
   fTheta = -0.01111;
   fPhi = 0.;
   fRandX = 10.*mm;
@@ -21,7 +40,6 @@ DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4String he
   fY_0 = 0.;
   fZ_0 = 0.;
   fParticleGun = new G4ParticleGun(1);
-  fHepMCAscii = new HepMCG4AsciiReader(fSeed,fHepMCpath);
 
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4String particleName;
@@ -29,7 +47,7 @@ DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4String he
   fPositron = particleTable->FindParticle(particleName="e+");
   fMuon = particleTable->FindParticle(particleName="mu+");
   fPion = particleTable->FindParticle(particleName="pi+");
-  fKaon = particleTable->FindParticle(particleName="kaon+");
+  fKaon0L = particleTable->FindParticle(particleName="kaon0L");
   fProton = particleTable->FindParticle(particleName="proton");
   fOptGamma = particleTable->FindParticle(particleName="opticalphoton");
 
@@ -38,27 +56,36 @@ DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4String he
 }
 
 DRsimPrimaryGeneratorAction::~DRsimPrimaryGeneratorAction() {
-  delete fParticleGun;
-  delete fHepMCAscii;
   delete fMessenger;
+
+  if (fHepMCpath.empty()) {
+    delete fParticleGun;
+  } else {
+    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
+    if (sHepMCreader) {
+      delete sHepMCreader;
+      sHepMCreader = 0;
+    }
+  }
 }
 
 void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
   if (fHepMCpath.empty()) {
-    y = (G4UniformRand()-0.5)*fRandX + fY_0;//- 3.142*cm;//
-    z = (G4UniformRand()-0.5)*fRandY + fZ_0;//- 4.7135*cm;//10x10 mm^2
-    org.set(0,y,z);
+    G4double y = (G4UniformRand()-0.5)*fRandX + fY_0;//- 3.142*cm;//
+    G4double z = (G4UniformRand()-0.5)*fRandY + fZ_0;//- 4.7135*cm;//10x10 mm^2
+    fOrg.set(0,y,z);
 
-    fParticleGun->SetParticlePosition(org); // http://www.apc.univ-paris7.fr/~franco/g4doxy/html/classG4VPrimaryGenerator.html
+    fParticleGun->SetParticlePosition(fOrg); // http://www.apc.univ-paris7.fr/~franco/g4doxy/html/classG4VPrimaryGenerator.html
 
-    direction.setREtaPhi(1.,0.,0.);
-    direction.rotateY(fTheta);
-    direction.rotateZ(fPhi);
+    fDirection.setREtaPhi(1.,0.,0.);
+    fDirection.rotateY(fTheta);
+    fDirection.rotateZ(fPhi);
 
-    fParticleGun->SetParticleMomentumDirection(direction);
+    fParticleGun->SetParticleMomentumDirection(fDirection);
     fParticleGun->GeneratePrimaryVertex(event);
   } else {
-    fHepMCAscii->GeneratePrimaryVertex(event);
+    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
+    sHepMCreader->GeneratePrimaryVertex(event);
   }
 }
 
