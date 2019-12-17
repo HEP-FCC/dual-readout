@@ -23,7 +23,6 @@ DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4String he
     DRsimPrimaryGeneratorAction();
   } else {
     G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
-    fHepMCpath = hepMCpath;
     if (!sHepMCreader) sHepMCreader = new HepMCG4Reader(fSeed,fHepMCpath);
 
     DefineCommands();

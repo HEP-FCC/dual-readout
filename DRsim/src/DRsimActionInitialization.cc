@@ -17,19 +17,15 @@ DRsimActionInitialization::DRsimActionInitialization(int seed, G4int wavBin, G4i
 DRsimActionInitialization::~DRsimActionInitialization() {}
 
 void DRsimActionInitialization::BuildForMaster() const {
-  DRsimEventAction* eventAction = new DRsimEventAction(fWavBin,fTimeBin);
-  SetUserAction(new DRsimRunAction(eventAction,fSeed,fWavBin,fTimeBin));
+  SetUserAction(new DRsimRunAction(fSeed,fWavBin,fTimeBin));
 }
 
 void DRsimActionInitialization::Build() const {
-  G4cout << "Primary Generator Action Started" << G4endl;
   SetUserAction(new DRsimPrimaryGeneratorAction(fSeed,fHepMCpath));
-  G4cout << "Initialize Event Action" << G4endl;
-  DRsimEventAction* eventAction = new DRsimEventAction(fWavBin,fTimeBin);
-  SetUserAction(eventAction);
-  G4cout << "Initialize Run Action" << G4endl;
+  SetUserAction(new DRsimRunAction(fSeed,fWavBin,fTimeBin));
 
-  SetUserAction(new DRsimRunAction(eventAction,fSeed,fWavBin,fTimeBin));
+  DRsimEventAction* eventAction = new DRsimEventAction();
+  SetUserAction(eventAction);
 
   SetUserAction(new DRsimSteppingAction(eventAction));
 }

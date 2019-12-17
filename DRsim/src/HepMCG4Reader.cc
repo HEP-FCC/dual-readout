@@ -12,8 +12,9 @@ HepMCG4Reader::HepMCG4Reader(G4int seed, G4String hepMCpath)
 }
 
 HepMCG4Reader::~HepMCG4Reader() {
-  delete fMessenger;
+  reader->close();
   delete reader;
+  delete fMessenger;
 }
 
 void HepMCG4Reader::Initialize() {

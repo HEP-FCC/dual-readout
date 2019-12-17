@@ -1,31 +1,28 @@
 #ifndef DRsimDetectorConstruction_h
 #define DRsimDetectorConstruction_h 1
 
-#include <string.h>
-#include <vector>
+#include "DRsimMagneticField.hh"
+#include "DRsimMaterials.hh"
+#include "DRsimSiPMHit.hh"
 
 #include "globals.hh"
 #include "G4VUserDetectorConstruction.hh"
-#include "G4RotationMatrix.hh"
-#include "G4FieldManager.hh"
 #include "G4Trap.hh"
 #include "G4Tubs.hh"
 #include "G4VSolid.hh"
 #include "G4LogicalVolume.hh"
-#include "G4VPhysicalVolume.hh"
-#include "G4Material.hh"
 #include "G4VSensitiveDetector.hh"
-#include "G4OpticalSurface.hh"
+#include "G4VisAttributes.hh"
+#include "G4GenericMessenger.hh"
+#include "G4FieldManager.hh"
+#include "G4ThreeVector.hh"
 
 #include "dimensionB.hh"
 #include "dimensionE.hh"
 
 using namespace std;
-class G4VisAttributes;
-class G4GenericMessenger;
-class DRsimMagneticField;
 
-/// Detector construction
+class DRsimMagneticField;
 
 class DRsimDetectorConstruction : public G4VUserDetectorConstruction {
 public:
@@ -35,16 +32,23 @@ public:
   virtual G4VPhysicalVolume* Construct();
   virtual void ConstructSDandField();
 
-  void ConstructMaterials();
-  void Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[], G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
-  void fiberBarrel(G4int i, G4double deltatheta_, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
-  void Endcap(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[], G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
-  void fiberEndcap(G4int i, G4double deltatheta, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
-
-  G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
-
 private:
   void DefineCommands();
+  void DefineMaterials();
+  G4Material* FindMaterial(G4String matName) { return fMaterials->GetMaterial(matName); }
+  G4OpticalSurface* FindSurface(G4String surfName) { return fMaterials->GetOpticalSurface(surfName); }
+
+  void Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
+    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair>& towerThetas, std::vector<std::pair>& towerXYs);
+
+  void fiberBarrel(G4int i, G4double deltatheta_, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
+
+  void Endcap(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
+    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair>& towerThetas, std::vector<std::pair>& towerXYs);
+
+  void fiberEndcap(G4int i, G4double deltatheta, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
+
+  DRsimMaterials* fMaterials;
 
   G4bool checkOverlaps;
   G4GenericMessenger* fMessenger;
@@ -52,10 +56,10 @@ private:
   static G4ThreadLocal DRsimMagneticField* fMagneticField;
   static G4ThreadLocal G4FieldManager* fFieldMgr;
 
-  G4VisAttributes* visAttrOrange;
-  G4VisAttributes* visAttrBlue;
-  G4VisAttributes* visAttrGray;
-  G4VisAttributes* visAttrGreen;
+  G4VisAttributes* fVisAttrOrange;
+  G4VisAttributes* fVisAttrBlue;
+  G4VisAttributes* fVisAttrGray;
+  G4VisAttributes* fVisAttrGreen;
 
   G4double innerR;
   G4double tower_height;
@@ -68,7 +72,6 @@ private:
   G4double phi_unit;
 
   G4double deltatheta;
-  G4double thetaofcenter;
   G4double fulltheta;
   G4double lastdeltatheta;
 
@@ -131,11 +134,20 @@ private:
   vector<G4LogicalVolume*> fiberLogical_EL[40];
   vector<G4LogicalVolume*> fiberLogical_EL_[40];
 
-  G4VSensitiveDetector* PMTSDBR[52];
-  G4VSensitiveDetector* PMTSDBL[52];
+  DRsimSiPMSD* fSiPMSDBR[52];
+  DRsimSiPMSD* fSiPMSDBL[52];
+  DRsimSiPMSD* fSiPMSDER[40];
+  DRsimSiPMSD* fSiPMSDEL[40];
 
-  G4VSensitiveDetector* PMTSDER[40];
-  G4VSensitiveDetector* PMTSDEL[40];
+  DRsimSiPMHit::hitXY fTowerXY;
+  std::vector<std::pair<int,float>> fTowerThetaBL;
+  std::vector<std::pair<int,float>> fTowerThetaBR;
+  std::vector<std::pair<int,float>> fTowerThetaEL;
+  std::vector<std::pair<int,float>> fTowerThetaER;
+  std::vector<DRsimSiPMHit::hitXY> fTowerXYBL;
+  std::vector<DRsimSiPMHit::hitXY> fTowerXYBR;
+  std::vector<DRsimSiPMHit::hitXY> fTowerXYEL;
+  std::vector<DRsimSiPMHit::hitXY> fTowerXYER;
 
   G4double clad_C_rMin;
   G4double clad_C_rMax;
@@ -161,23 +173,9 @@ private:
   G4double core_S_Sphi;
   G4double core_S_Dphi;
 
-  //---Materials for Cerenkov fiber---
-  G4Material *clad_C_Material;
-  G4Material *core_C_Material;
-
-  //---Materials for Scintillation fiber---
-  G4Material *clad_S_Material;
-  G4Material *core_S_Material;
-
-  //--- Material for PMT Photocathod ---
-  G4Material *PMTPC_Material;
-
   std::vector<G4float> fFiberX;
   std::vector<G4float> fFiberY;
   std::vector<G4bool> fFiberWhich;
-
-  int numx;
-  int numy;
 
   G4ThreeVector v1;
   G4ThreeVector v2;
@@ -198,26 +196,12 @@ private:
     0.01303,0.01280
   }; //apply the significance digit
 
-  G4Material* cu;
-  G4Material* Glass;
-  G4Material* GlassLayer;
-  G4Material* SiWafer;
-  G4Material* Air;
-  G4Material* filter;
-
   G4LogicalVolume* worldLogical;
-  G4OpticalSurface* photocath_opsurf;
-  G4OpticalSurface* filterSurf;
 
   G4String setTowerName(bool rbool, G4String BorE, int i) {
     if (rbool) return "T" + BorE + "R" + std::to_string(i);
     else return "T" + BorE + "L" + std::to_string(i);
   }
-
-protected:
-  G4LogicalVolume* fScoringVolume;
 };
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #endif

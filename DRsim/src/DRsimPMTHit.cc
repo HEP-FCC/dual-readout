@@ -1,70 +1,64 @@
-#include "DRsimPMTHit.hh"
+#include "DRsimSiPMHit.hh"
 
-#include "G4VVisManager.hh"
-#include "G4VisAttributes.hh"
-#include "G4Circle.hh"
-#include "G4Colour.hh"
-#include "G4AttDefStore.hh"
-#include "G4AttDef.hh"
-#include "G4AttValue.hh"
-#include "G4UIcommand.hh"
-#include "G4UnitsTable.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4ios.hh"
-#include <iomanip>
+G4ThreadLocal G4Allocator<DRsimSiPMHit>* DRsimSiPMHitAllocator = 0;
 
-G4ThreadLocal G4Allocator<DRsimPMTHit>* DRsimPMTHitAllocator = 0;
-
-DRsimPMTHit::DRsimPMTHit(G4int wavBin, G4int timeBin)
+DRsimSiPMHit::DRsimSiPMHit(G4int wavBin, G4int timeBin)
 : G4VHit(),
-  fPMTnum(0),
+  fSiPMnum(0),
   fPhotons(0),
-  fTowerIEta(999),
-  fTowerIPhi(999),
-  fWavelen(wavBin+2,0),
-  fTimeCount(timeBin+2,0),
+  fTowerTheta(std::make_pair(999,999.)),
+  fTowerPhi(std::make_pair(999,999.)),
+  fTowerXY(std::make_pair(-1,-1)),
+  fSiPMXY(std::make_pair(-1,-1)),
   fWavBin(wavBin),
   fTimeBin(timeBin)
 {}
 
-DRsimPMTHit::~DRsimPMTHit() {}
+DRsimSiPMHit::~DRsimSiPMHit() {}
 
-DRsimPMTHit::DRsimPMTHit(const DRsimPMTHit &right)
+DRsimSiPMHit::DRsimSiPMHit(const DRsimSiPMHit &right)
 : G4VHit() {
-  fPMTnum = right.fPMTnum;
+  fSiPMnum = right.fSiPMnum;
   fPhotons = right.fPhotons;
-  fTowerIEta = right.fTowerIEta;
-  fTowerIPhi = right.fTowerIPhi;
+  fTowerTheta = right.fTowerTheta;
+  fTowerPhi = right.fTowerPhi;
+  fTowerXY = right.fTowerXY;
+  fSiPMXY = right.fSiPMXY;
   fWavelen = right.fWavelen;
   fTimeCount = right.fTimeCount;
 }
 
-const DRsimPMTHit& DRsimPMTHit::operator=(const DRsimPMTHit &right) {
-  fPMTnum = right.fPMTnum;
+const DRsimSiPMHit& DRsimSiPMHit::operator=(const DRsimSiPMHit &right) {
+  fSiPMnum = right.fSiPMnum;
   fPhotons = right.fPhotons;
-  fTowerIEta = right.fTowerIEta;
-  fTowerIPhi = right.fTowerIPhi;
+  fTowerTheta = right.fTowerTheta;
+  fTowerPhi = right.fTowerPhi;
+  fTowerXY = right.fTowerXY;
+  fSiPMXY = right.fSiPMXY;
   fWavelen = right.fWavelen;
   fTimeCount = right.fTimeCount;
   return *this;
 }
 
-G4int DRsimPMTHit::operator==(const DRsimPMTHit &right) const {
-  return (fPMTnum==right.fPMTnum && fTowerIEta==right.fTowerIEta && fTowerIPhi==right.fTowerIPhi);
+G4int DRsimSiPMHit::operator==(const DRsimSiPMHit &right) const {
+  return (fSiPMnum==right.fSiPMnum && fTowerTheta==right.fTowerTheta && fTowerPhi==right.fTowerPhi && fSiPMXY==right.fSiPMXY);
 }
 
-void* DRsimPMTHit::operator new(size_t) {
-  if (!DRsimPMTHitAllocator) DRsimPMTHitAllocator = new G4Allocator<DRsimPMTHit>;
-  return (void*)DRsimPMTHitAllocator->MallocSingle();
-}
-
-void DRsimPMTHit::operator delete(void*aHit) {
-  DRsimPMTHitAllocator->FreeSingle((DRsimPMTHit*) aHit);
-}
-
-void DRsimPMTHit::Draw() {
+void DRsimSiPMHit::Draw() {
   G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
   if(pVVisManager) {}
 }
 
-void DRsimPMTHit::Print() {}
+void DRsimSiPMHit::Print() {}
+
+void CountWavlenSpectrum(hitRange range) {
+  auto it = fWavlenSpectrum.find(range);
+  if (it==fWavlenSpectrum.end()) fWavlenSpectrum.insert(std::make_pair(range,1));
+  else it->second++;
+}
+
+void CountTimeStruct(hitRange range) {
+  auto it = fTimeStruct.find(range);
+  if (it==fTimeStruct.end()) fTimeStruct.insert(std::make_pair(range,1));
+  else it->second++;
+}

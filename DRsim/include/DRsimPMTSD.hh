@@ -1,52 +1,43 @@
-#ifndef DRsimPMTSD_h
-#define DRsimPMTSD_h 1
+#ifndef DRsimSiPMSD_h
+#define DRsimSiPMSD_h 1
 
-#include "globals.hh"
+#include "DRsimSiPMHit.hh"
+
 #include "G4VSensitiveDetector.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4PhysicalConstants.hh"
+#include "G4Step.hh"
+#include "G4TouchableHistory.hh"
 
-#include "DRsimPMTHit.hh"
-
-class G4Step;
-class G4HCofThisEvent;
-class G4TouchableHistory;
-
-class DRsimPMTSD : public G4VSensitiveDetector {
+class DRsimSiPMSD : public G4VSensitiveDetector {
 public:
-  DRsimPMTSD(const G4String& name, const G4String& hitsCollectionName);
-  virtual ~DRsimPMTSD();
+  DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, std::pair<int,float> towerTheta, DRsimSiPMHit::hitXY towerXY);
+  virtual ~DRsimSiPMSD();
 
   virtual void Initialize(G4HCofThisEvent* HCE);
-  virtual G4bool ProcessHits(G4Step* aStep,G4TouchableHistory*);
+  virtual G4bool ProcessHits(G4Step* aStep, G4TouchableHistory*);
   virtual void EndOfEvent(G4HCofThisEvent* HCE);
 
 private:
-  DRsimPMTHitsCollection* fHitCollection;
+  DRsimSiPMHitsCollection* fHitCollection;
   G4int fHCID;
-  G4int fSDID;
-  bool fIsR;
-  bool fIsB;
   G4int fWavBin;
   G4int fTimeBin;
+  G4float fWavlenStart;
+  G4float fWavlenEnd;
+  G4float fWavlenStep;
+  G4float fTimeStart;
+  G4float fTimeEnd;
+  G4float fTimeStep;
+  G4float fPhiUnit;
+  std::pair<int,float> fTowerTheta;
+  DRsimSiPMHit::hitXY fTowerXY;
 
   G4double wavToE(G4double wav) { return h_Planck*c_light/wav; }
 
-  G4int findBin(G4double en) {
-    for (int i = 0; i < fWavBin+1; i++) {
-      if ( en < wavToE( 900*nm - i*600*nm/(double)fWavBin ) ) return i;
-      else continue;
-    }
-    return fWavBin+1;
-  }
-
-  G4int findTimeBin(G4double stepTime) {
-    for (int i = 0; i < fTimeBin+1; i++) {
-      if ( stepTime < ( 10*ns + i*60*ns/(double)fTimeBin ) ) return i;
-      else continue;
-    }
-    return fTimeBin+1;
-  }
+  DRsimSiPMHit::hitRange findWavRange(G4double en);
+  DRsimSiPMHit::hitRange findTimeRange(G4double stepTime);
+  DRsimSiPMHit::hitXY findSiPMXY(G4int SiPMnum, DRsimSiPMHit::hitXY towerXY);
 };
 
 #endif

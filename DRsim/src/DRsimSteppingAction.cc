@@ -1,56 +1,54 @@
 #include "DRsimSteppingAction.hh"
-#include "DRsimEventAction.hh"
-#include "DRsimDetectorConstruction.hh"
 
-#include "G4Step.hh"
-#include "G4Event.hh"
-#include "G4RunManager.hh"
-#include "G4LogicalVolume.hh"
 #include "G4ParticleDefinition.hh"
-#include "G4ParticleTypes.hh"
 
 DRsimSteppingAction::DRsimSteppingAction(DRsimEventAction* eventAction)
-: G4UserSteppingAction(),
-  fEventAction(eventAction),
-  fScoringVolume(0),
-  fEdep(0.), fEdepEle(0.), fEdepGamma(0.), fEdepCharged(0.)
+: G4UserSteppingAction(), fEventAction(eventAction)
 {}
 
 DRsimSteppingAction::~DRsimSteppingAction() {}
 
-void DRsimSteppingAction::UserSteppingAction(const G4Step* step)
-{
-  particle = step->GetTrack()->GetDefinition();
-  if (particle == G4OpticalPhoton::OpticalPhotonDefinition()) return;
+void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
+  if (step->GetTrack()->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) return;
 
-  pre_volume = step->GetPreStepPoint()->GetPhysicalVolume()->GetLogicalVolume();
-  presteppoint = step->GetPreStepPoint();
-  poststeppoint = step->GetPostStepPoint();
-  theTouchable = presteppoint->GetTouchableHandle();
+  G4Track* track = step->GetTrack();
+  G4ParticleDefinition* particle = track->GetDefinition();
+  G4int pdgID = particle->GetPDGEncoding();
+
+  G4StepPoint* presteppoint = step->GetPreStepPoint();
+  G4StepPoint* poststeppoint = step->GetPostStepPoint();
+  G4LogicalVolume* preVol = presteppoint->GetPhysicalVolume()->GetLogicalVolume();
+  G4TouchableHandle theTouchable = presteppoint->GetTouchableHandle();
 
   if (poststeppoint->GetStepStatus() == fWorldBoundary) {
-    fEventAction->AddLeakage(pdgID,step->GetPreStepPoint()->GetKineticEnergy(),step->GetPreStepPoint()->GetTotalEnergy());
+    fLeak.E = track->GetTotalEnergy();
+    fLeak.px = track->GetMomentum().x();
+    fLeak.py = track->GetMomentum().y();
+    fLeak.pz = track->GetMomentum().z();
+    fLeak.vx = presteppoint->GetPosition().x();
+    fLeak.vy = presteppoint->GetPosition().y();
+    fLeak.vz = presteppoint->GetPosition().z();
+    fLeak.vt = presteppoint->GetGlobalTime();
+
+    fEventAction->fillLeaks(fLeak);
   }
 
-  G4String matName = pre_volume->GetMaterial()->GetName();
+  G4String matName = preVol->GetMaterial()->GetName();
 
   if ( matName=="G4_Galactic" || matName=="Air" ) return;
 
-  motherTower = GetMotherTower(matName,theTouchable);
-  towerIEta = GetTowerIEta(motherTower->GetName());
-  towerIPhi = GetTowerIPhi(motherTower);
+  G4VPhysicalVolume* motherTower = GetMotherTower(matName,theTouchable);
+  fEdep.iTheta = GetTowerITheta(motherTower->GetName());
+  fEdep.iPhi = GetTowerIPhi(motherTower);
 
-  pdgID = particle->GetPDGEncoding();
-  pdgCharge = particle->GetPDGCharge();
-  fEdep = step->GetTotalEnergyDeposit();
-  fEdepEle = (std::abs(pdgID)==11) ? fEdep : 0.;
-  fEdepGamma = (std::abs(pdgID)==22) ? fEdep : 0.;
-  fEdepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? fEdep : 0.;
-  sl = step->GetStepLength();
+  G4double pdgCharge = particle->GetPDGCharge();
 
-  if ( fEdep > 0. ) {
-    fEventAction->AddStepInfo(fEdep,fEdepEle,fEdepGamma,fEdepCharged,towerIEta,towerIPhi);
-  }
+  fEdep.Edep = step->GetTotalEnergyDeposit();
+  fEdep.EdepEle = (std::abs(pdgID)==11) ? fEdep : 0.;
+  fEdep.EdepGamma = (std::abs(pdgID)==22) ? fEdep : 0.;
+  fEdep.EdepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? fEdep : 0.;
+
+  if ( fEdep > 0. ) fEventAction->fillEdeps(fEdep);
 
   return;
 }
