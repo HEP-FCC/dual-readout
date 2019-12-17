@@ -20,18 +20,14 @@ DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4String he
   fSeed = seed;
 
   if (fHepMCpath.empty()) {
-    DRsimPrimaryGeneratorAction();
+    initPtcGun();
   } else {
     G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
     if (!sHepMCreader) sHepMCreader = new HepMCG4Reader(fSeed,fHepMCpath);
-
-    DefineCommands();
   }
 }
 
-DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction()
-: G4VUserPrimaryGeneratorAction()
-{
+void DRsimPrimaryGeneratorAction::initPtcGun() {
   fTheta = -0.01111;
   fPhi = 0.;
   fRandX = 10.*mm;

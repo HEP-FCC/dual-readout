@@ -6,7 +6,6 @@
 #include "DRsimSiPMSD.hh"
 #include "DRsimSiPMHit.hh"
 
-#include "globals.hh"
 #include "G4VUserDetectorConstruction.hh"
 #include "G4Trap.hh"
 #include "G4Box.hh"

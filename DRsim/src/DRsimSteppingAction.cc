@@ -38,7 +38,7 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
 
   if ( matName=="G4_Galactic" || matName=="Air" ) return;
 
-  G4VPhysicalVolume* motherTower = GetMotherTower(matName,theTouchable);
+  G4VPhysicalVolume* motherTower = GetMotherTower(theTouchable);
   fEdep.iTheta = GetTowerITheta(motherTower->GetName());
   fEdep.iPhi = GetTowerIPhi(motherTower);
 

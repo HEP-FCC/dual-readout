@@ -1,4 +1,3 @@
-#include "DRsimSiPMSD.hh"
 #include "DRsimDetectorConstruction.hh"
 #include "DRsimCellParameterisation.hh"
 #include "DRsimFilterParameterisation.hh"
@@ -17,8 +16,6 @@
 #include "G4GeometryManager.hh"
 
 #include "G4Colour.hh"
-
-#include "G4ios.hh"
 #include "G4SystemOfUnits.hh"
 
 using namespace std;
@@ -150,7 +147,6 @@ G4VPhysicalVolume* DRsimDetectorConstruction::Construct() {
   delete dimE;
   delete dimB;
 
-  G4cout << "DETECTORCONSTRUCTION finished!" << G4endl;
   return worldPhysical;
 }
 
@@ -182,8 +178,6 @@ void DRsimDetectorConstruction::ConstructSDandField()
     SDman->AddNewDetector(fSiPMSDEL[i]);
     PMTcathLogicalEL[i]->SetSensitiveDetector(fSiPMSDEL[i]);
   }
-
-  G4cout << "Ended construct SD" << G4endl;
 }
 
 void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
@@ -202,7 +196,7 @@ void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
 
     dimB->Getpt_PMTG(pt);
     pmtg = new G4Trap("PMTGB",pt);
-    PMTGLogical[i] = new G4LogicalVolume(pmtg,FindMaterial("G4_Air"),towerName);
+    PMTGLogical[i] = new G4LogicalVolume(pmtg,FindMaterial("G4_AIR"),towerName);
 
     for(int j=0;j<NbOfZRot;j++){
       new G4PVPlacement(dimB->GetRM(j),dimB->GetOrigin(j),towerLogical[i],towerName,worldLogical,false,j,checkOverlaps);
@@ -217,7 +211,7 @@ void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
     towerThetas.push_back( std::make_pair(iTheta,signedTowerTheta) );
 
     G4VSolid* SiPMlayerSolid = new G4Box("SiPMlayerSolid",fTowerXY.first*1.5/2.*mm,fTowerXY.second*1.5/2.*mm,PMTT/2.);
-    G4LogicalVolume* SiPMlayerLogical = new G4LogicalVolume(SiPMlayerSolid,FindMaterial("G4_Air"),"SiPMlayerLogical");
+    G4LogicalVolume* SiPMlayerLogical = new G4LogicalVolume(SiPMlayerSolid,FindMaterial("G4_AIR"),"SiPMlayerLogical");
     new G4PVPlacement(0,G4ThreeVector(0.,0.,filterT/2.),SiPMlayerLogical,"SiPMlayerPhysical",PMTGLogical[i],false,0,checkOverlaps);
 
     G4VSolid* filterlayerSolid = new G4Box("filterlayerSolid",fTowerXY.first*1.5/2.*mm,fTowerXY.second*1.5/2.*mm,filterT/2.);
@@ -264,7 +258,7 @@ void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
 
     dimE->Getpt_PMTG(pt);
     pmtg = new G4Trap("PMTGE",pt);
-    PMTGLogical[i] = new G4LogicalVolume(pmtg,FindMaterial("G4_Air"),towerName);
+    PMTGLogical[i] = new G4LogicalVolume(pmtg,FindMaterial("G4_AIR"),towerName);
 
     for(int j=0;j<NbOfZRot;j++){
       new G4PVPlacement(dimE->GetRM(j),dimE->GetOrigin(j),towerLogical[i],towerName,worldLogical,false,j,checkOverlaps);
@@ -279,7 +273,7 @@ void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
     towerThetas.push_back( std::make_pair(iTheta,signedTowerTheta) );
 
     G4VSolid* SiPMlayerSolid = new G4Box("SiPMlayerSolid",fTowerXY.first*1.5/2.*mm,fTowerXY.second*1.5/2.*mm,PMTT/2.);
-    G4LogicalVolume* SiPMlayerLogical = new G4LogicalVolume(SiPMlayerSolid,FindMaterial("G4_Air"),"SiPMlayerLogical");
+    G4LogicalVolume* SiPMlayerLogical = new G4LogicalVolume(SiPMlayerSolid,FindMaterial("G4_AIR"),"SiPMlayerLogical");
     new G4PVPlacement(0,G4ThreeVector(0.,0.,filterT/2.),SiPMlayerLogical,"SiPMlayerPhysical",PMTGLogical[i],false,0,checkOverlaps);
 
     G4VSolid* filterlayerSolid = new G4Box("filterlayerSolid",fTowerXY.first*1.5/2.*mm,fTowerXY.second*1.5/2.*mm,filterT/2.);

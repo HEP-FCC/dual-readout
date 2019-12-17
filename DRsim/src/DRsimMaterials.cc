@@ -47,7 +47,7 @@ G4OpticalSurface* DRsimMaterials::GetOpticalSurface(const G4String surfName) {
 
 void DRsimMaterials::CreateMaterials() {
   fNistMan->FindOrBuildMaterial("G4_Galactic");
-  fNistMan->FindOrBuildMaterial("G4_Air");
+  fNistMan->FindOrBuildMaterial("G4_AIR");
 
   G4String symbol;
   G4double a, z, density;
@@ -62,7 +62,7 @@ void DRsimMaterials::CreateMaterials() {
   fSi = new G4Material("Silicon", z=14., a=28.09*g/mole, density=2.33*g/cm3);
 
   fVacuum = G4Material::GetMaterial("G4_Galactic");
-  fAir = G4Material::GetMaterial("G4_Air");
+  fAir = G4Material::GetMaterial("G4_AIR");
 
   fFluoPoly = new G4Material("FluorinatedPolymer", density=1.43*g/cm3, ncomponents=2);
   fFluoPoly->AddElement(C, 2);

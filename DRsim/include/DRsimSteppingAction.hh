@@ -20,14 +20,8 @@ private:
   DRsimEventAction* fEventAction;
   DRsimInterface::DRsimEdepData fEdep;
   DRsimInterface::DRsimLeakageData fLeak;
-
-  std::map<G4String, int> towerNameMap = {
-    {"Copper",0}, {"Polystyrene",2}, {"PMMA_Clad",1}, {"PMMA",2}, {"Fluorinated_Polymer",1}, {"Silicon",3}, {"Glass",2}, {"gelatin",2}, {"GlassLayer",1}
-  };
-
-  G4VPhysicalVolume* GetMotherTower(G4String matName, G4TouchableHandle touchable) {
-    return touchable->GetVolume(towerNameMap[matName]);
-  }
+  
+  G4VPhysicalVolume* GetMotherTower(G4TouchableHandle touchable) { return touchable->GetVolume(touchable->GetHistoryDepth()-1); }
 
   G4int GetTowerITheta(G4String towerName) {
     G4int towerITheta_ = std::stoi(towerName.substr(3));
