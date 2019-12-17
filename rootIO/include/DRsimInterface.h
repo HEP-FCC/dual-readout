@@ -1,6 +1,10 @@
 #ifndef DRsimInterface_h
 #define DRsimInterface_h 1
 
+#include <vector>
+#include <utility>
+#include <map>
+
 class DRsimInterface {
 public:
   DRsimInterface();

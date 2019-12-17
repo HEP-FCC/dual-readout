@@ -24,8 +24,8 @@ DRsimSiPMHit::DRsimSiPMHit(const DRsimSiPMHit &right)
   fTowerPhi = right.fTowerPhi;
   fTowerXY = right.fTowerXY;
   fSiPMXY = right.fSiPMXY;
-  fWavelen = right.fWavelen;
-  fTimeCount = right.fTimeCount;
+  fWavlenSpectrum = right.fWavlenSpectrum;
+  fTimeStruct = right.fTimeStruct;
 }
 
 const DRsimSiPMHit& DRsimSiPMHit::operator=(const DRsimSiPMHit &right) {
@@ -35,8 +35,8 @@ const DRsimSiPMHit& DRsimSiPMHit::operator=(const DRsimSiPMHit &right) {
   fTowerPhi = right.fTowerPhi;
   fTowerXY = right.fTowerXY;
   fSiPMXY = right.fSiPMXY;
-  fWavelen = right.fWavelen;
-  fTimeCount = right.fTimeCount;
+  fWavlenSpectrum = right.fWavlenSpectrum;
+  fTimeStruct = right.fTimeStruct;
   return *this;
 }
 
@@ -44,20 +44,17 @@ G4int DRsimSiPMHit::operator==(const DRsimSiPMHit &right) const {
   return (fSiPMnum==right.fSiPMnum && fTowerTheta==right.fTowerTheta && fTowerPhi==right.fTowerPhi && fSiPMXY==right.fSiPMXY);
 }
 
-void DRsimSiPMHit::Draw() {
-  G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
-  if(pVVisManager) {}
-}
+void DRsimSiPMHit::Draw() {}
 
 void DRsimSiPMHit::Print() {}
 
-void CountWavlenSpectrum(hitRange range) {
+void DRsimSiPMHit::CountWavlenSpectrum(DRsimInterface::hitRange range) {
   auto it = fWavlenSpectrum.find(range);
   if (it==fWavlenSpectrum.end()) fWavlenSpectrum.insert(std::make_pair(range,1));
   else it->second++;
 }
 
-void CountTimeStruct(hitRange range) {
+void DRsimSiPMHit::CountTimeStruct(DRsimInterface::hitRange range) {
   auto it = fTimeStruct.find(range);
   if (it==fTimeStruct.end()) fTimeStruct.insert(std::make_pair(range,1));
   else it->second++;

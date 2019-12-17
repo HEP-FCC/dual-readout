@@ -4,12 +4,13 @@
 #include "G4HCofThisEvent.hh"
 #include "G4SDManager.hh"
 #include "G4ParticleDefinition.hh"
+#include "G4ParticleTypes.hh"
 
 using namespace std;
 
-DRsimSiPMSD::DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, std::pair<int,float> towerTheta, DRsimSiPMHit::hitXY towerXY)
+DRsimSiPMSD::DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, std::pair<int,float> towerTheta, DRsimInterface::hitXY towerXY)
 : G4VSensitiveDetector(name), fHitCollection(0), fHCID(-1), fTowerTheta(towerTheta), fTowerXY(towerXY), fWavBin(60), fTimeBin(300), fPhiUnit(2*M_PI/(G4float)283),
-fWavlenStart(900.),fWavlenEnd(300.),fTimeStart(10.),fTimeEnd(70.)
+fWavlenStart(900.), fWavlenEnd(300.), fTimeStart(10.), fTimeEnd(70.)
 {
   collectionName.insert(hitsCollectionName);
   fWavlenStep = (fWavlenStart-fWavlenEnd)/(float)fWavBin;
@@ -54,10 +55,10 @@ G4bool DRsimSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
 
   hit->photonCount();
 
-  DRsimSiPMHit::hitRange wavRange = findWavRange(energy);
+  DRsimInterface::hitRange wavRange = findWavRange(energy);
   hit->CountWavlenSpectrum(wavRange);
 
-  DRsimSiPMHit::hitRange timeRange = findTimeRange(hitTime);
+  DRsimInterface::hitRange timeRange = findTimeRange(hitTime);
   hit->CountTimeStruct(timeRange);
 
   return true;
@@ -74,7 +75,7 @@ void DRsimSiPMSD::EndOfEvent(G4HCofThisEvent*) {
   }
 }
 
-DRsimSiPMHit::hitRange findWavRange(G4double en) {
+DRsimInterface::hitRange DRsimSiPMSD::findWavRange(G4double en) {
   int i = 0;
   for ( ; i < fWavBin+1; i++) {
     if ( en < wavToE( (fWavlenStart - (float)i*fWavlenStep)*nm ) ) break;
@@ -86,7 +87,7 @@ DRsimSiPMHit::hitRange findWavRange(G4double en) {
   return std::make_pair( fWavlenStart-(float)i*fWavlenStep, fWavlenStart-(float)(i-1)*fWavlenStep );
 }
 
-DRsimSiPMHit::hitRange findTimeRange(G4double stepTime) {
+DRsimInterface::hitRange DRsimSiPMSD::findTimeRange(G4double stepTime) {
   int i = 0;
   for ( ; i < fTimeBin+1; i++) {
     if ( stepTime < ( (fTimeStart + (float)i*fTimeStep)*ns ) ) break;
@@ -98,7 +99,7 @@ DRsimSiPMHit::hitRange findTimeRange(G4double stepTime) {
   return std::make_pair( fTimeStart+(float)(i-1)*fTimeStep, fTimeStart+(float)i*fTimeStep );
 }
 
-DRsimSiPMHit::hitXY findSiPMXY(G4int SiPMnum, DRsimSiPMHit::hitXY towerXY) {
+DRsimInterface::hitXY DRsimSiPMSD::findSiPMXY(G4int SiPMnum, DRsimInterface::hitXY towerXY) {
   int x = SiPMnum/towerXY.second;
   int y = SiPMnum%towerXY.second;
 

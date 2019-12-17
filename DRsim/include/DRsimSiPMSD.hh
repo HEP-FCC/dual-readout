@@ -11,7 +11,7 @@
 
 class DRsimSiPMSD : public G4VSensitiveDetector {
 public:
-  DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, std::pair<int,float> towerTheta, DRsimSiPMHit::hitXY towerXY);
+  DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, std::pair<int,float> towerTheta, DRsimInterface::hitXY towerXY);
   virtual ~DRsimSiPMSD();
 
   virtual void Initialize(G4HCofThisEvent* HCE);
@@ -21,23 +21,23 @@ public:
 private:
   DRsimSiPMHitsCollection* fHitCollection;
   G4int fHCID;
+  std::pair<int,float> fTowerTheta;
+  DRsimInterface::hitXY fTowerXY;
   G4int fWavBin;
   G4int fTimeBin;
+  G4float fPhiUnit;
   G4float fWavlenStart;
   G4float fWavlenEnd;
-  G4float fWavlenStep;
   G4float fTimeStart;
   G4float fTimeEnd;
+  G4float fWavlenStep;
   G4float fTimeStep;
-  G4float fPhiUnit;
-  std::pair<int,float> fTowerTheta;
-  DRsimSiPMHit::hitXY fTowerXY;
 
   G4double wavToE(G4double wav) { return h_Planck*c_light/wav; }
 
-  DRsimSiPMHit::hitRange findWavRange(G4double en);
-  DRsimSiPMHit::hitRange findTimeRange(G4double stepTime);
-  DRsimSiPMHit::hitXY findSiPMXY(G4int SiPMnum, DRsimSiPMHit::hitXY towerXY);
+  DRsimInterface::hitRange findWavRange(G4double en);
+  DRsimInterface::hitRange findTimeRange(G4double stepTime);
+  DRsimInterface::hitXY findSiPMXY(G4int SiPMnum, DRsimInterface::hitXY towerXY);
 };
 
 #endif

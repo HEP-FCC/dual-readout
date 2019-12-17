@@ -2,11 +2,11 @@
 
 #include "G4PrimaryVertex.hh"
 #include "G4RunManager.hh"
+#include "G4SDManager.hh"
 
 using namespace std;
 DRsimEventAction::DRsimEventAction()
-: G4UserEventAction(),
- fSiPMID(0)
+: G4UserEventAction()
 {
   // set printing per each event
   G4RunManager::GetRunManager()->SetPrintProgress(1);
@@ -75,7 +75,7 @@ void DRsimEventAction::EndOfEventAction(const G4Event* event) {
   }
 }
 
-void fillHits(DRsimSiPMHit* hit) {
+void DRsimEventAction::fillHits(DRsimSiPMHit* hit) {
   DRsimInterface::DRsimSiPMData sipmData;
   sipmData.count = hit->GetPhotonCount();
   sipmData.SiPMnum = hit->GetSiPMnum();
@@ -101,7 +101,7 @@ void fillHits(DRsimSiPMHit* hit) {
   }
 }
 
-void fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc) {
+void DRsimEventAction::fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc) {
   DRsimInterface::DRsimGenData GenData;
   GenData.E = ptc->GetTotalEnergy();
   GenData.px = ptc->GetPx();
@@ -116,7 +116,7 @@ void fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc) {
   fEventData.GenPtcs.push_back(GenData);
 }
 
-void fillEdeps(DRsimInterface::DRsimEdepData edepData) {
+void DRsimEventAction::fillEdeps(DRsimInterface::DRsimEdepData edepData) {
   toweriTiP towerTP = std::make_pair(edepData.iTheta,edepData.iPhi);
   auto towerIter = fEdepMap.find(towerTP);
 
@@ -130,6 +130,6 @@ void fillEdeps(DRsimInterface::DRsimEdepData edepData) {
   }
 }
 
-void fillLeaks(DRsimInterface::DRsimLeakageData leakData) {
+void DRsimEventAction::fillLeaks(DRsimInterface::DRsimLeakageData leakData) {
   fEventData.leaks.push_back(leakData);
 }

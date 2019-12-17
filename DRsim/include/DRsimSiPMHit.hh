@@ -9,10 +9,6 @@
 
 class DRsimSiPMHit : public G4VHit {
 public:
-  typedef DRsimInterface::hitRange hitRange;
-  typedef DRsimInterface::hitXY hitXY;
-  typedef DRsimInterface::DRsimTimeStruct DRsimTimeStruct;
-  typedef DRsimInterface::DRsimWavlenSpectrum DRsimWavlenSpectrum;
 
   DRsimSiPMHit(G4int wavBin, G4int timeBin);
   DRsimSiPMHit(const DRsimSiPMHit &right);
@@ -37,29 +33,29 @@ public:
   std::pair<int,float> GetTowerTheta() const { return fTowerTheta; }
 
   void SetTowerPhi(std::pair<int,float> phi) { fTowerPhi = phi; }
-  std::pair<int,float> GetTowerPhi() const { return fTowerIPhi; }
+  std::pair<int,float> GetTowerPhi() const { return fTowerPhi; }
 
-  void SetTowerXY(hitXY xy) { fTowerXY = xy; }
-  hitXY GetTowerXY() const { return fTowerXY; }
+  void SetTowerXY(DRsimInterface::hitXY xy) { fTowerXY = xy; }
+  DRsimInterface::hitXY GetTowerXY() const { return fTowerXY; }
 
-  void SetSiPMXY(hitXY xy) { fSiPMXY = xy; }
-  hitXY GetSiPMXY() const { return fSiPMXY; }
+  void SetSiPMXY(DRsimInterface::hitXY xy) { fSiPMXY = xy; }
+  DRsimInterface::hitXY GetSiPMXY() const { return fSiPMXY; }
 
-  void CountWavlenSpectrum(hitRange range);
-  DRsimWavlenSpectrum GetWavlenSpectrum() const { return fWavlenSpectrum; }
+  void CountWavlenSpectrum(DRsimInterface::hitRange range);
+  DRsimInterface::DRsimWavlenSpectrum GetWavlenSpectrum() const { return fWavlenSpectrum; }
 
-  void CountTimeStruct(hitRange range);
-  DRsimTimeStruct GetTimeStruct() const { return fTimeStruct; }
+  void CountTimeStruct(DRsimInterface::hitRange range);
+  DRsimInterface::DRsimTimeStruct GetTimeStruct() const { return fTimeStruct; }
 
 private:
   G4int fSiPMnum;
   G4int fPhotons;
   std::pair<int,float> fTowerTheta;
   std::pair<int,float> fTowerPhi;
-  hitXY fTowerXY;
-  hitXY fSiPMXY;
-  DRsimWavlenSpectrum fWavlenSpectrum;
-  DRsimTimeStruct fTimeStruct;
+  DRsimInterface::hitXY fTowerXY;
+  DRsimInterface::hitXY fSiPMXY;
+  DRsimInterface::DRsimWavlenSpectrum fWavlenSpectrum;
+  DRsimInterface::DRsimTimeStruct fTimeStruct;
 
   G4int fWavBin;
   G4int fTimeBin;

@@ -3,11 +3,13 @@
 
 #include "DRsimMagneticField.hh"
 #include "DRsimMaterials.hh"
+#include "DRsimSiPMSD.hh"
 #include "DRsimSiPMHit.hh"
 
 #include "globals.hh"
 #include "G4VUserDetectorConstruction.hh"
 #include "G4Trap.hh"
+#include "G4Box.hh"
 #include "G4Tubs.hh"
 #include "G4VSolid.hh"
 #include "G4LogicalVolume.hh"
@@ -39,19 +41,18 @@ private:
   G4OpticalSurface* FindSurface(G4String surfName) { return fMaterials->GetOpticalSurface(surfName); }
 
   void Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
-    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair>& towerThetas, std::vector<std::pair>& towerXYs);
+    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair<int,float>>& towerThetas, std::vector<DRsimInterface::hitXY>& towerXYs);
 
   void fiberBarrel(G4int i, G4double deltatheta_, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
 
   void Endcap(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
-    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair>& towerThetas, std::vector<std::pair>& towerXYs);
+    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair<int,float>>& towerThetas, std::vector<DRsimInterface::hitXY>& towerXYs);
 
   void fiberEndcap(G4int i, G4double deltatheta, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
 
-  DRsimMaterials* fMaterials;
-
   G4bool checkOverlaps;
   G4GenericMessenger* fMessenger;
+  DRsimMaterials* fMaterials;
 
   static G4ThreadLocal DRsimMagneticField* fMagneticField;
   static G4ThreadLocal G4FieldManager* fFieldMgr;
@@ -139,15 +140,15 @@ private:
   DRsimSiPMSD* fSiPMSDER[40];
   DRsimSiPMSD* fSiPMSDEL[40];
 
-  DRsimSiPMHit::hitXY fTowerXY;
+  DRsimInterface::hitXY fTowerXY;
   std::vector<std::pair<int,float>> fTowerThetaBL;
   std::vector<std::pair<int,float>> fTowerThetaBR;
   std::vector<std::pair<int,float>> fTowerThetaEL;
   std::vector<std::pair<int,float>> fTowerThetaER;
-  std::vector<DRsimSiPMHit::hitXY> fTowerXYBL;
-  std::vector<DRsimSiPMHit::hitXY> fTowerXYBR;
-  std::vector<DRsimSiPMHit::hitXY> fTowerXYEL;
-  std::vector<DRsimSiPMHit::hitXY> fTowerXYER;
+  std::vector<DRsimInterface::hitXY> fTowerXYBL;
+  std::vector<DRsimInterface::hitXY> fTowerXYBR;
+  std::vector<DRsimInterface::hitXY> fTowerXYEL;
+  std::vector<DRsimInterface::hitXY> fTowerXYER;
 
   G4double clad_C_rMin;
   G4double clad_C_rMax;

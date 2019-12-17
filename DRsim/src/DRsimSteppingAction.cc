@@ -1,6 +1,7 @@
 #include "DRsimSteppingAction.hh"
 
 #include "G4ParticleDefinition.hh"
+#include "G4ParticleTypes.hh"
 
 DRsimSteppingAction::DRsimSteppingAction(DRsimEventAction* eventAction)
 : G4UserSteppingAction(), fEventAction(eventAction)
@@ -44,11 +45,11 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
   G4double pdgCharge = particle->GetPDGCharge();
 
   fEdep.Edep = step->GetTotalEnergyDeposit();
-  fEdep.EdepEle = (std::abs(pdgID)==11) ? fEdep : 0.;
-  fEdep.EdepGamma = (std::abs(pdgID)==22) ? fEdep : 0.;
-  fEdep.EdepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? fEdep : 0.;
+  fEdep.EdepEle = (std::abs(pdgID)==11) ? fEdep.Edep : 0.;
+  fEdep.EdepGamma = (std::abs(pdgID)==22) ? fEdep.Edep : 0.;
+  fEdep.EdepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? fEdep.Edep : 0.;
 
-  if ( fEdep > 0. ) fEventAction->fillEdeps(fEdep);
+  if ( fEdep.Edep > 0. ) fEventAction->fillEdeps(fEdep);
 
   return;
 }
