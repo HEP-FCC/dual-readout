@@ -4,8 +4,10 @@
 #include <iostream>
 #include <fstream>
 
+int HepMCG4Reader::sNumRef = 0;
+
 HepMCG4Reader::HepMCG4Reader(G4int seed, G4String hepMCpath)
-: verbose(0), fMessenger(0), fSeed(seed), fHepMCpath(hepMCpath)
+: verbose(1), fMessenger(0), fSeed(seed), fHepMCpath(hepMCpath)
 {
   DefineCommands();
   Initialize();
@@ -36,5 +38,5 @@ void HepMCG4Reader::DefineCommands() {
 
   G4GenericMessenger::Command& verboseCmd = fMessenger->DeclareMethod("verbose",&HepMCG4Reader::SetVerboseLevel,"verbose level");
   verboseCmd.SetParameterName("verbose",true);
-  verboseCmd.SetDefaultValue("0");
+  verboseCmd.SetDefaultValue("1");
 }

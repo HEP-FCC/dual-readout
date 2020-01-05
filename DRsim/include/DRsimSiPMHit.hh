@@ -15,7 +15,7 @@ public:
   virtual ~DRsimSiPMHit();
 
   const DRsimSiPMHit& operator=(const DRsimSiPMHit &right);
-  int operator==(const DRsimSiPMHit &right) const;
+  G4bool operator==(const DRsimSiPMHit &right) const;
 
   inline void *operator new(size_t);
   inline void operator delete(void* aHit);

@@ -1,10 +1,20 @@
 #include "DRsimEventAction.hh"
+#include "DRsimRunAction.hh"
+#include "DRsimPrimaryGeneratorAction.hh"
 
 #include "G4PrimaryVertex.hh"
 #include "G4RunManager.hh"
 #include "G4SDManager.hh"
+#include "G4AutoLock.hh"
+#include "G4Threading.hh"
 
 using namespace std;
+
+namespace {
+  G4Mutex DRsimEventActionMutex = G4MUTEX_INITIALIZER;
+  G4Condition DRsimEventActionCV = G4CONDITION_INITIALIZER;
+}
+
 DRsimEventAction::DRsimEventAction()
 : G4UserEventAction()
 {
@@ -26,6 +36,8 @@ void DRsimEventAction::BeginOfEventAction(const G4Event*) {
     fSiPMCollID.push_back(sdManager->GetCollectionID("ERC"+std::to_string(i)));
     fSiPMCollID.push_back(sdManager->GetCollectionID("ELC"+std::to_string(i)));
   }
+
+  fEventData = new DRsimInterface::DRsimEventData();
 }
 
 void DRsimEventAction::clear() {
@@ -62,7 +74,11 @@ void DRsimEventAction::EndOfEventAction(const G4Event* event) {
   }
 
   for (const auto& towerMap : fTowerMap) {
-    fEventData.towers.push_back(towerMap.second);
+    fEventData->towers.push_back(towerMap.second);
+  }
+
+  for (const auto& edepMap : fEdepMap) {
+    fEventData->Edeps.push_back(edepMap.second);
   }
 
   for (int iVtx = 0; iVtx < event->GetNumberOfPrimaryVertex(); iVtx++) {
@@ -73,6 +89,12 @@ void DRsimEventAction::EndOfEventAction(const G4Event* event) {
       fillPtcs(vtx,ptc);
     }
   }
+
+  fEventData->event_number = DRsimPrimaryGeneratorAction::sIdxEvt;
+
+  queue();
+
+  delete fEventData;
 }
 
 void DRsimEventAction::fillHits(DRsimSiPMHit* hit) {
@@ -113,7 +135,7 @@ void DRsimEventAction::fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc) {
   GenData.vz = vtx->GetZ0();
   GenData.vt = vtx->GetT0();
 
-  fEventData.GenPtcs.push_back(GenData);
+  fEventData->GenPtcs.push_back(GenData);
 }
 
 void DRsimEventAction::fillEdeps(DRsimInterface::DRsimEdepData edepData) {
@@ -131,5 +153,17 @@ void DRsimEventAction::fillEdeps(DRsimInterface::DRsimEdepData edepData) {
 }
 
 void DRsimEventAction::fillLeaks(DRsimInterface::DRsimLeakageData leakData) {
-  fEventData.leaks.push_back(leakData);
+  fEventData->leaks.push_back(leakData);
+}
+
+void DRsimEventAction::queue() {
+  while ( DRsimRunAction::sNumEvt != DRsimPrimaryGeneratorAction::sIdxEvt ) {
+    G4AutoLock lock(&DRsimEventActionMutex);
+    if ( DRsimRunAction::sNumEvt == DRsimPrimaryGeneratorAction::sIdxEvt ) break;
+    G4CONDITIONWAIT(&DRsimEventActionCV, &lock);
+  }
+  G4AutoLock lock(&DRsimEventActionMutex);
+  DRsimRunAction::sRootIO->write(fEventData);
+  DRsimRunAction::sNumEvt++;
+  G4CONDITIONBROADCAST(&DRsimEventActionCV);
 }

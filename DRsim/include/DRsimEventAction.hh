@@ -27,8 +27,9 @@ private:
   void clear();
   void fillHits(DRsimSiPMHit* hit);
   void fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc);
+  void queue();
 
-  DRsimInterface::DRsimEventData fEventData;
+  DRsimInterface::DRsimEventData* fEventData;
   std::map<toweriTiP, DRsimInterface::DRsimTowerData> fTowerMap;
   std::map<toweriTiP, DRsimInterface::DRsimEdepData> fEdepMap;
 

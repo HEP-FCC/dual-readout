@@ -6,15 +6,13 @@
 
 class DRsimActionInitialization : public G4VUserActionInitialization {
 public:
-  DRsimActionInitialization(int seed, G4int wavBin, G4int timeBin, G4String hepMCpath);
+  DRsimActionInitialization(int seed, G4String hepMCpath);
   virtual ~DRsimActionInitialization();
 
   virtual void BuildForMaster() const;
   virtual void Build() const;
 private:
   int fSeed;
-  G4int fWavBin;
-  G4int fTimeBin;
   G4String fHepMCpath;
 };
 

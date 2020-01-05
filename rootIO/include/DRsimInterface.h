@@ -84,6 +84,9 @@ public:
     DRsimEventData() {};
     virtual ~DRsimEventData() {};
 
+    const DRsimEventData& operator=(const DRsimEventData& right);
+
+    int event_number;
     std::vector<DRsimTowerData> towers;
     std::vector<DRsimEdepData> Edeps;
     std::vector<DRsimLeakageData> leaks;

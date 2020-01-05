@@ -7,6 +7,7 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4ParticleGun.hh"
 #include "G4ThreeVector.hh"
+#include "G4Types.hh"
 
 class G4GenericMessenger;
 class G4Event;
@@ -29,6 +30,9 @@ public:
 
   void SetRandX(G4double randx) { fRandX = randx; }
   void SetRandY(G4double randy) { fRandY = randy; }
+
+  static G4ThreadLocal int sIdxEvt;
+  static int sNumEvt;
 
 private:
   void DefineCommands();

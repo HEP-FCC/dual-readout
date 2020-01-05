@@ -25,6 +25,10 @@ include(${ROOT_USE_FILE})
 ROOT_GENERATE_DICTIONARY(G__rootIO ${headers} LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/include/LinkDef.h)
 add_library(rootIO SHARED ${sources} G__rootIO.cxx)
 target_include_directories(rootIO PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${ROOT_INCLUDE_DIRS})
-target_link_libraries(rootIO ${ROOT_LIBRARIES})
+target_link_libraries(
+  rootIO
+  ${FASTJET_DIR}/lib/libfastjet.so
+  ${ROOT_LIBRARIES}
+)
 
 install(TARGETS rootIO LIBRARY DESTINATION lib)

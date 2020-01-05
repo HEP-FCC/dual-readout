@@ -40,7 +40,7 @@ const DRsimSiPMHit& DRsimSiPMHit::operator=(const DRsimSiPMHit &right) {
   return *this;
 }
 
-G4int DRsimSiPMHit::operator==(const DRsimSiPMHit &right) const {
+G4bool DRsimSiPMHit::operator==(const DRsimSiPMHit &right) const {
   return (fSiPMnum==right.fSiPMnum && fTowerTheta==right.fTowerTheta && fTowerPhi==right.fTowerPhi && fSiPMXY==right.fSiPMXY);
 }
 

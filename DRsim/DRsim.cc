@@ -30,9 +30,6 @@ int main(int argc, char** argv) {
 
   G4int seed = 0;
   G4String hepMCpath;
-  // Binning of wavelength & timing should be integers
-  G4int wavBin = 60; // 900nm to 300nm
-  G4int timeBin = 300; // 100hps to 700hps (h=10^2)
   if (argc > 2) seed = atoi(argv[2]);
   if (argc > 3) hepMCpath = argv[3];
 
@@ -60,7 +57,7 @@ int main(int argc, char** argv) {
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization
-  runManager->SetUserInitialization(new DRsimActionInitialization(seed,wavBin,timeBin,hepMCpath));
+  runManager->SetUserInitialization(new DRsimActionInitialization(seed,hepMCpath));
 
   // Visualization manager construction
   #ifdef G4VIS_USE
