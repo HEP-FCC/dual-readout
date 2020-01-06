@@ -23,6 +23,10 @@ using namespace std;
 G4ThreadLocal DRsimMagneticField* DRsimDetectorConstruction::fMagneticField = 0;
 G4ThreadLocal G4FieldManager* DRsimDetectorConstruction::fFieldMgr = 0;
 
+int DRsimDetectorConstruction::sNumBarrel = 52;
+int DRsimDetectorConstruction::sNumEndcap = 40;
+int DRsimDetectorConstruction::sNumZRot = 283;
+
 DRsimDetectorConstruction::DRsimDetectorConstruction()
 : G4VUserDetectorConstruction(), fMessenger(0), fMaterials(NULL) {
   DefineCommands();
@@ -96,24 +100,21 @@ G4VPhysicalVolume* DRsimDetectorConstruction::Construct() {
 
   innerR = 1800.;
   tower_height = 2500.;
-  NbOfBarrel = 52;
-  NbOfEndcap = 40;
-  NbOfZRot = 283;
   fulltheta = 0.;
-  phi_unit = 2*M_PI/(G4double)NbOfZRot;
+  phi_unit = 2*M_PI/(G4double)sNumZRot;
 
   fiber = new G4Tubs("fiber",0,clad_C_rMax,tower_height/2.,0*deg,360.*deg);// S is the same
   fiberC = new G4Tubs("fiberC",0,core_C_rMax,tower_height/2.,0*deg,360.*deg);
   fiberS = new G4Tubs("fiberS",0,core_S_rMax,tower_height/2.,0*deg,360.*deg);
 
-  G4double deltatheta_endcap = deltatheta_barrel[NbOfBarrel-1];
+  G4double deltatheta_endcap = deltatheta_barrel[sNumBarrel-1];
 
   // barrel
 
   dimB = new dimensionB();
   dimB->SetInnerR(innerR);
   dimB->SetTower_height(tower_height);
-  dimB->SetNumZRot(NbOfZRot);
+  dimB->SetNumZRot(sNumZRot);
   dimB->SetPMTT(PMTT+filterT);
 
   dimB->Rbool(1);
@@ -129,7 +130,7 @@ G4VPhysicalVolume* DRsimDetectorConstruction::Construct() {
   dimE = new dimensionE();
   dimE->SetInnerR_new(3125.83);
   dimE->SetTower_height(tower_height);
-  dimE->SetNumZRot(NbOfZRot);
+  dimE->SetNumZRot(sNumZRot);
   dimE->SetDeltaTheta(lastdeltatheta);
   dimE->SetPMTT(PMTT+filterT);
 
@@ -150,30 +151,29 @@ G4VPhysicalVolume* DRsimDetectorConstruction::Construct() {
   return worldPhysical;
 }
 
-void DRsimDetectorConstruction::ConstructSDandField()
-{
+void DRsimDetectorConstruction::ConstructSDandField() {
   G4SDManager* SDman = G4SDManager::GetSDMpointer();
   G4String SiPMName = "SiPMSD";
 
-  for(int i=0;i<NbOfBarrel;i++){
+  for (int i = 0; i < sNumBarrel; i++) {
     fSiPMSDBR[i] = new DRsimSiPMSD("BR"+std::to_string(i),"BRC"+std::to_string(i),fTowerThetaBR.at(i),fTowerXYBR.at(i));
     SDman->AddNewDetector(fSiPMSDBR[i]);
     PMTcathLogicalBR[i]->SetSensitiveDetector(fSiPMSDBR[i]);
   }
 
-  for(int i=0;i<NbOfBarrel;i++){
+  for (int i = 0; i < sNumBarrel; i++) {
     fSiPMSDBL[i] = new DRsimSiPMSD("BL"+std::to_string(i),"BLC"+std::to_string(i),fTowerThetaBL.at(i),fTowerXYBL.at(i));
     SDman->AddNewDetector(fSiPMSDBL[i]);
     PMTcathLogicalBL[i]->SetSensitiveDetector(fSiPMSDBL[i]);
   }
 
-  for(int i=0;i<NbOfEndcap;i++){
+  for (int i = 0; i < sNumEndcap; i++) {
     fSiPMSDER[i] = new DRsimSiPMSD("ER"+std::to_string(i),"ERC"+std::to_string(i),fTowerThetaER.at(i),fTowerXYER.at(i));
     SDman->AddNewDetector(fSiPMSDER[i]);
     PMTcathLogicalER[i]->SetSensitiveDetector(fSiPMSDER[i]);
   }
 
-  for(int i=0;i<NbOfEndcap;i++){
+  for (int i = 0; i < sNumEndcap; i++) {
     fSiPMSDEL[i] = new DRsimSiPMSD("EL"+std::to_string(i),"ELC"+std::to_string(i),fTowerThetaEL.at(i),fTowerXYEL.at(i));
     SDman->AddNewDetector(fSiPMSDEL[i]);
     PMTcathLogicalEL[i]->SetSensitiveDetector(fSiPMSDEL[i]);
@@ -183,7 +183,7 @@ void DRsimDetectorConstruction::ConstructSDandField()
 void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
   G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair<int,float>>& towerThetas, std::vector<DRsimInterface::hitXY>& towerXYs) {
 
-  for(int i=0;i<NbOfBarrel;i++) {
+  for (int i = 0; i < sNumBarrel; i++) {
     float towerTheta = fulltheta + deltatheta_barrel[i]/2.;
     dimB->SetDeltaTheta(deltatheta_barrel[i]);
     dimB->SetThetaOfCenter(towerTheta);
@@ -198,7 +198,7 @@ void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
     pmtg = new G4Trap("PMTGB",pt);
     PMTGLogical[i] = new G4LogicalVolume(pmtg,FindMaterial("G4_AIR"),towerName);
 
-    for(int j=0;j<NbOfZRot;j++){
+    for(int j=0;j<sNumZRot;j++){
       new G4PVPlacement(dimB->GetRM(j),dimB->GetOrigin(j),towerLogical[i],towerName,worldLogical,false,j,checkOverlaps);
       new G4PVPlacement(dimB->GetRM(j),dimB->GetOrigin_PMTG(j),PMTGLogical[i],towerName,worldLogical,false,j,checkOverlaps);
     }
@@ -246,7 +246,7 @@ void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
 void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
   G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair<int,float>>& towerThetas, std::vector<DRsimInterface::hitXY>& towerXYs) {
 
-  for(int i=0;i<NbOfEndcap;i++) {
+  for(int i=0;i<sNumEndcap;i++) {
     float towerTheta = fulltheta + lastdeltatheta/2.;
     dimE->SetThetaOfCenter(towerTheta);
     dimE->CalBasic();
@@ -260,7 +260,7 @@ void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
     pmtg = new G4Trap("PMTGE",pt);
     PMTGLogical[i] = new G4LogicalVolume(pmtg,FindMaterial("G4_AIR"),towerName);
 
-    for(int j=0;j<NbOfZRot;j++){
+    for(int j=0;j<sNumZRot;j++){
       new G4PVPlacement(dimE->GetRM(j),dimE->GetOrigin(j),towerLogical[i],towerName,worldLogical,false,j,checkOverlaps);
       new G4PVPlacement(dimE->GetRM(j),dimE->GetOrigin_PMTG(j),PMTGLogical[i],towerName,worldLogical,false,j,checkOverlaps);
     }

@@ -1,4 +1,5 @@
 #include "DRsimPrimaryGeneratorAction.hh"
+#include "DRsimRunAction.hh"
 
 #include "G4Event.hh"
 #include "G4ParticleTable.hh"
@@ -10,7 +11,6 @@
 #include <cmath>
 
 namespace { G4Mutex DRsimPrimaryGeneratorMutex = G4MUTEX_INITIALIZER; }
-HepMCG4Reader* DRsimPrimaryGeneratorAction::sHepMCreader = 0;
 int DRsimPrimaryGeneratorAction::sNumEvt = 0;
 G4ThreadLocal int DRsimPrimaryGeneratorAction::sIdxEvt = 0;
 
@@ -23,10 +23,6 @@ DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4String he
 
   if (fHepMCpath.empty()) {
     initPtcGun();
-  } else {
-    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
-    HepMCG4Reader::sNumRef++;
-    if (!sHepMCreader) sHepMCreader = new HepMCG4Reader(fSeed,fHepMCpath);
   }
 }
 
@@ -57,13 +53,6 @@ DRsimPrimaryGeneratorAction::~DRsimPrimaryGeneratorAction() {
   if (fHepMCpath.empty()) {
     if (fParticleGun) delete fParticleGun;
     if (fMessenger) delete fMessenger;
-  } else {
-    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
-    HepMCG4Reader::sNumRef--;
-    if (sHepMCreader && HepMCG4Reader::sNumRef==0) {
-      delete sHepMCreader;
-      sHepMCreader = 0;
-    }
   }
 }
 
@@ -87,7 +76,7 @@ void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
     sNumEvt++;
   } else {
     G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
-    sHepMCreader->GeneratePrimaryVertex(event);
+    DRsimRunAction::sHepMCreader->GeneratePrimaryVertex(event);
     sIdxEvt = sNumEvt;
     sNumEvt++;
   }

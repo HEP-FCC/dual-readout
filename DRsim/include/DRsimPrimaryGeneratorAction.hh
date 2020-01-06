@@ -38,8 +38,6 @@ private:
   void DefineCommands();
   void initPtcGun();
 
-  static HepMCG4Reader* sHepMCreader;
-
   G4int fSeed;
   G4String fHepMCpath;
   G4ParticleGun* fParticleGun;

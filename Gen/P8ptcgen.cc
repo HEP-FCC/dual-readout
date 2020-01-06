@@ -33,16 +33,13 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  // Confirm that external files will be used for input and output.
-  cout << "\n >>> PYTHIA settings will be read from file " << argv[1]
-       << " <<< \n >>> HepMC events will be written to file "
-       << argv[2] << " <<< \n" << endl;
-
   // Interface for conversion from Pythia8::Event to HepMC event.
   HepMC3::Pythia8ToHepMC3 ToHepMC;
 
   // Specify file where HepMC events will be stored.
-  HepMC3::WriterRootTree rootOutput(argv[2]);
+  std::string seed = argv[2];
+  std::string filename = argv[3];
+  HepMC3::WriterRootTree rootOutput(filename+"_"+seed+".root");
   fastjetInterface fjInterface;
 
   // Generator.
@@ -52,7 +49,6 @@ int main(int argc, char* argv[]) {
 
   // Read in commands from external file.
   pythia.readFile(argv[1]);
-  std::string seed = argv[3];
   pythia.readString("Random:seed = "+seed);
 
   // Extract settings to be used in the main program.

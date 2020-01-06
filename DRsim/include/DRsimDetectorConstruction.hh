@@ -33,6 +33,10 @@ public:
   virtual G4VPhysicalVolume* Construct();
   virtual void ConstructSDandField();
 
+  static int sNumBarrel;
+  static int sNumEndcap;
+  static int sNumZRot;
+
 private:
   void DefineCommands();
   void DefineMaterials();
@@ -63,10 +67,6 @@ private:
 
   G4double innerR;
   G4double tower_height;
-
-  G4int NbOfBarrel;
-  G4int NbOfEndcap;
-  G4int NbOfZRot;
 
   G4double theta_unit;
   G4double phi_unit;

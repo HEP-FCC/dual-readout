@@ -4,8 +4,6 @@
 #include <iostream>
 #include <fstream>
 
-int HepMCG4Reader::sNumRef = 0;
-
 HepMCG4Reader::HepMCG4Reader(G4int seed, G4String hepMCpath)
 : verbose(1), fMessenger(0), fSeed(seed), fHepMCpath(hepMCpath)
 {

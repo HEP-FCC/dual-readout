@@ -7,11 +7,18 @@
 
 class DRsimRootInterface {
 public:
-  DRsimRootInterface(const std::string& filename, const std::string& treename);
+  DRsimRootInterface(const std::string& filename);
   ~DRsimRootInterface();
 
-  void write(const DRsimInterface::DRsimEventData* evt);
+  void fill(const DRsimInterface::DRsimEventData* evt);
+  void read(DRsimInterface::DRsimEventData& evt);
+  void create();
+  void set();
+  void write();
   void close();
+
+  unsigned int entries() { return fTree->GetEntries(); }
+  unsigned int numEvt() { return fNumEvt; }
 
 private:
   void init();
@@ -19,8 +26,8 @@ private:
   TFile* fFile;
   TTree* fTree;
   std::string fFilename;
-  std::string fTreename;
   DRsimInterface::DRsimEventData* fEventData;
+  unsigned int fNumEvt;
 };
 
 #endif

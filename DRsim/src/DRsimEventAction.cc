@@ -1,6 +1,7 @@
 #include "DRsimEventAction.hh"
 #include "DRsimRunAction.hh"
 #include "DRsimPrimaryGeneratorAction.hh"
+#include "DRsimDetectorConstruction.hh"
 
 #include "G4PrimaryVertex.hh"
 #include "G4RunManager.hh"
@@ -28,11 +29,11 @@ void DRsimEventAction::BeginOfEventAction(const G4Event*) {
 	clear();
 
   G4SDManager* sdManager = G4SDManager::GetSDMpointer();
-  for (int i = 0; i < 52; i++) {
+  for (int i = 0; i < DRsimDetectorConstruction::sNumBarrel; i++) {
     fSiPMCollID.push_back(sdManager->GetCollectionID("BRC"+std::to_string(i)));
     fSiPMCollID.push_back(sdManager->GetCollectionID("BLC"+std::to_string(i)));
   }
-  for (int i = 0; i < 40; i++) {
+  for (int i = 0; i < DRsimDetectorConstruction::sNumEndcap; i++) {
     fSiPMCollID.push_back(sdManager->GetCollectionID("ERC"+std::to_string(i)));
     fSiPMCollID.push_back(sdManager->GetCollectionID("ELC"+std::to_string(i)));
   }
@@ -163,7 +164,7 @@ void DRsimEventAction::queue() {
     G4CONDITIONWAIT(&DRsimEventActionCV, &lock);
   }
   G4AutoLock lock(&DRsimEventActionMutex);
-  DRsimRunAction::sRootIO->write(fEventData);
+  DRsimRunAction::sRootIO->fill(fEventData);
   DRsimRunAction::sNumEvt++;
   G4CONDITIONBROADCAST(&DRsimEventActionCV);
 }

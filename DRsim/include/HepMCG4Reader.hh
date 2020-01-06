@@ -25,8 +25,6 @@ public:
 
   void Initialize();
 
-  static int sNumRef;
-
 private:
   void DefineCommands();
 
