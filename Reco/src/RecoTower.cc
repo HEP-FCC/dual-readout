@@ -1,4 +1,5 @@
 #include "RecoTower.h"
+#include "RecoInterface.h"
 
 #include "Riostream.h"
 
@@ -18,4 +19,20 @@ void RecoTower::readCSV(std::vector<std::pair<float,float>>& calibs, std::string
     calibs.push_back(std::make_pair(ceren,scint));
   }
   in.close();
+}
+
+void RecoTower::reconstruct(const DRsimInterface::DRsimTowerData& tower) {
+  RecoInterface::RecoTowerData recoTower(tower);
+
+  for (auto sipmItr = tower.SiPMs.begin(); sipmItr != tower.SiPMs.end(); ++sipmItr) {
+    auto sipm = *sipmItr;
+    
+    for (auto timeItr = sipm.timeStruct.begin(); timeItr != sipm.timeStruct.end(); ++timeItr) {
+      auto timeObj = *timeItr;
+
+    }
+
+
+  } // sipm loop
+
 }

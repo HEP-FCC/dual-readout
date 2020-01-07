@@ -27,7 +27,7 @@ void DRsimCellParameterisation::ComputeTransformation(const G4int copyNo, G4VPhy
   physVol->SetTranslation(G4ThreeVector(fXCell[copyNo],fYCell[copyNo],0.));
 }
 
-bool DRsimCellParameterisation::IsCerenkov(G4int col, G4int row) const {
+bool DRsimCellParameterisation::IsCerenkov(G4int col, G4int row) {
   bool isCeren = false;
   if ( col%2 == 1 ) { isCeren = !isCeren; }
   if ( row%2 == 1 ) { isCeren = !isCeren; }

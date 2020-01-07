@@ -60,8 +60,7 @@ DRsimDetectorConstruction::DRsimDetectorConstruction()
 
   theta_unit=0;
   phi_unit=0;
-  deltatheta=0;
-  fDThetaEndcap = fDThetaBarrel[sNumBarrel-1];
+  fDThetaEndcap = fDThetaBarrel[52-1];
 
   fVisAttrOrange = new G4VisAttributes(G4Colour(1.0,0.5,0.,1.0));
   fVisAttrOrange->SetVisibility(true);

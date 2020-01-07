@@ -23,15 +23,8 @@ int main(int argc, char* argv[]) {
 
     for (auto towerItr = evt.towers.begin(); towerItr != evt.towers.end(); ++towerItr) {
       auto tower = *towerItr;
-      for (auto sipmItr = tower.SiPMs.begin(); sipmItr != tower.SiPMs.end(); ++sipmItr) {
-        auto sipm = *sipmItr;
-        for (auto timeItr = sipm.timeStruct.begin(); timeItr != sipm.timeStruct.end(); ++timeItr) {
-          auto timeObj = *timeItr;
+      recoTower->reconstruct(tower);
 
-        }
-
-
-      } // sipm loop
     } // tower loop
   } // event loop
 

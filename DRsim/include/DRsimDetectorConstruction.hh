@@ -71,7 +71,6 @@ private:
   G4double theta_unit;
   G4double phi_unit;
 
-  G4double deltatheta;
   G4double fulltheta;
   G4double fDThetaEndcap;
 

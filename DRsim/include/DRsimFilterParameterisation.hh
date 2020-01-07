@@ -15,8 +15,6 @@ public:
 
   virtual void ComputeTransformation(const G4int copyNo, G4VPhysicalVolume* physVol) const;
 
-  bool IsCerenkov(G4int col, G4int row) const;
-
 private:
   std::vector<G4double> fXFilter;
   std::vector<G4double> fYFilter;
