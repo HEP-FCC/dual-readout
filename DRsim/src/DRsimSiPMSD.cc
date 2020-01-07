@@ -10,7 +10,7 @@
 using namespace std;
 
 DRsimSiPMSD::DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, std::pair<int,float> towerTheta, DRsimInterface::hitXY towerXY)
-: G4VSensitiveDetector(name), fHitCollection(0), fHCID(-1), fTowerTheta(towerTheta), fTowerXY(towerXY), fWavBin(60), fTimeBin(300),
+: G4VSensitiveDetector(name), fHitCollection(0), fHCID(-1), fTowerTheta(towerTheta), fTowerXY(towerXY), fWavBin(60), fTimeBin(600),
 fPhiUnit(2*M_PI/(G4float)DRsimDetectorConstruction::sNumZRot), fWavlenStart(900.), fWavlenEnd(300.), fTimeStart(10.), fTimeEnd(70.)
 {
   collectionName.insert(hitsCollectionName);
