@@ -44,12 +44,12 @@ private:
   G4OpticalSurface* FindSurface(G4String surfName) { return fMaterials->GetOpticalSurface(surfName); }
 
   void Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
-    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair<int,float>>& towerThetas, std::vector<DRsimInterface::hitXY>& towerXYs);
+    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<DRsimInterface::DRsimTowerProperty>& towerProps);
 
   void fiberBarrel(G4int i, G4double deltatheta_, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
 
   void Endcap(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
-    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair<int,float>>& towerThetas, std::vector<DRsimInterface::hitXY>& towerXYs);
+    G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<DRsimInterface::DRsimTowerProperty>& towerProps);
 
   void fiberEndcap(G4int i, G4double deltatheta, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
 
@@ -66,14 +66,14 @@ private:
   G4VisAttributes* fVisAttrGreen;
 
   G4double innerR;
-  G4double tower_height;
+  G4double towerH;
 
   G4double theta_unit;
   G4double phi_unit;
 
   G4double deltatheta;
   G4double fulltheta;
-  G4double lastdeltatheta;
+  G4double fDThetaEndcap;
 
   G4ThreeVector pt[8]={G4ThreeVector()};
 
@@ -140,14 +140,10 @@ private:
   DRsimSiPMSD* fSiPMSDEL[40];
 
   DRsimInterface::hitXY fTowerXY;
-  std::vector<std::pair<int,float>> fTowerThetaBL;
-  std::vector<std::pair<int,float>> fTowerThetaBR;
-  std::vector<std::pair<int,float>> fTowerThetaEL;
-  std::vector<std::pair<int,float>> fTowerThetaER;
-  std::vector<DRsimInterface::hitXY> fTowerXYBL;
-  std::vector<DRsimInterface::hitXY> fTowerXYBR;
-  std::vector<DRsimInterface::hitXY> fTowerXYEL;
-  std::vector<DRsimInterface::hitXY> fTowerXYER;
+  std::vector<DRsimInterface::DRsimTowerProperty> fTowerBL;
+  std::vector<DRsimInterface::DRsimTowerProperty> fTowerBR;
+  std::vector<DRsimInterface::DRsimTowerProperty> fTowerEL;
+  std::vector<DRsimInterface::DRsimTowerProperty> fTowerER;
 
   G4double clad_C_rMin;
   G4double clad_C_rMax;
@@ -187,7 +183,7 @@ private:
   G4double outerSide_half;
   G4double outerSide_half_;
 
-  G4double deltatheta_barrel[52] = {
+  G4double fDThetaBarrel[52] = {
     0.02222,0.02220,0.02217,0.02214,0.02209,0.02203,0.02196,0.02188,0.02179,0.02169,
     0.02158,0.02146,0.02133,0.02119,0.02105,0.02089,0.02073,0.02056,0.02039,0.02020,
     0.02002,0.01982,0.01962,0.01941,0.01920,0.01898,0.01876,0.01854,0.01831,0.01808,

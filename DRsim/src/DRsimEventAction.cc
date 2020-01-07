@@ -116,6 +116,9 @@ void DRsimEventAction::fillHits(DRsimSiPMHit* hit) {
     towerData.towerPhi = hit->GetTowerPhi();
     towerData.numx = hit->GetTowerXY().first;
     towerData.numy = hit->GetTowerXY().second;
+    towerData.innerR = hit->GetTowerInnerR();
+    towerData.towerH = hit->GetTowerH();
+    towerData.dTheta = hit->GetTowerDTheta();
     towerData.SiPMs.push_back(sipmData);
 
     fTowerMap.insert(std::make_pair(towerTP,towerData));

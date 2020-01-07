@@ -9,6 +9,9 @@ DRsimSiPMHit::DRsimSiPMHit(G4int wavBin, G4int timeBin)
   fTowerTheta(std::make_pair(999,999.)),
   fTowerPhi(std::make_pair(999,999.)),
   fTowerXY(std::make_pair(-1,-1)),
+  fInnerR(0.),
+  fTowerH(0.),
+  fDTheta(0.),
   fSiPMXY(std::make_pair(-1,-1)),
   fWavBin(wavBin),
   fTimeBin(timeBin)
@@ -23,6 +26,9 @@ DRsimSiPMHit::DRsimSiPMHit(const DRsimSiPMHit &right)
   fTowerTheta = right.fTowerTheta;
   fTowerPhi = right.fTowerPhi;
   fTowerXY = right.fTowerXY;
+  fInnerR = right.fInnerR;
+  fTowerH = right.fTowerH;
+  fDTheta = right.fDTheta;
   fSiPMXY = right.fSiPMXY;
   fWavlenSpectrum = right.fWavlenSpectrum;
   fTimeStruct = right.fTimeStruct;
@@ -34,6 +40,9 @@ const DRsimSiPMHit& DRsimSiPMHit::operator=(const DRsimSiPMHit &right) {
   fTowerTheta = right.fTowerTheta;
   fTowerPhi = right.fTowerPhi;
   fTowerXY = right.fTowerXY;
+  fInnerR = right.fInnerR;
+  fTowerH = right.fTowerH;
+  fDTheta = right.fDTheta;
   fSiPMXY = right.fSiPMXY;
   fWavlenSpectrum = right.fWavlenSpectrum;
   fTimeStruct = right.fTimeStruct;

@@ -9,13 +9,19 @@
 
 using namespace std;
 
-DRsimSiPMSD::DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, std::pair<int,float> towerTheta, DRsimInterface::hitXY towerXY)
-: G4VSensitiveDetector(name), fHitCollection(0), fHCID(-1), fTowerTheta(towerTheta), fTowerXY(towerXY), fWavBin(60), fTimeBin(600),
+DRsimSiPMSD::DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, DRsimInterface::DRsimTowerProperty towerProp)
+: G4VSensitiveDetector(name), fHitCollection(0), fHCID(-1), fWavBin(60), fTimeBin(600),
 fPhiUnit(2*M_PI/(G4float)DRsimDetectorConstruction::sNumZRot), fWavlenStart(900.), fWavlenEnd(300.), fTimeStart(10.), fTimeEnd(70.)
 {
   collectionName.insert(hitsCollectionName);
   fWavlenStep = (fWavlenStart-fWavlenEnd)/(float)fWavBin;
   fTimeStep = (fTimeEnd-fTimeStart)/(float)fTimeBin;
+
+  fTowerTheta = towerProp.towerTheta;
+  fTowerXY = towerProp.towerXY;
+  fInnerR = towerProp.innerR;
+  fTowerH = towerProp.towerH;
+  fDTheta = towerProp.dTheta;
 }
 
 DRsimSiPMSD::~DRsimSiPMSD() {}
@@ -49,6 +55,9 @@ G4bool DRsimSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
     hit->SetTowerTheta(fTowerTheta);
     hit->SetTowerPhi(std::make_pair(towerPhi,(float)towerPhi*fPhiUnit));
     hit->SetTowerXY(fTowerXY);
+    hit->SetTowerInnerR(fInnerR);
+    hit->SetTowerH(fTowerH);
+    hit->SetTowerDTheta(fDTheta);
     hit->SetSiPMXY(findSiPMXY(SiPMnum,fTowerXY));
 
     fHitCollection->insert(hit);

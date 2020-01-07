@@ -15,6 +15,17 @@ public:
   typedef std::map<hitRange, int> DRsimTimeStruct;
   typedef std::map<hitRange, int> DRsimWavlenSpectrum;
 
+  struct DRsimTowerProperty {
+    DRsimTowerProperty() {};
+    virtual ~DRsimTowerProperty() {};
+
+    std::pair<int,float> towerTheta;
+    DRsimInterface::hitXY towerXY;
+    float innerR;
+    float towerH;
+    float dTheta;
+  };
+
   struct DRsimSiPMData {
     DRsimSiPMData() {};
     virtual ~DRsimSiPMData() {};
@@ -35,6 +46,9 @@ public:
     std::pair<int,float> towerPhi;
     int numx;
     int numy;
+    float innerR;
+    float towerH;
+    float dTheta;
     std::vector<DRsimSiPMData> SiPMs;
   };
 
@@ -83,8 +97,6 @@ public:
   struct DRsimEventData {
     DRsimEventData() {};
     virtual ~DRsimEventData() {};
-
-    const DRsimEventData& operator=(const DRsimEventData& right);
 
     int event_number;
     std::vector<DRsimTowerData> towers;

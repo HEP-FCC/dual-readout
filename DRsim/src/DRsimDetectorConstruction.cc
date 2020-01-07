@@ -61,6 +61,7 @@ DRsimDetectorConstruction::DRsimDetectorConstruction()
   theta_unit=0;
   phi_unit=0;
   deltatheta=0;
+  fDThetaEndcap = fDThetaBarrel[sNumBarrel-1];
 
   fVisAttrOrange = new G4VisAttributes(G4Colour(1.0,0.5,0.,1.0));
   fVisAttrOrange->SetVisibility(true);
@@ -99,51 +100,48 @@ G4VPhysicalVolume* DRsimDetectorConstruction::Construct() {
   G4VPhysicalVolume* worldPhysical = new G4PVPlacement(0,G4ThreeVector(),worldLogical,"worldPhysical",0,false,0,checkOverlaps);
 
   innerR = 1800.;
-  tower_height = 2500.;
+  towerH = 2500.;
   fulltheta = 0.;
   phi_unit = 2*M_PI/(G4double)sNumZRot;
 
-  fiber = new G4Tubs("fiber",0,clad_C_rMax,tower_height/2.,0*deg,360.*deg);// S is the same
-  fiberC = new G4Tubs("fiberC",0,core_C_rMax,tower_height/2.,0*deg,360.*deg);
-  fiberS = new G4Tubs("fiberS",0,core_S_rMax,tower_height/2.,0*deg,360.*deg);
-
-  G4double deltatheta_endcap = deltatheta_barrel[sNumBarrel-1];
+  fiber = new G4Tubs("fiber",0,clad_C_rMax,towerH/2.,0*deg,360.*deg);// S is the same
+  fiberC = new G4Tubs("fiberC",0,core_C_rMax,towerH/2.,0*deg,360.*deg);
+  fiberS = new G4Tubs("fiberS",0,core_S_rMax,towerH/2.,0*deg,360.*deg);
 
   // barrel
 
   dimB = new dimensionB();
   dimB->SetInnerR(innerR);
-  dimB->SetTower_height(tower_height);
+  dimB->SetTower_height(towerH);
   dimB->SetNumZRot(sNumZRot);
   dimB->SetPMTT(PMTT+filterT);
 
   dimB->Rbool(1);
   fulltheta = 0.;
-  Barrel(towerLogicalBR,PMTGLogicalBR,PMTfilterLogicalBR,PMTcellLogicalBR,PMTcathLogicalBR,fiberLogical_BR,fiberLogical_BR_,fTowerThetaBR,fTowerXYBR);
+  Barrel(towerLogicalBR,PMTGLogicalBR,PMTfilterLogicalBR,PMTcellLogicalBR,PMTcathLogicalBR,fiberLogical_BR,fiberLogical_BR_,fTowerBR);
 
   dimB->Rbool(0);
   fulltheta = 0.;
-  Barrel(towerLogicalBL,PMTGLogicalBL,PMTfilterLogicalBL,PMTcellLogicalBL,PMTcathLogicalBL,fiberLogical_BL,fiberLogical_BL_,fTowerThetaBL,fTowerXYBL);
+  Barrel(towerLogicalBL,PMTGLogicalBL,PMTfilterLogicalBL,PMTcellLogicalBL,PMTcathLogicalBL,fiberLogical_BL,fiberLogical_BL_,fTowerBL);
 
   // endcap
-  lastdeltatheta = deltatheta_endcap;
   dimE = new dimensionE();
   dimE->SetInnerR_new(3125.83);
-  dimE->SetTower_height(tower_height);
+  dimE->SetTower_height(towerH);
   dimE->SetNumZRot(sNumZRot);
-  dimE->SetDeltaTheta(lastdeltatheta);
+  dimE->SetDeltaTheta(fDThetaEndcap);
   dimE->SetPMTT(PMTT+filterT);
 
   fulltheta = 0.95717;
   dimE->Rbool(1);
 
-  Endcap(towerLogicalER,PMTGLogicalER,PMTfilterLogicalER,PMTcellLogicalER,PMTcathLogicalER,fiberLogical_ER,fiberLogical_ER_,fTowerThetaER,fTowerXYER);
+  Endcap(towerLogicalER,PMTGLogicalER,PMTfilterLogicalER,PMTcellLogicalER,PMTcathLogicalER,fiberLogical_ER,fiberLogical_ER_,fTowerER);
 
   // endcap L
   fulltheta = 0.95717;
   dimE->Rbool(0);
 
-  Endcap(towerLogicalEL,PMTGLogicalEL,PMTfilterLogicalEL,PMTcellLogicalEL,PMTcathLogicalEL,fiberLogical_EL,fiberLogical_EL_,fTowerThetaEL,fTowerXYEL);
+  Endcap(towerLogicalEL,PMTGLogicalEL,PMTfilterLogicalEL,PMTcellLogicalEL,PMTcathLogicalEL,fiberLogical_EL,fiberLogical_EL_,fTowerEL);
 
   delete dimE;
   delete dimB;
@@ -156,36 +154,36 @@ void DRsimDetectorConstruction::ConstructSDandField() {
   G4String SiPMName = "SiPMSD";
 
   for (int i = 0; i < sNumBarrel; i++) {
-    fSiPMSDBR[i] = new DRsimSiPMSD("BR"+std::to_string(i),"BRC"+std::to_string(i),fTowerThetaBR.at(i),fTowerXYBR.at(i));
+    fSiPMSDBR[i] = new DRsimSiPMSD("BR"+std::to_string(i),"BRC"+std::to_string(i),fTowerBR.at(i));
     SDman->AddNewDetector(fSiPMSDBR[i]);
     PMTcathLogicalBR[i]->SetSensitiveDetector(fSiPMSDBR[i]);
   }
 
   for (int i = 0; i < sNumBarrel; i++) {
-    fSiPMSDBL[i] = new DRsimSiPMSD("BL"+std::to_string(i),"BLC"+std::to_string(i),fTowerThetaBL.at(i),fTowerXYBL.at(i));
+    fSiPMSDBL[i] = new DRsimSiPMSD("BL"+std::to_string(i),"BLC"+std::to_string(i),fTowerBL.at(i));
     SDman->AddNewDetector(fSiPMSDBL[i]);
     PMTcathLogicalBL[i]->SetSensitiveDetector(fSiPMSDBL[i]);
   }
 
   for (int i = 0; i < sNumEndcap; i++) {
-    fSiPMSDER[i] = new DRsimSiPMSD("ER"+std::to_string(i),"ERC"+std::to_string(i),fTowerThetaER.at(i),fTowerXYER.at(i));
+    fSiPMSDER[i] = new DRsimSiPMSD("ER"+std::to_string(i),"ERC"+std::to_string(i),fTowerER.at(i));
     SDman->AddNewDetector(fSiPMSDER[i]);
     PMTcathLogicalER[i]->SetSensitiveDetector(fSiPMSDER[i]);
   }
 
   for (int i = 0; i < sNumEndcap; i++) {
-    fSiPMSDEL[i] = new DRsimSiPMSD("EL"+std::to_string(i),"ELC"+std::to_string(i),fTowerThetaEL.at(i),fTowerXYEL.at(i));
+    fSiPMSDEL[i] = new DRsimSiPMSD("EL"+std::to_string(i),"ELC"+std::to_string(i),fTowerEL.at(i));
     SDman->AddNewDetector(fSiPMSDEL[i]);
     PMTcathLogicalEL[i]->SetSensitiveDetector(fSiPMSDEL[i]);
   }
 }
 
 void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
-  G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair<int,float>>& towerThetas, std::vector<DRsimInterface::hitXY>& towerXYs) {
+  G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<DRsimInterface::DRsimTowerProperty>& towerProps) {
 
   for (int i = 0; i < sNumBarrel; i++) {
-    float towerTheta = fulltheta + deltatheta_barrel[i]/2.;
-    dimB->SetDeltaTheta(deltatheta_barrel[i]);
+    float towerTheta = fulltheta + fDThetaBarrel[i]/2.;
+    dimB->SetDeltaTheta(fDThetaBarrel[i]);
     dimB->SetThetaOfCenter(towerTheta);
     dimB->CalBasic();
     dimB->Getpt(pt);
@@ -204,11 +202,17 @@ void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
     }
 
     dimB->Getpt(pt);
-    fiberBarrel(i,deltatheta_barrel[i],towerLogical,fiberLogical,fiberLogical_);
+    fiberBarrel(i,fDThetaBarrel[i],towerLogical,fiberLogical,fiberLogical_);
+
     int iTheta = dimB->GetRbool() ? i : -i-1;
     float signedTowerTheta = dimB->GetRbool() ? towerTheta : -towerTheta;
-    towerXYs.push_back(fTowerXY);
-    towerThetas.push_back( std::make_pair(iTheta,signedTowerTheta) );
+    DRsimInterface::DRsimTowerProperty towerProp;
+    towerProp.towerXY = fTowerXY;
+    towerProp.towerTheta = std::make_pair(iTheta,signedTowerTheta);
+    towerProp.innerR = dimB->GetInnerR_new();
+    towerProp.towerH = towerH;
+    towerProp.dTheta = fDThetaBarrel[i];
+    towerProps.push_back(towerProp);
 
     G4VSolid* SiPMlayerSolid = new G4Box("SiPMlayerSolid",fTowerXY.first*1.5/2.*mm,fTowerXY.second*1.5/2.*mm,PMTT/2.);
     G4LogicalVolume* SiPMlayerLogical = new G4LogicalVolume(SiPMlayerSolid,FindMaterial("G4_AIR"),"SiPMlayerLogical");
@@ -236,7 +240,7 @@ void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
     G4PVParameterised* filterPhysical = new G4PVParameterised("filterPhysical",PMTfilterLogical[i],filterlayerLogical,kXAxis,fTowerXY.first*fTowerXY.second/2,filterParam);
     new G4LogicalBorderSurface("filterSurf",filterPhysical,PMTcellPhysical,FindSurface("FilterSurf"));
 
-    fulltheta = fulltheta+deltatheta_barrel[i];
+    fulltheta = fulltheta+fDThetaBarrel[i];
 
     PMTcathLogical[i]->SetVisAttributes(fVisAttrGreen);
     PMTfilterLogical[i]->SetVisAttributes(fVisAttrOrange);
@@ -244,10 +248,10 @@ void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
 }
 
 void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
-  G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<std::pair<int,float>>& towerThetas, std::vector<DRsimInterface::hitXY>& towerXYs) {
+  G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<DRsimInterface::DRsimTowerProperty>& towerProps) {
 
   for(int i=0;i<sNumEndcap;i++) {
-    float towerTheta = fulltheta + lastdeltatheta/2.;
+    float towerTheta = fulltheta + fDThetaEndcap/2.;
     dimE->SetThetaOfCenter(towerTheta);
     dimE->CalBasic();
     dimE->Getpt(pt);
@@ -266,11 +270,17 @@ void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
     }
 
     dimE->Getpt(pt);
-    fiberEndcap(i,lastdeltatheta,towerLogical,fiberLogical,fiberLogical_);
+    fiberEndcap(i,fDThetaEndcap,towerLogical,fiberLogical,fiberLogical_);
+
     int iTheta = dimE->GetRbool() ? i+52 : -i-52-1;
     float signedTowerTheta = dimE->GetRbool() ? towerTheta : -towerTheta;
-    towerXYs.push_back(fTowerXY);
-    towerThetas.push_back( std::make_pair(iTheta,signedTowerTheta) );
+    DRsimInterface::DRsimTowerProperty towerProp;
+    towerProp.towerXY = fTowerXY;
+    towerProp.towerTheta = std::make_pair(iTheta,signedTowerTheta);
+    towerProp.innerR = dimE->GetInnerR_new();
+    towerProp.towerH = towerH;
+    towerProp.dTheta = fDThetaEndcap;
+    towerProps.push_back(towerProp);
 
     G4VSolid* SiPMlayerSolid = new G4Box("SiPMlayerSolid",fTowerXY.first*1.5/2.*mm,fTowerXY.second*1.5/2.*mm,PMTT/2.);
     G4LogicalVolume* SiPMlayerLogical = new G4LogicalVolume(SiPMlayerSolid,FindMaterial("G4_AIR"),"SiPMlayerLogical");
@@ -298,7 +308,7 @@ void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
     G4PVParameterised* filterPhysical = new G4PVParameterised("filterPhysical",PMTfilterLogical[i],filterlayerLogical,kXAxis,fTowerXY.first*fTowerXY.second/2,filterParam);
     new G4LogicalBorderSurface("filterSurf",filterPhysical,PMTcellPhysical,FindSurface("FilterSurf"));
 
-    fulltheta = fulltheta+lastdeltatheta;
+    fulltheta = fulltheta+fDThetaEndcap;
 
     PMTcathLogical[i]->SetVisAttributes(fVisAttrGreen);
     PMTfilterLogical[i]->SetVisAttributes(fVisAttrOrange);
@@ -319,7 +329,7 @@ void DRsimDetectorConstruction::fiberBarrel(G4int i, G4double deltatheta_,G4Logi
   v4 = dimB->GetV4();
 
   innerSide_half = dimB->GetInnerR_new()*tan(deltatheta_/2.);
-  outerSide_half = (dimB->GetInnerR_new()+tower_height)*tan(deltatheta_/2.);
+  outerSide_half = (dimB->GetInnerR_new()+towerH)*tan(deltatheta_/2.);
 
   int numx = (int)(((v4.getX()*tan(phi_unit/2.)*2)-1.2*mm)/(1.5*mm)) + 1;
   int numy = (int)((outerSide_half*2-1.2*mm)/(1.5*mm)) + 1;
@@ -379,7 +389,7 @@ void DRsimDetectorConstruction::fiberEndcap(G4int i, G4double deltatheta_, G4Log
   v4 = dimE->GetV4();
 
   innerSide_half = dimE->GetInnerR_new()*tan(deltatheta_/2.);
-  outerSide_half = (dimE->GetInnerR_new()+tower_height)*tan(deltatheta_/2.);
+  outerSide_half = (dimE->GetInnerR_new()+towerH)*tan(deltatheta_/2.);
 
   int numx = (int)(((v4.getX()*tan(phi_unit/2.)*2)-1.2*mm)/(1.5*mm)) + 1;
   int numy = (int)((outerSide_half*2-1.2*mm)/(1.5*mm)) + 1;

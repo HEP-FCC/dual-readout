@@ -38,6 +38,15 @@ public:
   void SetTowerXY(DRsimInterface::hitXY xy) { fTowerXY = xy; }
   DRsimInterface::hitXY GetTowerXY() const { return fTowerXY; }
 
+  void SetTowerInnerR(G4float innerR) { fInnerR = innerR; }
+  G4float GetTowerInnerR() const { return fInnerR; }
+
+  void SetTowerH(G4float towerH) { fTowerH = towerH; }
+  G4float GetTowerH() const { return fTowerH; }
+
+  void SetTowerDTheta(G4float dTheta) { fDTheta = dTheta; }
+  G4float GetTowerDTheta() const { return fDTheta; }
+
   void SetSiPMXY(DRsimInterface::hitXY xy) { fSiPMXY = xy; }
   DRsimInterface::hitXY GetSiPMXY() const { return fSiPMXY; }
 
@@ -53,6 +62,9 @@ private:
   std::pair<int,float> fTowerTheta;
   std::pair<int,float> fTowerPhi;
   DRsimInterface::hitXY fTowerXY;
+  G4float fInnerR;
+  G4float fTowerH;
+  G4float fDTheta;
   DRsimInterface::hitXY fSiPMXY;
   DRsimInterface::DRsimWavlenSpectrum fWavlenSpectrum;
   DRsimInterface::DRsimTimeStruct fTimeStruct;

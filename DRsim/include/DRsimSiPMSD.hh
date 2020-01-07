@@ -2,6 +2,7 @@
 #define DRsimSiPMSD_h 1
 
 #include "DRsimSiPMHit.hh"
+#include "DRsimInterface.h"
 
 #include "G4VSensitiveDetector.hh"
 #include "G4SystemOfUnits.hh"
@@ -11,7 +12,7 @@
 
 class DRsimSiPMSD : public G4VSensitiveDetector {
 public:
-  DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, std::pair<int,float> towerTheta, DRsimInterface::hitXY towerXY);
+  DRsimSiPMSD(const G4String& name, const G4String& hitsCollectionName, DRsimInterface::DRsimTowerProperty towerProp);
   virtual ~DRsimSiPMSD();
 
   virtual void Initialize(G4HCofThisEvent* HCE);
@@ -21,8 +22,6 @@ public:
 private:
   DRsimSiPMHitsCollection* fHitCollection;
   G4int fHCID;
-  std::pair<int,float> fTowerTheta;
-  DRsimInterface::hitXY fTowerXY;
   G4int fWavBin;
   G4int fTimeBin;
   G4float fPhiUnit;
@@ -32,6 +31,11 @@ private:
   G4float fTimeEnd;
   G4float fWavlenStep;
   G4float fTimeStep;
+  std::pair<int,float> fTowerTheta;
+  DRsimInterface::hitXY fTowerXY;
+  G4float fInnerR;
+  G4float fTowerH;
+  G4float fDTheta;
 
   G4double wavToE(G4double wav) { return h_Planck*c_light/wav; }
 
