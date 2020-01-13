@@ -1,7 +1,7 @@
 #ifndef DRsimRunAction_h
 #define DRsimRunAction_h 1
 
-#include "DRsimRootInterface.h"
+#include "RootInterface.h"
 #include "HepMCG4Reader.hh"
 
 #include "G4UserRunAction.hh"
@@ -18,7 +18,7 @@ public:
   virtual void EndOfRunAction(const G4Run*);
 
   static HepMCG4Reader* sHepMCreader;
-  static DRsimRootInterface* sRootIO;
+  static RootInterface<DRsimInterface::DRsimEventData>* sRootIO;
   static int sNumEvt;
 
 private:

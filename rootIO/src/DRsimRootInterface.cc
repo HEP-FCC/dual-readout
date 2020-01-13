@@ -1,43 +1,43 @@
-#include "DRsimRootInterface.h"
+#include "RootInterface.h"
 
-DRsimRootInterface::DRsimRootInterface(const std::string& filename)
+RootInterface::RootInterface(const std::string& filename)
 : fFilename(filename), fNumEvt(0) {
   init();
 }
 
-DRsimRootInterface::~DRsimRootInterface() {}
+RootInterface::~RootInterface() {}
 
-void DRsimRootInterface::init() {
-  fEventData = new DRsimInterface::DRsimEventData();
+void RootInterface::init() {
+  fEventData = new T();
   fFile = TFile::Open(fFilename.c_str(),"UPDATE");
 }
 
-void DRsimRootInterface::create() {
-  fTree = new TTree("DRsim","DRsim");
-  fTree->Branch("DRsimEventData",fEventData);
+void RootInterface::create(const std::string& name, const std::string& title) {
+  fTree = new TTree(name.c_str(),name.c_str());
+  fTree->Branch(title.c_str(),fEventData);
 }
 
-void DRsimRootInterface::set() {
-  fTree = (TTree*)fFile->Get("DRsim");
-  fTree->SetBranchAddress("DRsimEventData",&fEventData);
+void RootInterface::set(const std::string& name, const std::string& title) {
+  fTree = (TTree*)fFile->Get(name.c_str());
+  fTree->SetBranchAddress(title.c_str(),&fEventData);
 }
 
-void DRsimRootInterface::fill(const DRsimInterface::DRsimEventData* evt) {
+void RootInterface::fill(const T* evt) {
   *fEventData = *evt;
   fTree->Fill();
 }
 
-void DRsimRootInterface::read(DRsimInterface::DRsimEventData& evt) {
+void RootInterface::read(T& evt) {
   fTree->GetEntry(fNumEvt);
   evt = *fEventData;
   fNumEvt++;
 }
 
-void DRsimRootInterface::write() {
+void RootInterface::write() {
   fFile->WriteTObject(fTree);
 }
 
-void DRsimRootInterface::close() {
+void RootInterface::close() {
   fFile->Close();
   if (fEventData) delete fEventData;
 }

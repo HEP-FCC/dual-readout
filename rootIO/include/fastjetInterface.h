@@ -44,8 +44,9 @@ public:
   fastjetInterface();
   ~fastjetInterface();
 
-  void init(TTree* treeIn);
+  void init(TTree* treeIn, std::string branchname);
   void writeJets(std::vector<fastjet::PseudoJet> jets);
+  void runFastjet(const std::vector<fastjet::PseudoJet>& input);
 
 private:
   std::vector<fastjetData> fJets;

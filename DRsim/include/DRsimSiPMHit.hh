@@ -6,6 +6,7 @@
 #include "G4VHit.hh"
 #include "G4THitsCollection.hh"
 #include "G4Allocator.hh"
+#include "G4ThreeVector.hh"
 
 class DRsimSiPMHit : public G4VHit {
 public:
@@ -28,6 +29,9 @@ public:
 
   void SetSiPMnum(G4int n) { fSiPMnum = n; }
   G4int GetSiPMnum() const { return fSiPMnum; }
+
+  void SetSiPMpos(G4ThreeVector pos) { fSiPMpos = pos; }
+  G4ThreeVector GetSiPMpos() const { return fSiPMpos; }
 
   void SetTowerTheta(std::pair<int,float> theta) { fTowerTheta = theta; }
   std::pair<int,float> GetTowerTheta() const { return fTowerTheta; }
@@ -59,6 +63,7 @@ public:
 private:
   G4int fSiPMnum;
   G4int fPhotons;
+  G4ThreeVector fSiPMpos;
   std::pair<int,float> fTowerTheta;
   std::pair<int,float> fTowerPhi;
   DRsimInterface::hitXY fTowerXY;

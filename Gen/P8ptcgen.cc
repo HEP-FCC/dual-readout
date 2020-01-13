@@ -65,12 +65,10 @@ int main(int argc, char* argv[]) {
   // Initialization.
   pythia.init();
 
-  fjInterface.init(rootOutput.m_tree);
+  fjInterface.init(rootOutput.m_tree,"Genjets");
   P8ptcgun ptcgun(idGun, eeGun, theta, 0.);
 
   // FastJet
-  double dR = 0.4;
-  fastjet::JetDefinition jetDef(fastjet::antikt_algorithm, dR);
   std::vector<fastjet::PseudoJet> fjInputs;
 
   // Begin event loop.
@@ -125,15 +123,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Run Fastjet algorithm
-    vector <fastjet::PseudoJet> inclusiveJets, sortedJets;
-    fastjet::ClusterSequence clustSeq(fjInputs, jetDef);
-
-    // Extract inclusive jets sorted by pT
-    inclusiveJets = clustSeq.inclusive_jets();
-    sortedJets    = fastjet::sorted_by_pt(inclusiveJets);
-
-    // Write the HepMC event to file. Done with it.
-    fjInterface.writeJets(sortedJets);
+    fjInterface.runFastjet(fjInputs);
+    
     rootOutput.write_event(*hepmcevt);
     delete hepmcevt;
 

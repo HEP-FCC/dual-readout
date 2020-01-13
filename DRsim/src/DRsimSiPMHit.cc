@@ -6,6 +6,7 @@ DRsimSiPMHit::DRsimSiPMHit(G4int wavBin, G4int timeBin)
 : G4VHit(),
   fSiPMnum(0),
   fPhotons(0),
+  fSiPMpos(G4ThreeVector(0.,0.,0.)),
   fTowerTheta(std::make_pair(999,999.)),
   fTowerPhi(std::make_pair(999,999.)),
   fTowerXY(std::make_pair(-1,-1)),
@@ -23,6 +24,7 @@ DRsimSiPMHit::DRsimSiPMHit(const DRsimSiPMHit &right)
 : G4VHit() {
   fSiPMnum = right.fSiPMnum;
   fPhotons = right.fPhotons;
+  fSiPMpos = right.fSiPMpos;
   fTowerTheta = right.fTowerTheta;
   fTowerPhi = right.fTowerPhi;
   fTowerXY = right.fTowerXY;
@@ -37,6 +39,7 @@ DRsimSiPMHit::DRsimSiPMHit(const DRsimSiPMHit &right)
 const DRsimSiPMHit& DRsimSiPMHit::operator=(const DRsimSiPMHit &right) {
   fSiPMnum = right.fSiPMnum;
   fPhotons = right.fPhotons;
+  fSiPMpos = right.fSiPMpos;
   fTowerTheta = right.fTowerTheta;
   fTowerPhi = right.fTowerPhi;
   fTowerXY = right.fTowerXY;

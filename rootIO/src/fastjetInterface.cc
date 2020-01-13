@@ -1,4 +1,8 @@
 #include "fastjetInterface.h"
+
+#include "fastjet/ClusterSequence.hh"
+#include "fastjet/PseudoJet.hh"
+
 #include <algorithm>
 
 fastjetInterface::fastjetInterface() {}
@@ -30,8 +34,8 @@ fastjetInterface::fastjetData::fastjetData(fastjet::PseudoJet& jet) {
   nConstituents = jet.constituents().size();
 }
 
-void fastjetInterface::init(TTree* treeIn) {
-  treeIn->Branch("Genjets", &fJets);
+void fastjetInterface::init(TTree* treeIn, std::string branchname) {
+  treeIn->Branch(branchname.c_str(), &fJets);
 }
 
 void fastjetInterface::writeJets(std::vector<fastjet::PseudoJet> jets) {
@@ -41,4 +45,20 @@ void fastjetInterface::writeJets(std::vector<fastjet::PseudoJet> jets) {
   for (auto jet = jets.begin(); jet != jets.end(); ++jet) {
     fJets.push_back(fastjetData(*jet));
   }
+}
+
+void fastjetInterface::runFastjet(const std::vector<fastjet::PseudoJet>& input) {
+  // FastJet
+  double dR = 0.4;
+  fastjet::JetDefinition jetDef(fastjet::antikt_algorithm, dR);
+
+  // Run Fastjet algorithm
+  std::vector<fastjet::PseudoJet> inclusiveJets, sortedJets;
+  fastjet::ClusterSequence clustSeq_F(input, jetDef);
+
+  // Extract inclusive jets sorted by pT
+  inclusiveJets = clustSeq.inclusive_jets();
+  sortedJets    = fastjet::sorted_by_pt(inclusiveJets);
+
+  writeJets(sortedJets);
 }

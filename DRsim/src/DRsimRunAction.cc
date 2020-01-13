@@ -9,7 +9,7 @@ using namespace std;
 
 namespace { G4Mutex DRsimRunActionMutex = G4MUTEX_INITIALIZER; }
 HepMCG4Reader* DRsimRunAction::sHepMCreader = 0;
-DRsimRootInterface* DRsimRunAction::sRootIO = 0;
+RootInterface* DRsimRunAction::sRootIO = 0;
 int DRsimRunAction::sNumEvt = 0;
 
 DRsimRunAction::DRsimRunAction(int seed, G4String hepMCpath)
@@ -21,8 +21,8 @@ DRsimRunAction::DRsimRunAction(int seed, G4String hepMCpath)
   G4AutoLock lock(&DRsimRunActionMutex);
 
   if (!sRootIO) {
-    sRootIO = new DRsimRootInterface(fHepMCpath+"_"+std::to_string(fSeed)+".root");
-    sRootIO->create();
+    sRootIO = new RootInterface<DRsimInterface::DRsimEventData>(fHepMCpath+"_"+std::to_string(fSeed)+".root");
+    sRootIO->create("DRsim","DRsimEventData");
   }
 
   if (!fHepMCpath.empty() && !sHepMCreader) {

@@ -11,17 +11,12 @@
 #pragma link C++ class std::vector<fastjetInterface::fastjetData>+;
 #pragma link C++ class std::vector<fastjetInterface::fastjetDataBase>+;
 
+#pragma link C++ class DRsimInterface::threeVector+;
 #pragma link C++ struct DRsimInterface::DRsimSiPMData+;
 #pragma link C++ struct DRsimInterface::DRsimTowerData+;
 #pragma link C++ struct DRsimInterface::DRsimEdepData+;
 #pragma link C++ struct DRsimInterface::DRsimLeakageData+;
 #pragma link C++ struct DRsimInterface::DRsimGenData+;
-
-#pragma link C++ class std::vector<DRsimInterface::DRsimSiPMData>+;
-#pragma link C++ class std::vector<DRsimInterface::DRsimTowerData>+;
-#pragma link C++ class std::vector<DRsimInterface::DRsimEdepData>+;
-#pragma link C++ class std::vector<DRsimInterface::DRsimLeakageData>+;
-#pragma link C++ class std::vector<DRsimInterface::DRsimGenData>+;
 #pragma link C++ struct DRsimInterface::DRsimEventData+;
 
 #endif

@@ -1,8 +1,6 @@
 #ifndef DRsimEventAction_h
 #define DRsimEventAction_h 1
 
-using namespace std;
-
 #include "DRsimInterface.h"
 #include "DRsimSiPMHit.hh"
 

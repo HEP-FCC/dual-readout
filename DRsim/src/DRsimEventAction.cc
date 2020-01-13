@@ -9,8 +9,6 @@
 #include "G4AutoLock.hh"
 #include "G4Threading.hh"
 
-using namespace std;
-
 namespace {
   G4Mutex DRsimEventActionMutex = G4MUTEX_INITIALIZER;
   G4Condition DRsimEventActionCV = G4CONDITION_INITIALIZER;
@@ -104,6 +102,7 @@ void DRsimEventAction::fillHits(DRsimSiPMHit* hit) {
   sipmData.SiPMnum = hit->GetSiPMnum();
   sipmData.x = hit->GetSiPMXY().first;
   sipmData.y = hit->GetSiPMXY().second;
+  sipmData.pos = std::make_tuple(hit->GetSiPMpos().x(),hit->GetSiPMpos().y(),hit->GetSiPMpos().z());
   sipmData.timeStruct = hit->GetTimeStruct();
   sipmData.wavlenSpectrum = hit->GetWavlenSpectrum();
 

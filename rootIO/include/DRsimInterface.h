@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <map>
+#include <tuple>
 
 class DRsimInterface {
 public:
@@ -14,6 +15,7 @@ public:
   typedef std::pair<int,int> hitXY;
   typedef std::map<hitRange, int> DRsimTimeStruct;
   typedef std::map<hitRange, int> DRsimWavlenSpectrum;
+  typedef std::tuple<float,float,float> threeVector;
 
   struct DRsimTowerProperty {
     DRsimTowerProperty() {};
@@ -34,6 +36,7 @@ public:
     int SiPMnum;
     int x;
     int y;
+    threeVector pos;
     DRsimTimeStruct timeStruct;
     DRsimWavlenSpectrum wavlenSpectrum;
   };

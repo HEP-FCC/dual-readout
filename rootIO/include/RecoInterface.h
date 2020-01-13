@@ -10,6 +10,7 @@ public:
 
   struct RecoFiberData {
     RecoFiberData() {};
+    RecoFiberData(const DRsimInterface::DRsimSiPMData& sipmIn);
     ~RecoFiberData() {};
 
     bool IsCerenkov;
@@ -19,9 +20,8 @@ public:
     float t;
     int x;
     int y;
-    float theta;
-    float phi;
     float depth;
+    DRsimInterface::threeVector pos;
   };
 
   struct RecoTowerData {
@@ -32,10 +32,10 @@ public:
     float E_C;
     float E_S;
     float E_Scorr;
+    float E_DR;
+    float E_DRcorr;
     int n_C;
     int n_S;
-    float t_C;
-    float t_S;
     std::pair<int,float> theta;
     std::pair<int,float> phi;
     int numx;
@@ -43,8 +43,21 @@ public:
     float innerR;
     float towerH;
     float dTheta;
-    float depth;
-    std::vector<RecoFiberData> Fibers;
+    std::vector<RecoFiberData> fibers;
+  };
+
+  struct RecoEventData {
+    RecoEventData();
+    ~RecoEventData() {};
+
+    float E_C;
+    float E_S;
+    float E_Scorr;
+    float E_DR;
+    flaot E_DRcorr;
+    int n_C;
+    int n_S;
+    std::vector<RecoTowerData> towers;
   };
 };
 

@@ -40,6 +40,7 @@ G4bool DRsimSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
   G4int nofHits = fHitCollection->entries();
   G4double hitTime = step->GetPostStepPoint()->GetGlobalTime();
   G4double energy = step->GetTrack()->GetTotalEnergy();
+
   DRsimSiPMHit* hit = NULL;
 
   for (G4int i = 0; i < nofHits; i++) {
@@ -59,6 +60,7 @@ G4bool DRsimSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
     hit->SetTowerH(fTowerH);
     hit->SetTowerDTheta(fDTheta);
     hit->SetSiPMXY(findSiPMXY(SiPMnum,fTowerXY));
+    hit->SetSiPMpos(step->GetPostStepPoint()->GetTouchableHandle()->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0.,0.,0.)));
 
     fHitCollection->insert(hit);
   }
