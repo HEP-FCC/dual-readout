@@ -26,10 +26,3 @@ DRsimCellParameterisation::~DRsimCellParameterisation()
 void DRsimCellParameterisation::ComputeTransformation(const G4int copyNo, G4VPhysicalVolume* physVol) const {
   physVol->SetTranslation(G4ThreeVector(fXCell[copyNo],fYCell[copyNo],0.));
 }
-
-bool DRsimCellParameterisation::IsCerenkov(G4int col, G4int row) {
-  bool isCeren = false;
-  if ( col%2 == 1 ) { isCeren = !isCeren; }
-  if ( row%2 == 1 ) { isCeren = !isCeren; }
-  return isCeren;
-}

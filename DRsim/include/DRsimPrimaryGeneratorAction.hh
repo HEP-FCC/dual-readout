@@ -15,7 +15,7 @@ class G4ParticleDefinition;
 
 class DRsimPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
 public:
-  DRsimPrimaryGeneratorAction(G4int seed, G4String hepMCpath);
+  DRsimPrimaryGeneratorAction(G4int seed, G4bool useHepMC);
   virtual ~DRsimPrimaryGeneratorAction();
 
   virtual void GeneratePrimaries(G4Event*);
@@ -39,7 +39,7 @@ private:
   void initPtcGun();
 
   G4int fSeed;
-  G4String fHepMCpath;
+  G4bool fUseHepMC;
   G4ParticleGun* fParticleGun;
   G4GenericMessenger* fMessenger;
   G4ParticleDefinition* fElectron;

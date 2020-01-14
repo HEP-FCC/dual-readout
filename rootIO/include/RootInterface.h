@@ -18,6 +18,7 @@ public:
   void write();
   void close();
 
+  TTree* getTree();
   unsigned int entries() { return fTree->GetEntries(); }
   unsigned int numEvt() { return fNumEvt; }
 

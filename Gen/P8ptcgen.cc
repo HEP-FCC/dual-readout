@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
   // Initialization.
   pythia.init();
 
-  fjInterface.init(rootOutput.m_tree,"Genjets");
+  fjInterface.init(rootOutput.m_tree,"GenJets");
   P8ptcgun ptcgun(idGun, eeGun, theta, 0.);
 
   // FastJet
@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
 
     // Run Fastjet algorithm
     fjInterface.runFastjet(fjInputs);
-    
+
     rootOutput.write_event(*hepmcevt);
     delete hepmcevt;
 
@@ -133,11 +133,6 @@ int main(int argc, char* argv[]) {
       event.list(true);
       // Also list junctions.
       event.listJunctions();
-
-      // For the first event, print the FastJet details
-      cout << "Ran " << jetDef.description() << endl;
-      cout << "Strategy adopted by FastJet was "
-           << clustSeq.strategy_string() << endl << endl;
     }
   // End of event loop. Statistics.
   }

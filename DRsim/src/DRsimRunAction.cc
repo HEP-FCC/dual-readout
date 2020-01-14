@@ -9,24 +9,25 @@ using namespace std;
 
 namespace { G4Mutex DRsimRunActionMutex = G4MUTEX_INITIALIZER; }
 HepMCG4Reader* DRsimRunAction::sHepMCreader = 0;
-RootInterface* DRsimRunAction::sRootIO = 0;
+RootInterface<DRsimInterface::DRsimEventData>* DRsimRunAction::sRootIO = 0;
 int DRsimRunAction::sNumEvt = 0;
 
-DRsimRunAction::DRsimRunAction(int seed, G4String hepMCpath)
+DRsimRunAction::DRsimRunAction(G4int seed, G4String filename, G4bool useHepMC)
 : G4UserRunAction()
 {
   fSeed = seed;
-  fHepMCpath = hepMCpath;
+  fFilename = filename;
+  fUseHepMC = useHepMC;
 
   G4AutoLock lock(&DRsimRunActionMutex);
 
   if (!sRootIO) {
-    sRootIO = new RootInterface<DRsimInterface::DRsimEventData>(fHepMCpath+"_"+std::to_string(fSeed)+".root");
+    sRootIO = new RootInterface<DRsimInterface::DRsimEventData>(fFilename+"_"+std::to_string(fSeed)+".root");
     sRootIO->create("DRsim","DRsimEventData");
   }
 
-  if (!fHepMCpath.empty() && !sHepMCreader) {
-    sHepMCreader = new HepMCG4Reader(fSeed,fHepMCpath);
+  if (fUseHepMC && !sHepMCreader) {
+    sHepMCreader = new HepMCG4Reader(fSeed,fFilename);
   }
 }
 
@@ -34,7 +35,7 @@ DRsimRunAction::~DRsimRunAction() {
   if (IsMaster()) {
     G4AutoLock lock(&DRsimRunActionMutex);
 
-    if (!fHepMCpath.empty() && sHepMCreader) {
+    if (fUseHepMC && sHepMCreader) {
       delete sHepMCreader;
       sHepMCreader = 0;
     }

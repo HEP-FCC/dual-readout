@@ -9,6 +9,22 @@ int main(int argc, char* argv[]) {
   std::string filenum = std::string(argv[1]);
   std::string filename = std::string(argv[2]);
 
+  RootInterface<RecoInterface::RecoEventData>* recoInterface = new RootInterface<RecoInterface::RecoEventData>(filename+"_"+filenum+".root");
+  recoInterface->create("Reco","RecoEventData");
+
+  fastjetInterface fjTower_S;
+  fjTower_S.init(recoInterface->getTree(),"RecoTowerJets_S");
+  fastjetInterface fjTower_Scorr;
+  fjTower_Scorr.init(recoInterface->getTree(),"RecoTowerJets_Scorr");
+  fastjetInterface fjTower_DR;
+  fjTower_DR.init(recoInterface->getTree(),"RecoTowerJets_DR");
+  fastjetInterface fjTower_DRcorr;
+  fjTower_DRcorr.init(recoInterface->getTree(),"RecoTowerJets_DRcorr");
+  fastjetInterface fjFiber_S;
+  fjFiber_S.init(recoInterface->getTree(),"RecoFiberJets_S");
+  fastjetInterface fjFiber_Scorr;
+  fjFiber_Scorr.init(recoInterface->getTree(),"RecoFiberJets_Scorr");
+
   RootInterface<DRsimInterface::DRsimEventData>* drInterface = new RootInterface<DRsimInterface::DRsimEventData>(filename+"_"+filenum+".root");
   drInterface->set("DRsim","DRsimEventData");
 
@@ -21,47 +37,38 @@ int main(int argc, char* argv[]) {
     recoTower->getFiber()->clear();
 
     DRsimInterface::DRsimEventData evt;
-    RecoInterface::RecoEventData recoEvt();
+    RecoInterface::RecoEventData* recoEvt = new RecoInterface::RecoEventData();
     drInterface->read(evt);
 
     for (auto towerItr = evt.towers.begin(); towerItr != evt.towers.end(); ++towerItr) {
       auto tower = *towerItr;
-      recoTower->reconstruct(tower,recoEvt);
+      recoTower->reconstruct(tower,*recoEvt);
 
       auto theTower = recoTower->getTower();
-      recoEvt.E_C += theTower.E_C;
-      recoEvt.E_S += theTower.E_S;
-      recoEvt.E_Scorr += theTower.E_Scorr;
-      recoEvt.n_C += theTower.n_C;
-      recoEvt.n_S += theTower.n_S;
+      recoEvt->E_C += theTower.E_C;
+      recoEvt->E_S += theTower.E_S;
+      recoEvt->E_Scorr += theTower.E_Scorr;
+      recoEvt->n_C += theTower.n_C;
+      recoEvt->n_S += theTower.n_S;
     } // tower loop
-    recoEvt.E_DR = RecoTower::E_DR(recoEvt.E_C,recoEvt.E_S);
-    recoEvt.E_DRcorr = RecoTower::E_DR(recoEvt.E_C,recoEvt.E_Scorr);
+    recoEvt->E_DR = RecoTower::E_DR(recoEvt->E_C,recoEvt->E_S);
+    recoEvt->E_DRcorr = RecoTower::E_DR(recoEvt->E_C,recoEvt->E_Scorr);
 
-    // // FastJet
-    // double dR = 0.4;
-    // fastjet::JetDefinition jetDef(fastjet::antikt_algorithm, dR);
-    //
-    // // Run Fastjet algorithm
-    //  inclusiveJets_F, sortedJets_F;
-    // std::vector <fastjet::PseudoJet> inclusiveJets_S, sortedJets_S;
-    // std::vector <fastjet::PseudoJet> inclusiveJets_DR, sortedJets_DR;
-    // fastjet::ClusterSequence clustSeq_F(recoTower->getFiber()->getFjInputs(), jetDef);
-    // fastjet::ClusterSequence clustSeq_S(recoTower->getFjInputs_S(), jetDef);
-    // fastjet::ClusterSequence clustSeq_DR(recoTower->getFjInputs_DR(), jetDef);
-    //
-    // // Extract inclusive jets sorted by pT
-    // inclusiveJets = clustSeq.inclusive_jets();
-    // sortedJets    = fastjet::sorted_by_pt(inclusiveJets);
-    //
-    // // Write the HepMC event to file. Done with it.
-    // fjInterface.writeJets(sortedJets);
-    // rootOutput.write_event(*hepmcevt);
-    // delete hepmcevt;
+    fjTower_S.runFastjet(recoTower->getFjInputs_S());
+    fjTower_Scorr.runFastjet(recoTower->getFjInputs_Scorr());
+    fjTower_DR.runFastjet(recoTower->getFjInputs_DR());
+    fjTower_DRcorr.runFastjet(recoTower->getFjInputs_DRcorr());
+    fjFiber_S.runFastjet(recoTower->getFiber()->getFjInputs_S());
+    fjFiber_Scorr.runFastjet(recoTower->getFiber()->getFjInputs_Scorr());
 
-
+    recoInterface->fill(recoEvt);
+    delete recoEvt;
 
   } // event loop
+
+  drInterface->close();
+  recoInterface->write();
+  recoInterface->close();
 
   return 0;
 }

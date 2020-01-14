@@ -29,9 +29,9 @@ int main(int argc, char** argv) {
   #endif
 
   G4int seed = 0;
-  G4String hepMCpath;
+  G4String filename;
   if (argc > 2) seed = atoi(argv[2]);
-  if (argc > 3) hepMCpath = argv[3];
+  if (argc > 3) filename = argv[3];
 
   CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
   CLHEP::HepRandom::setTheSeed(seed);
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization
-  runManager->SetUserInitialization(new DRsimActionInitialization(seed,hepMCpath));
+  runManager->SetUserInitialization(new DRsimActionInitialization(seed,filename));
 
   // Visualization manager construction
   #ifdef G4VIS_USE

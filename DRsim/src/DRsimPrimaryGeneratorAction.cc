@@ -15,13 +15,13 @@ int DRsimPrimaryGeneratorAction::sNumEvt = 0;
 G4ThreadLocal int DRsimPrimaryGeneratorAction::sIdxEvt = 0;
 
 using namespace std;
-DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4String hepMCpath)
+DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4bool useHepMC)
 : G4VUserPrimaryGeneratorAction()
 {
-  fHepMCpath = hepMCpath;
   fSeed = seed;
+  fUseHepMC = useHepMC;
 
-  if (fHepMCpath.empty()) {
+  if (!fUseHepMC) {
     initPtcGun();
   }
 }
@@ -50,14 +50,14 @@ void DRsimPrimaryGeneratorAction::initPtcGun() {
 }
 
 DRsimPrimaryGeneratorAction::~DRsimPrimaryGeneratorAction() {
-  if (fHepMCpath.empty()) {
+  if (!fUseHepMC) {
     if (fParticleGun) delete fParticleGun;
     if (fMessenger) delete fMessenger;
   }
 }
 
 void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
-  if (fHepMCpath.empty()) {
+  if (!fUseHepMC) {
     G4double y = (G4UniformRand()-0.5)*fRandX + fY_0;//- 3.142*cm;//
     G4double z = (G4UniformRand()-0.5)*fRandY + fZ_0;//- 4.7135*cm;//10x10 mm^2
     fOrg.set(0,y,z);

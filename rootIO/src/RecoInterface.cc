@@ -1,5 +1,4 @@
 #include "RecoInterface.h"
-#include "DRsimCellParameterisation.hh"
 
 RecoInterface::RecoTowerData::RecoTowerData(const DRsimInterface::DRsimTowerData& towerIn) {
   theta = towerIn.towerTheta;
@@ -20,7 +19,7 @@ RecoInterface::RecoTowerData::RecoTowerData(const DRsimInterface::DRsimTowerData
 }
 
 RecoInterface::RecoFiberData::RecoFiberData(const DRsimInterface::DRsimSiPMData& sipmIn) {
-  IsCerenkov = DRsimCellParameterisation::IsCerenkov(sipmIn.x,sipmIn.y);
+  IsCerenkov = RecoInterface::IsCerenkov(sipmIn.x,sipmIn.y);
   n = sipmIn.count;
   x = sipmIn.x;
   y = sipmIn.y;
@@ -40,4 +39,11 @@ RecoInterface::RecoEventData::RecoEventData() {
   E_DRcorr = 0.;
   n_C = 0;
   n_S = 0;
+}
+
+bool RecoInterface::IsCerenkov(int col, int row) {
+  bool isCeren = false;
+  if ( col%2 == 1 ) { isCeren = !isCeren; }
+  if ( row%2 == 1 ) { isCeren = !isCeren; }
+  return isCeren;
 }

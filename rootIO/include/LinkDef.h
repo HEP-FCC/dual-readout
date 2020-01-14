@@ -19,4 +19,8 @@
 #pragma link C++ struct DRsimInterface::DRsimGenData+;
 #pragma link C++ struct DRsimInterface::DRsimEventData+;
 
+#pragma link C++ struct RecoInterface::RecoFiberData+;
+#pragma link C++ struct RecoInterface::RecoTowerData+;
+#pragma link C++ struct RecoInterface::RecoEventData+;
+
 #endif

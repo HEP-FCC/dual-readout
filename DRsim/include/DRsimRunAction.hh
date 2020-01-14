@@ -2,6 +2,7 @@
 #define DRsimRunAction_h 1
 
 #include "RootInterface.h"
+#include "DRsimInterface.h"
 #include "HepMCG4Reader.hh"
 
 #include "G4UserRunAction.hh"
@@ -11,7 +12,7 @@ class G4Run;
 
 class DRsimRunAction : public G4UserRunAction {
 public:
-  DRsimRunAction(int seed, G4String hepMCpath);
+  DRsimRunAction(G4int seed, G4String filename, G4bool useHepMC);
   virtual ~DRsimRunAction();
 
   virtual void BeginOfRunAction(const G4Run*);
@@ -22,8 +23,9 @@ public:
   static int sNumEvt;
 
 private:
-  int fSeed;
-  G4String fHepMCpath;
+  G4int fSeed;
+  G4String fFilename;
+  G4bool fUseHepMC;
 };
 
 #endif

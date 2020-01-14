@@ -1,6 +1,7 @@
 #ifndef RecoFiber_h
 #define RecoFiber_h 1
 
+#include "RecoInterface.h"
 #include "DRsimInterface.h"
 #include "fastjet/PseudoJet.hh"
 

@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-void RecoFiber::RecoFiber() {
+RecoFiber::RecoFiber() {
   fCalibS = 0.;
   fCalibC = 0.;
 
@@ -46,7 +46,7 @@ float RecoFiber::setTmax(const DRsimInterface::DRsimSiPMData& sipm) {
 }
 
 float RecoFiber::setDepth(const float tmax, const RecoInterface::RecoTowerData& recoTower) {
-  float depth = ( recoTower.innerR/0.3 + recoTower.towerH/fSpeed - recoFiber.t )/( fEffSpeedInv );
+  float depth = ( recoTower.innerR/0.3 + recoTower.towerH/fSpeed - tmax )/( fEffSpeedInv );
   if (depth < 0.) return 0.;
   else if (depth > recoTower.towerH) return recoTower.towerH;
   else return depth;

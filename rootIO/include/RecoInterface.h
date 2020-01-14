@@ -54,11 +54,13 @@ public:
     float E_S;
     float E_Scorr;
     float E_DR;
-    flaot E_DRcorr;
+    float E_DRcorr;
     int n_C;
     int n_S;
     std::vector<RecoTowerData> towers;
   };
+
+  static bool IsCerenkov(int col, int row);
 };
 
 #endif

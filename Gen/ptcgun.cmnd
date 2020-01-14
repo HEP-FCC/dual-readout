@@ -5,12 +5,12 @@
 ! The changes here are illustrative, not always physics-motivated.
 
 ! 1) Settings that will be used in a main program.
-Main:numberOfEvents = 1            ! number of events to generate
+Main:numberOfEvents = 2            ! number of events to generate
 Main:timesAllowErrors = 3          ! abort run after this many flawed events
-Main:spareMode1 = 21               ! ID of particle gun
+Main:spareMode1 = 11               ! ID of particle gun
 Main:spareParm1 = 20.              ! Energy of particle
 Main:spareFlag1 = false            ! true if initial particle is at rest
-Main:spareFlag2 = false            ! true if particle is colour singlet
+Main:spareFlag2 = true             ! true if particle is colour singlet
 Main:spareParm2 = 1.5596863        ! theta of particle gun
 Main:spareParm3 = 20.              ! PS scale
 Random:setSeed = on                ! use random seed

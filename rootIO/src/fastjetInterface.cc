@@ -54,7 +54,7 @@ void fastjetInterface::runFastjet(const std::vector<fastjet::PseudoJet>& input) 
 
   // Run Fastjet algorithm
   std::vector<fastjet::PseudoJet> inclusiveJets, sortedJets;
-  fastjet::ClusterSequence clustSeq_F(input, jetDef);
+  fastjet::ClusterSequence clustSeq(input, jetDef);
 
   // Extract inclusive jets sorted by pT
   inclusiveJets = clustSeq.inclusive_jets();

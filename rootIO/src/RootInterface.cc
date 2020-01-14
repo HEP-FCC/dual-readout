@@ -1,43 +1,62 @@
 #include "RootInterface.h"
+#include "DRsimInterface.h"
+#include "RecoInterface.h"
 
-RootInterface::RootInterface(const std::string& filename)
+template <typename T>
+RootInterface<T>::RootInterface(const std::string& filename)
 : fFilename(filename), fNumEvt(0) {
   init();
 }
 
-RootInterface::~RootInterface() {}
+template <typename T>
+RootInterface<T>::~RootInterface() {}
 
-void RootInterface::init() {
+template <typename T>
+void RootInterface<T>::init() {
   fEventData = new T();
   fFile = TFile::Open(fFilename.c_str(),"UPDATE");
 }
 
-void RootInterface::create(const std::string& name, const std::string& title) {
+template <typename T>
+void RootInterface<T>::create(const std::string& name, const std::string& title) {
   fTree = new TTree(name.c_str(),name.c_str());
   fTree->Branch(title.c_str(),fEventData);
 }
 
-void RootInterface::set(const std::string& name, const std::string& title) {
+template <typename T>
+void RootInterface<T>::set(const std::string& name, const std::string& title) {
   fTree = (TTree*)fFile->Get(name.c_str());
   fTree->SetBranchAddress(title.c_str(),&fEventData);
 }
 
-void RootInterface::fill(const T* evt) {
+template <typename T>
+void RootInterface<T>::fill(const T* evt) {
   *fEventData = *evt;
   fTree->Fill();
 }
 
-void RootInterface::read(T& evt) {
+template <typename T>
+void RootInterface<T>::read(T& evt) {
   fTree->GetEntry(fNumEvt);
   evt = *fEventData;
   fNumEvt++;
 }
 
-void RootInterface::write() {
+template <typename T>
+void RootInterface<T>::write() {
   fFile->WriteTObject(fTree);
 }
 
-void RootInterface::close() {
+template <typename T>
+void RootInterface<T>::close() {
   fFile->Close();
   if (fEventData) delete fEventData;
 }
+
+template <typename T>
+TTree* RootInterface<T>::getTree() {
+  return fTree;
+}
+
+template class RootInterface<DRsimInterface::DRsimEventData>;
+template class RootInterface<RecoInterface::RecoEventData>;

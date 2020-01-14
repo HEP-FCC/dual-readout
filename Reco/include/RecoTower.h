@@ -1,8 +1,9 @@
 #ifndef RecoTower_h
 #define RecoTower_h 1
 
-#include "DRsimInterface.h"
+#include "RecoInterface.h"
 #include "RecoFiber.h"
+#include "DRsimInterface.h"
 #include "fastjet/PseudoJet.hh"
 
 #include <utility>
@@ -23,7 +24,7 @@ public:
   const std::vector<fastjet::PseudoJet>& getFjInputs_Scorr() { return fFjInputs_Scorr; }
   const std::vector<fastjet::PseudoJet>& getFjInputs_DR() { return fFjInputs_DR; }
   const std::vector<fastjet::PseudoJet>& getFjInputs_DRcorr() { return fFjInputs_DRcorr; }
-  void addFjInputs(const RecoInterface::RecoFiberData& recoFiber);
+  void addFjInputs(const RecoInterface::RecoTowerData& recoTower);
   void clear();
 
   static float E_DR(float E_C, float E_S);
