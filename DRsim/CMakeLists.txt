@@ -44,8 +44,8 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 add_executable(DRsim DRsim.cc ${sources} ${headers})
 target_link_libraries(
   DRsim ${Geant4_LIBRARIES}
-  ${HEPMC_DIR}/lib/libHepMC3.so
-  ${HEPMC_DIR}/lib/libHepMC3rootIO.so
+  ${HEPMC_DIR}/lib64/libHepMC3.so
+  ${HEPMC_DIR}/lib64/libHepMC3rootIO.so
   rootIO
 )
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(P8ptcgen)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(HEPMC_DIR "$ENV{HEPMC_DIR}")
@@ -25,8 +25,8 @@ add_executable(P8ptcgen P8ptcgen.cc ${sources} ${headers})
 target_link_libraries(
   P8ptcgen
   ${PYTHIA_DIR}/lib/libpythia8.a
-  ${HEPMC_DIR}/lib/libHepMC3.so
-  ${HEPMC_DIR}/lib/libHepMC3rootIO.so
+  ${HEPMC_DIR}/lib64/libHepMC3.so
+  ${HEPMC_DIR}/lib64/libHepMC3rootIO.so
   ${FASTJET_DIR}/lib/libfastjet.so
   rootIO
   ${CMAKE_DL_LIBS}
