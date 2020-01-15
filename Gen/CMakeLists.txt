@@ -1,12 +1,4 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(P8ptcgen)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(HEPMC_DIR "$ENV{HEPMC_DIR}")
-set(PYTHIA_DIR "$ENV{PYTHIA_DIR}")
-set(FASTJET_DIR "$ENV{FASTJET_DIR}")
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include

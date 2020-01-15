@@ -1,5 +1,13 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(dual-readout)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(DR_DIR "$ENV{DR_DIR}")
+set(HEPMC_DIR "$ENV{HEPMC_DIR}")
+set(PYTHIA_DIR "$ENV{PYTHIA_DIR}")
+set(FASTJET_DIR "$ENV{FASTJET_DIR}")
 
 add_subdirectory(rootIO)
 add_subdirectory(DRsim)

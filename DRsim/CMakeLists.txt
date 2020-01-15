@@ -1,6 +1,5 @@
 #----------------------------------------------------------------------------
 # Setup the project
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(DRsim)
 
 #----------------------------------------------------------------------------
@@ -20,11 +19,6 @@ endif()
 # Setup include directory for this project
 #
 include(${Geant4_USE_FILE})
-
-#----------------------------------------------------------------------------
-# Find HepMC (required package)
-#
-set(HEPMC_DIR "$ENV{HEPMC_DIR}")
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
