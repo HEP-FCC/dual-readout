@@ -8,10 +8,11 @@ RecoFiber::RecoFiber() {
   fCalibS = 0.;
   fCalibC = 0.;
 
-  fSpeed = 0.1588;
-  fEffSpeedInv = 1./fSpeed - 1./0.3;
-  fDepthEM = 0.14949;
-  fAbsLen = 5.677;
+  // [L] = mm, [t] = ns
+  fSpeed = 158.8;
+  fEffSpeedInv = 1./fSpeed - 1./300.;
+  fDepthEM = 149.49;
+  fAbsLen = 5677.;
 }
 
 void RecoFiber::reconstruct(const DRsimInterface::DRsimSiPMData& sipm, RecoInterface::RecoTowerData& recoTower) {
@@ -46,7 +47,7 @@ float RecoFiber::setTmax(const DRsimInterface::DRsimSiPMData& sipm) {
 }
 
 float RecoFiber::setDepth(const float tmax, const RecoInterface::RecoTowerData& recoTower) {
-  float depth = ( recoTower.innerR/0.3 + recoTower.towerH/fSpeed - tmax )/( fEffSpeedInv );
+  float depth = ( recoTower.innerR/300. + recoTower.towerH/fSpeed - tmax )/( fEffSpeedInv );
   if (depth < 0.) return 0.;
   else if (depth > recoTower.towerH) return recoTower.towerH;
   else return depth;
