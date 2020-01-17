@@ -23,6 +23,7 @@ public:
 private:
   float setTmax(const DRsimInterface::DRsimSiPMData& sipm);
   float setDepth(const float tmax, const RecoInterface::RecoTowerData& recoTower);
+  int cutXtalk(const DRsimInterface::DRsimSiPMData& sipm);
 
   RecoInterface::RecoFiberData fData;
   std::vector<fastjet::PseudoJet> fFjInputs_S;
@@ -35,6 +36,7 @@ private:
   float fEffSpeedInv;
   float fDepthEM;
   float fAbsLen;
+  float fCThres;
 };
 
 #endif

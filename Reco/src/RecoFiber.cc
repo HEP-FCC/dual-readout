@@ -13,12 +13,14 @@ RecoFiber::RecoFiber() {
   fEffSpeedInv = 1./fSpeed - 1./300.;
   fDepthEM = 149.49;
   fAbsLen = 5677.;
+  fCThres = 34.1;
 }
 
 void RecoFiber::reconstruct(const DRsimInterface::DRsimSiPMData& sipm, RecoInterface::RecoTowerData& recoTower) {
   RecoInterface::RecoFiberData recoFiber(sipm);
 
   if (recoFiber.IsCerenkov) {
+    recoFiber.n = cutXtalk(sipm);
     recoFiber.E = recoFiber.n / fCalibC;
     recoFiber.Ecorr = recoFiber.E;
     recoFiber.t = setTmax(sipm);
@@ -51,6 +53,17 @@ float RecoFiber::setDepth(const float tmax, const RecoInterface::RecoTowerData& 
   if (depth < 0.) return 0.;
   else if (depth > recoTower.towerH) return recoTower.towerH;
   else return depth;
+}
+
+int RecoFiber::cutXtalk(const DRsimInterface::DRsimSiPMData& sipm) {
+  int sum = 0;
+  for (auto timeItr = sipm.timeStruct.begin(); timeItr != sipm.timeStruct.end(); ++timeItr) {
+    auto timeObj = *timeItr;
+
+    if (timeObj.first.first < fCThres) sum += timeObj.second;
+  }
+
+  return sum;
 }
 
 void RecoFiber::addFjInputs(const RecoInterface::RecoFiberData& recoFiber) {
