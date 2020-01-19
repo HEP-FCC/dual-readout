@@ -2,6 +2,8 @@
 #include "RecoInterface.h"
 #include "DRsimInterface.h"
 
+#include "TROOT.h"
+#include "TStyle.h"
 #include "TH1.h"
 #include "TCanvas.h"
 #include "TF1.h"
@@ -15,6 +17,8 @@ int main(int argc, char* argv[]) {
   TString filename = argv[1];
   float low = std::stof(argv[2]);
   float high = std::stof(argv[3]);
+
+  gStyle->SetOptFit(1);
 
   TH1F* tEdep = new TH1F("totEdep","Total Energy deposit;MeV;Evt",100,low*1000.,high*1000.);
   tEdep->Sumw2(); tEdep->SetLineColor(kRed); tEdep->SetLineWidth(2);
@@ -64,17 +68,18 @@ int main(int argc, char* argv[]) {
   tE_S->SetOption("p"); tE_S->Fit(grE_S,"R+&same");
 
   c->cd();
+  tE_S->SetTitle("");
   tE_S->Draw(""); c->Update();
   TPaveStats* statsE_S = (TPaveStats*)c->GetPrimitive("stats");
   statsE_S->SetName("Scint");
   statsE_S->SetTextColor(kRed);
-  statsE_S->SetY1NDC(.6); statsE_S->SetY2NDC(.8);
+  statsE_S->SetY1NDC(.4); statsE_S->SetY2NDC(.7);
 
   tE_C->Draw("sames"); c->Update();
   TPaveStats* statsE_C = (TPaveStats*)c->GetPrimitive("stats");
   statsE_C->SetName("Cerenkov");
   statsE_C->SetTextColor(kBlue);
-  statsE_C->SetY1NDC(.8); statsE_C->SetY2NDC(1.);
+  statsE_C->SetY1NDC(.7); statsE_C->SetY2NDC(1.);
 
   c->SaveAs(filename+"_Ecs.png");
   tE_S->Draw("Hist");

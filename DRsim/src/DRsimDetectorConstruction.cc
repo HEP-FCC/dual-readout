@@ -1,6 +1,7 @@
 #include "DRsimDetectorConstruction.hh"
 #include "DRsimCellParameterisation.hh"
 #include "DRsimFilterParameterisation.hh"
+#include "DRsimSiPMSD.hh"
 
 #include "G4VPhysicalVolume.hh"
 #include "G4PVPlacement.hh"
@@ -152,28 +153,29 @@ void DRsimDetectorConstruction::ConstructSDandField() {
   G4SDManager* SDman = G4SDManager::GetSDMpointer();
   G4String SiPMName = "SiPMSD";
 
+  // Not a memory leak - SDs are deleted by G4SDManager. Deleting them manually will cause double delete!
   for (int i = 0; i < sNumBarrel; i++) {
-    fSiPMSDBR[i] = new DRsimSiPMSD("BR"+std::to_string(i),"BRC"+std::to_string(i),fTowerBR.at(i));
-    SDman->AddNewDetector(fSiPMSDBR[i]);
-    PMTcathLogicalBR[i]->SetSensitiveDetector(fSiPMSDBR[i]);
+    DRsimSiPMSD* SiPMSDBR = new DRsimSiPMSD("BR"+std::to_string(i),"BRC"+std::to_string(i),fTowerBR.at(i));
+    SDman->AddNewDetector(SiPMSDBR);
+    PMTcathLogicalBR[i]->SetSensitiveDetector(SiPMSDBR);
   }
 
   for (int i = 0; i < sNumBarrel; i++) {
-    fSiPMSDBL[i] = new DRsimSiPMSD("BL"+std::to_string(i),"BLC"+std::to_string(i),fTowerBL.at(i));
-    SDman->AddNewDetector(fSiPMSDBL[i]);
-    PMTcathLogicalBL[i]->SetSensitiveDetector(fSiPMSDBL[i]);
+    DRsimSiPMSD* SiPMSDBL = new DRsimSiPMSD("BL"+std::to_string(i),"BLC"+std::to_string(i),fTowerBL.at(i));
+    SDman->AddNewDetector(SiPMSDBL);
+    PMTcathLogicalBL[i]->SetSensitiveDetector(SiPMSDBL);
   }
 
   for (int i = 0; i < sNumEndcap; i++) {
-    fSiPMSDER[i] = new DRsimSiPMSD("ER"+std::to_string(i),"ERC"+std::to_string(i),fTowerER.at(i));
-    SDman->AddNewDetector(fSiPMSDER[i]);
-    PMTcathLogicalER[i]->SetSensitiveDetector(fSiPMSDER[i]);
+    DRsimSiPMSD* SiPMSDER = new DRsimSiPMSD("ER"+std::to_string(i),"ERC"+std::to_string(i),fTowerER.at(i));
+    SDman->AddNewDetector(SiPMSDER);
+    PMTcathLogicalER[i]->SetSensitiveDetector(SiPMSDER);
   }
 
   for (int i = 0; i < sNumEndcap; i++) {
-    fSiPMSDEL[i] = new DRsimSiPMSD("EL"+std::to_string(i),"ELC"+std::to_string(i),fTowerEL.at(i));
-    SDman->AddNewDetector(fSiPMSDEL[i]);
-    PMTcathLogicalEL[i]->SetSensitiveDetector(fSiPMSDEL[i]);
+    DRsimSiPMSD* SiPMSDEL = new DRsimSiPMSD("EL"+std::to_string(i),"ELC"+std::to_string(i),fTowerEL.at(i));
+    SDman->AddNewDetector(SiPMSDEL);
+    PMTcathLogicalEL[i]->SetSensitiveDetector(SiPMSDEL);
   }
 }
 

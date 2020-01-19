@@ -3,7 +3,6 @@
 
 #include "DRsimMagneticField.hh"
 #include "DRsimMaterials.hh"
-#include "DRsimSiPMSD.hh"
 #include "DRsimSiPMHit.hh"
 
 #include "G4VUserDetectorConstruction.hh"
@@ -132,11 +131,6 @@ private:
   vector<G4LogicalVolume*> fiberLogical_ER_[40];
   vector<G4LogicalVolume*> fiberLogical_EL[40];
   vector<G4LogicalVolume*> fiberLogical_EL_[40];
-
-  DRsimSiPMSD* fSiPMSDBR[52];
-  DRsimSiPMSD* fSiPMSDBL[52];
-  DRsimSiPMSD* fSiPMSDER[40];
-  DRsimSiPMSD* fSiPMSDEL[40];
 
   DRsimInterface::hitXY fTowerXY;
   std::vector<DRsimInterface::DRsimTowerProperty> fTowerBL;
