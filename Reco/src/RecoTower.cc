@@ -56,6 +56,7 @@ void RecoTower::reconstruct(const DRsimInterface::DRsimTowerData& tower, RecoInt
   recoTower.E_DR = E_DR(recoTower.E_C,recoTower.E_S);
   recoTower.E_DRcorr = E_DR(recoTower.E_C,recoTower.E_Scorr);
 
+  addFjInputs(recoTower);
   fData = recoTower;
   evt.towers.push_back(fData);
 }
@@ -66,19 +67,19 @@ int RecoTower::getAbsITheta(const int iTheta) {
 
 void RecoTower::addFjInputs(const RecoInterface::RecoTowerData& recoTower) {
   TVector3 p_DR;
-  p_DR.SetPtThetaPhi(recoTower.E_DR,recoTower.theta.second,recoTower.phi.second);
+  p_DR.SetMagThetaPhi(recoTower.E_DR,recoTower.theta.second,recoTower.phi.second);
   fFjInputs_DR.push_back( fastjet::PseudoJet(p_DR.x(),p_DR.y(),p_DR.z(),recoTower.E_DR) );
 
   TVector3 p_DRcorr;
-  p_DRcorr.SetPtThetaPhi(recoTower.E_DRcorr,recoTower.theta.second,recoTower.phi.second);
+  p_DRcorr.SetMagThetaPhi(recoTower.E_DRcorr,recoTower.theta.second,recoTower.phi.second);
   fFjInputs_DRcorr.push_back( fastjet::PseudoJet(p_DRcorr.x(),p_DRcorr.y(),p_DRcorr.z(),recoTower.E_DRcorr) );
 
   TVector3 p_S;
-  p_S.SetPtThetaPhi(recoTower.E_S,recoTower.theta.second,recoTower.phi.second);
+  p_S.SetMagThetaPhi(recoTower.E_S,recoTower.theta.second,recoTower.phi.second);
   fFjInputs_S.push_back( fastjet::PseudoJet(p_S.x(),p_S.y(),p_S.z(),recoTower.E_S) );
 
   TVector3 p_Scorr;
-  p_Scorr.SetPtThetaPhi(recoTower.E_Scorr,recoTower.theta.second,recoTower.phi.second);
+  p_Scorr.SetMagThetaPhi(recoTower.E_Scorr,recoTower.theta.second,recoTower.phi.second);
   fFjInputs_Scorr.push_back( fastjet::PseudoJet(p_Scorr.x(),p_Scorr.y(),p_Scorr.z(),recoTower.E_Scorr) );
 }
 

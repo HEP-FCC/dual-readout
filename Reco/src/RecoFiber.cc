@@ -30,10 +30,10 @@ void RecoFiber::reconstruct(const DRsimInterface::DRsimSiPMData& sipm, RecoInter
 
     recoFiber.depth = setDepth(recoFiber.t,recoTower);
     recoFiber.Ecorr = recoFiber.E*std::exp((-recoFiber.depth+fDepthEM)/fAbsLen);
+    addFjInputs(recoFiber);
   }
 
   fData = recoFiber;
-  addFjInputs(fData);
   recoTower.fibers.push_back(fData);
 }
 

@@ -37,6 +37,8 @@ public:
     bool validCS;
     bool hasConstituents;
     int nConstituents;
+    bool hasChild;
+    fastjetDataBase child;
     // bool hasExclusiveSubjets; #FIXME add exclusive jets if needed (with appropriate d_cut)
     // int nExclusiveSubjets;
   };

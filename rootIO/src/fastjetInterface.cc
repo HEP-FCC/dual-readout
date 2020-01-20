@@ -32,6 +32,10 @@ fastjetInterface::fastjetData::fastjetData(fastjet::PseudoJet& jet) {
   validCS = jet.has_valid_cs();
   hasConstituents = jet.has_constituents();
   nConstituents = jet.constituents().size();
+
+  fastjet::PseudoJet childPJ;
+  hasChild = jet.has_child(childPJ);
+  child = fastjetDataBase(childPJ);
 }
 
 void fastjetInterface::init(TTree* treeIn, std::string branchname) {
