@@ -61,7 +61,7 @@ public:
             ++m_internal_event_number;
         }
 
-        evt->set_units(Units::GEV,Units::MM);
+        evt->set_units(Units::MEV,Units::MM);
 
         // 2. Fill particle information
         std::vector<GenParticlePtr> hepevt_particles;
