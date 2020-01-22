@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
     // Construct new empty HepMC event and fill it.
     // Units will be as chosen for HepMC build, but can be changed
     // by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)
-    HepMC3::GenEvent* hepmcevt = new HepMC3::GenEvent(HepMC3::Units::MEV, HepMC3::Units::MM);
+    HepMC3::GenEvent* hepmcevt = new HepMC3::GenEvent(HepMC3::Units::GEV, HepMC3::Units::MM);
     ToHepMC.fill_next_event( pythia, hepmcevt );
 
     fjInputs.resize(0);

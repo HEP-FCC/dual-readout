@@ -23,7 +23,7 @@ void HepMCG4Reader::Initialize() {
 }
 
 HepMC3::GenEvent* HepMCG4Reader::GenerateHepMCEvent() {
-  HepMC3::GenEvent* evt = new HepMC3::GenEvent(HepMC3::Units::MEV,HepMC3::Units::MM);
+  HepMC3::GenEvent* evt = new HepMC3::GenEvent(HepMC3::Units::GEV,HepMC3::Units::MM);
   reader->read_event(*evt);
   if( reader->failed() ) return 0;
   if( verbose>0 ) HepMC3::Print::listing(*evt);;
