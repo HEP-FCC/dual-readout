@@ -49,10 +49,12 @@ public:
   void init(TTree* treeIn, std::string branchname);
   void writeJets(std::vector<fastjet::PseudoJet> jets);
   void runFastjet(const std::vector<fastjet::PseudoJet>& input);
+  void set(TTree* treeIn, std::string branchname);
+  void read(std::vector<fastjetData>& jets);
 
 private:
-  std::vector<fastjetData> fJets;
-  std::vector<fastjetDataBase> fJetBase;
+  std::vector<fastjetData>* fJets;
+  std::vector<fastjetDataBase>* fJetBase;
 
 };
 

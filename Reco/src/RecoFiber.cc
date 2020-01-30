@@ -24,6 +24,7 @@ void RecoFiber::reconstruct(const DRsimInterface::DRsimSiPMData& sipm, RecoInter
     recoFiber.E = recoFiber.n / fCalibC;
     recoFiber.Ecorr = recoFiber.E;
     recoFiber.t = setTmax(sipm);
+    addFjInputs(recoFiber);
   } else {
     recoFiber.E = recoFiber.n / fCalibS;
     recoFiber.t = setTmax(sipm);
@@ -69,13 +70,19 @@ int RecoFiber::cutXtalk(const DRsimInterface::DRsimSiPMData& sipm) {
 void RecoFiber::addFjInputs(const RecoInterface::RecoFiberData& recoFiber) {
   TVector3 vec(std::get<0>(recoFiber.pos),std::get<1>(recoFiber.pos),std::get<2>(recoFiber.pos));
   TVector3 p = recoFiber.E*vec.Unit();
-  fFjInputs_S.push_back( fastjet::PseudoJet(p.x(),p.y(),p.z(),recoFiber.E) );
 
-  TVector3 p_corr = recoFiber.Ecorr*vec.Unit();
-  fFjInputs_Scorr.push_back( fastjet::PseudoJet(p_corr.x(),p_corr.y(),p_corr.z(),recoFiber.Ecorr) );
+  if (recoFiber.IsCerenkov) {
+    fFjInputs_C.push_back( fastjet::PseudoJet(p.x(),p.y(),p.z(),recoFiber.E) );
+  } else {
+    fFjInputs_S.push_back( fastjet::PseudoJet(p.x(),p.y(),p.z(),recoFiber.E) );
+
+    TVector3 p_corr = recoFiber.Ecorr*vec.Unit();
+    fFjInputs_Scorr.push_back( fastjet::PseudoJet(p_corr.x(),p_corr.y(),p_corr.z(),recoFiber.Ecorr) );
+  }
 }
 
 void RecoFiber::clear() {
   fFjInputs_S.clear();
   fFjInputs_Scorr.clear();
+  fFjInputs_C.clear();
 }

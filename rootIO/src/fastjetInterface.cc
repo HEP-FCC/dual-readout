@@ -5,9 +5,15 @@
 
 #include <algorithm>
 
-fastjetInterface::fastjetInterface() {}
+fastjetInterface::fastjetInterface() {
+  fJets = new std::vector<fastjetData>(0);
+  fJetBase = new std::vector<fastjetDataBase>(0);
+}
 
-fastjetInterface::~fastjetInterface() {}
+fastjetInterface::~fastjetInterface() {
+  if (fJets) delete fJets;
+  if (fJetBase) delete fJetBase;
+}
 
 fastjetInterface::fastjetDataBase::fastjetDataBase(fastjet::PseudoJet& jet) {
   E = jet.E();
@@ -43,11 +49,11 @@ void fastjetInterface::init(TTree* treeIn, std::string branchname) {
 }
 
 void fastjetInterface::writeJets(std::vector<fastjet::PseudoJet> jets) {
-  fJets.clear();
-  fJets.reserve(jets.size());
+  fJets->clear();
+  fJets->reserve(jets.size());
 
   for (auto jet = jets.begin(); jet != jets.end(); ++jet) {
-    fJets.push_back(fastjetData(*jet));
+    fJets->push_back(fastjetData(*jet));
   }
 }
 
@@ -65,4 +71,12 @@ void fastjetInterface::runFastjet(const std::vector<fastjet::PseudoJet>& input) 
   sortedJets    = fastjet::sorted_by_pt(inclusiveJets);
 
   writeJets(sortedJets);
+}
+
+void fastjetInterface::set(TTree* treeIn, std::string branchname) {
+  treeIn->SetBranchAddress(branchname.c_str(),&fJets);
+}
+
+void fastjetInterface::read(std::vector<fastjetData>& jets) {
+  jets = *fJets;
 }

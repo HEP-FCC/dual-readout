@@ -24,6 +24,8 @@ int main(int argc, char* argv[]) {
   fjFiber_S.init(recoInterface->getTree(),"RecoFiberJets_S");
   fastjetInterface fjFiber_Scorr;
   fjFiber_Scorr.init(recoInterface->getTree(),"RecoFiberJets_Scorr");
+  fastjetInterface fjFiber_C;
+  fjFiber_C.init(recoInterface->getTree(),"RecoFiberJets_C");
 
   RootInterface<DRsimInterface::DRsimEventData>* drInterface = new RootInterface<DRsimInterface::DRsimEventData>(filename+"_"+filenum+".root");
   drInterface->set("DRsim","DRsimEventData");
@@ -60,6 +62,7 @@ int main(int argc, char* argv[]) {
     fjTower_DRcorr.runFastjet(recoTower->getFjInputs_DRcorr());
     fjFiber_S.runFastjet(recoTower->getFiber()->getFjInputs_S());
     fjFiber_Scorr.runFastjet(recoTower->getFiber()->getFjInputs_Scorr());
+    fjFiber_C.runFastjet(recoTower->getFiber()->getFjInputs_C());
 
     recoInterface->fill(recoEvt);
     delete recoEvt;

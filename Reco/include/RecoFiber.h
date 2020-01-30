@@ -17,6 +17,7 @@ public:
   void setCalibC(float calibC) { fCalibC = calibC; }
   const std::vector<fastjet::PseudoJet>& getFjInputs_S() { return fFjInputs_S; }
   const std::vector<fastjet::PseudoJet>& getFjInputs_Scorr() { return fFjInputs_Scorr; }
+  const std::vector<fastjet::PseudoJet>& getFjInputs_C() { return fFjInputs_C; }
   void addFjInputs(const RecoInterface::RecoFiberData& recoFiber);
   void clear();
 
@@ -28,6 +29,7 @@ private:
   RecoInterface::RecoFiberData fData;
   std::vector<fastjet::PseudoJet> fFjInputs_S;
   std::vector<fastjet::PseudoJet> fFjInputs_Scorr;
+  std::vector<fastjet::PseudoJet> fFjInputs_C;
 
   float fCalibS;
   float fCalibC;
