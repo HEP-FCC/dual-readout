@@ -4,6 +4,7 @@
 #include "fastjet/PseudoJet.hh"
 
 #include <algorithm>
+#include <cmath>
 
 fastjetInterface::fastjetInterface() {
   fJets = new std::vector<fastjetData>(0);
@@ -59,8 +60,8 @@ void fastjetInterface::writeJets(std::vector<fastjet::PseudoJet> jets) {
 
 void fastjetInterface::runFastjet(const std::vector<fastjet::PseudoJet>& input) {
   // FastJet
-  double dR = 0.4;
-  fastjet::JetDefinition jetDef(fastjet::antikt_algorithm, dR);
+  double dR = M_PI/2.;
+  fastjet::JetDefinition jetDef(fastjet::ee_genkt_algorithm,dR,-1);
 
   // Run Fastjet algorithm
   std::vector<fastjet::PseudoJet> inclusiveJets, sortedJets;
