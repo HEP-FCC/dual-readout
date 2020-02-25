@@ -16,18 +16,9 @@ file(GLOB headers
 
 include(${ROOT_USE_FILE})
 add_executable(analysis analysis.cc ${sources} ${headers})
-add_executable(jet jet.cc ${sources} ${headers})
 add_executable(JER JER.cc ${sources} ${headers})
 target_link_libraries(
   analysis
-  ${HEPMC_DIR}/lib64/libHepMC3.so
-  ${HEPMC_DIR}/lib64/libHepMC3rootIO.so
-  rootIO
-  ${ROOT_LIBRARIES}
-  ${CMAKE_DL_LIBS}
-)
-target_link_libraries(
-  jet
   ${HEPMC_DIR}/lib64/libHepMC3.so
   ${HEPMC_DIR}/lib64/libHepMC3rootIO.so
   rootIO
@@ -55,4 +46,4 @@ foreach(_script ${analysis_SCRIPTS})
   )
 endforeach()
 
-install(TARGETS analysis jet JER DESTINATION bin)
+install(TARGETS analysis JER DESTINATION bin)
