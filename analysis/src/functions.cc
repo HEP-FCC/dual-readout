@@ -37,7 +37,7 @@ std::vector<fastjetInterface::fastjetData> functions::runFastjet(const std::vect
   sortedJets    = fastjet::sorted_by_pt(inclusiveJets);
 
   std::vector<fastjetInterface::fastjetData> output;
-  for (jet : sortedJets) {
+  for (auto jet : sortedJets) {
     output.push_back(fastjetInterface::fastjetData(jet));
   }
 
