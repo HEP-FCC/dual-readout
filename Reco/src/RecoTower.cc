@@ -32,7 +32,10 @@ void RecoTower::readCSV(std::string filename) {
 void RecoTower::reconstruct(const DRsimInterface::DRsimTowerData& tower, RecoInterface::RecoEventData& evt) {
   RecoInterface::RecoTowerData recoTower(tower);
 
-  if (getAbsITheta(recoTower.theta.first) > 51) return;
+  if (getAbsITheta(recoTower.theta.first) > 51) {
+    fData = recoTower;
+    return;
+  }
 
   fFiber->setCalibC( fSF_C*fCalibs.at(getAbsITheta(recoTower.theta.first)).first );
   fFiber->setCalibS( fSF_S*fCalibs.at(getAbsITheta(recoTower.theta.first)).second );
