@@ -30,6 +30,7 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
     fLeak.vy = presteppoint->GetPosition().y();
     fLeak.vz = presteppoint->GetPosition().z();
     fLeak.vt = presteppoint->GetGlobalTime();
+    fLeak.pdgId = track->GetDefinition()->GetPDGEncoding();
 
     fEventAction->fillLeaks(fLeak);
   }

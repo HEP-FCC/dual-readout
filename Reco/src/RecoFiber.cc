@@ -21,12 +21,12 @@ void RecoFiber::reconstruct(const DRsimInterface::DRsimSiPMData& sipm, RecoInter
 
   if (recoFiber.IsCerenkov) {
     recoFiber.n = cutXtalk(sipm);
-    recoFiber.E = recoFiber.n / fCalibC;
+    recoFiber.E = (float)recoFiber.n / fCalibC;
     recoFiber.Ecorr = recoFiber.E;
     recoFiber.t = setTmax(sipm);
     addFjInputs(recoFiber);
   } else {
-    recoFiber.E = recoFiber.n / fCalibS;
+    recoFiber.E = (float)recoFiber.n / fCalibS;
     recoFiber.t = setTmax(sipm);
 
     recoFiber.depth = setDepth(recoFiber.t,recoTower);
