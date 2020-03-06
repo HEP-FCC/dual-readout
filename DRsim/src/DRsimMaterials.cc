@@ -148,7 +148,7 @@ void DRsimMaterials::CreateMaterials() {
   mpPS->AddProperty("RINDEX",opEn,RI_PS,nEnt);
   mpPS->AddProperty("ABSLENGTH",opEn,AbsLen_PS,nEnt);
   mpPS->AddProperty("FASTCOMPONENT",opEn,scintFast_PS,nEnt);
-  mpPS->AddConstProperty("SCINTILLATIONYIELD",10./keV);
+  mpPS->AddConstProperty("SCINTILLATIONYIELD",13.9./keV);
   mpPS->AddConstProperty("RESOLUTIONSCALE",1.0);
   mpPS->AddConstProperty("FASTTIMECONSTANT",2.8*ns);
   fPS->SetMaterialPropertiesTable(mpPS);
@@ -174,9 +174,9 @@ void DRsimMaterials::CreateMaterials() {
   fSiPMSurf->SetMaterialPropertiesTable(mpSiPM);
 
   G4double filterEff[nEnt] = {
-    1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000,
-    1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 0.900, 0.734,
-    0.568, 0.402, 0.296, 0.070, 0.000, 0.000, 0.000, 0.000, 0.000
+    0.900, 0.900, 0.900, 0.900, 0.900, 0.900, 0.900, 0.900,
+    0.900, 0.900, 0.900, 0.890, 0.880, 0.850, 0.300, 0.000,
+    0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000
   };
   G4double filterRef[nEnt]; std::fill_n(filterRef,nEnt,0.);
   G4double RI_gel[nEnt]; std::fill_n(RI_gel,nEnt,1.52);
