@@ -148,7 +148,7 @@ void DRsimMaterials::CreateMaterials() {
   mpPS->AddProperty("RINDEX",opEn,RI_PS,nEnt);
   mpPS->AddProperty("ABSLENGTH",opEn,AbsLen_PS,nEnt);
   mpPS->AddProperty("FASTCOMPONENT",opEn,scintFast_PS,nEnt);
-  mpPS->AddConstProperty("SCINTILLATIONYIELD",13.9./keV);
+  mpPS->AddConstProperty("SCINTILLATIONYIELD",13.9/keV);
   mpPS->AddConstProperty("RESOLUTIONSCALE",1.0);
   mpPS->AddConstProperty("FASTTIMECONSTANT",2.8*ns);
   fPS->SetMaterialPropertiesTable(mpPS);
