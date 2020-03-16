@@ -35,25 +35,21 @@ DRsimDetectorConstruction::DRsimDetectorConstruction()
 
   clad_C_rMin = 0.49*mm;
   clad_C_rMax = 0.50*mm;
-  clad_C_Dz   = 2.5*m;
   clad_C_Sphi = 0.;
   clad_C_Dphi = 2.*M_PI;
 
   core_C_rMin = 0.*mm;
   core_C_rMax = 0.49*mm;
-  core_C_Dz   = 2.5*m;
   core_C_Sphi = 0.;
   core_C_Dphi = 2.*M_PI;
 
   clad_S_rMin = 0.485*mm;
   clad_S_rMax = 0.50*mm;
-  clad_S_Dz   = 2.5*m;
   clad_S_Sphi = 0.;
   clad_S_Dphi = 2.*M_PI;
 
   core_S_rMin = 0.*mm;
   core_S_rMax = 0.485*mm;
-  core_S_Dz   = 2.5*m;
   core_S_Sphi = 0.;
   core_S_Dphi = 2.*M_PI;
   PMTT = 0.3*mm;
@@ -100,7 +96,7 @@ G4VPhysicalVolume* DRsimDetectorConstruction::Construct() {
   G4VPhysicalVolume* worldPhysical = new G4PVPlacement(0,G4ThreeVector(),worldLogical,"worldPhysical",0,false,0,checkOverlaps);
 
   innerR = 1800.;
-  towerH = 2500.;
+  towerH = 2000.;
   fulltheta = 0.;
   phi_unit = 2*M_PI/(G4double)sNumZRot;
 

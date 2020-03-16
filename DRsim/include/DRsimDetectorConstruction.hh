@@ -140,25 +140,21 @@ private:
 
   G4double clad_C_rMin;
   G4double clad_C_rMax;
-  G4double clad_C_Dz  ;
   G4double clad_C_Sphi;
   G4double clad_C_Dphi;
 
   G4double core_C_rMin;
   G4double core_C_rMax;
-  G4double core_C_Dz  ;
   G4double core_C_Sphi;
   G4double core_C_Dphi;
 
   G4double clad_S_rMin;
   G4double clad_S_rMax;
-  G4double clad_S_Dz  ;
   G4double clad_S_Sphi;
   G4double clad_S_Dphi;
 
   G4double core_S_rMin;
   G4double core_S_rMax;
-  G4double core_S_Dz  ;
   G4double core_S_Sphi;
   G4double core_S_Dphi;
 
