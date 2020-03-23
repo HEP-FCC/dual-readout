@@ -13,7 +13,7 @@ RecoFiber::RecoFiber() {
   fEffSpeedInv = 1./fSpeed - 1./300.;
   fDepthEM = 149.49;
   fAbsLen = 5677.;
-  fCThres = 34.1;
+  fCThres = 30.;
 }
 
 void RecoFiber::reconstruct(const DRsimInterface::DRsimSiPMData& sipm, RecoInterface::RecoTowerData& recoTower) {
