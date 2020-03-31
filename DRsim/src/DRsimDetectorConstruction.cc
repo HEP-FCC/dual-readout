@@ -97,7 +97,6 @@ G4VPhysicalVolume* DRsimDetectorConstruction::Construct() {
   G4VPhysicalVolume* worldPhysical = new G4PVPlacement(0,G4ThreeVector(),worldLogical,"worldPhysical",0,false,0,checkOverlaps);
 
   innerR = 1800.;
-  sTowerH = 2000.;
   fulltheta = 0.;
   phi_unit = 2*M_PI/(G4double)sNumZRot;
 
