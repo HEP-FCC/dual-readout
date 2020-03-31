@@ -39,7 +39,7 @@ void DRsimActionInitialization::DefineCommands() {
   G4GenericMessenger::Command& ioCmd = fMessenger->DeclareProperty("useHepMC",fUseHepMC,"use HepMC");
   G4GenericMessenger::Command& CalibCmd = fMessenger->DeclareProperty("useCalib",fUseCalib,"use Calib");
   ioCmd.SetParameterName("useHepMC",true);
-  CalibCmd.SetDefaultValue("False");
-  ioCmd.SetParameterName("useCalib",true);
+  ioCmd.SetDefaultValue("False");
+  CalibCmd.SetParameterName("useCalib",true);
   CalibCmd.SetDefaultValue("False");
 }
