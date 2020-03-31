@@ -35,6 +35,7 @@ public:
   static int sNumBarrel;
   static int sNumEndcap;
   static int sNumZRot;
+  static double sTowerH;
 
 private:
   void DefineCommands();

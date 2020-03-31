@@ -3,6 +3,7 @@
 #include "DRsimRunAction.hh"
 #include "DRsimEventAction.hh"
 #include "DRsimSteppingAction.hh"
+#include "DRsimStackingAction.hh"
 
 #include "G4GenericMessenger.hh"
 
@@ -29,9 +30,11 @@ void DRsimActionInitialization::Build() const {
   SetUserAction(new DRsimRunAction(fSeed,fFilename,fUseHepMC));
 
   DRsimEventAction* eventAction = new DRsimEventAction();
+  DRsimStackingAction* stackAction = new DRsimStackingAction();
   SetUserAction(eventAction);
+  SetUserAction(stackAction);
 
-  SetUserAction(new DRsimSteppingAction(eventAction));
+  SetUserAction(new DRsimSteppingAction(eventAction,stackAction));
 }
 
 void DRsimActionInitialization::DefineCommands() {
