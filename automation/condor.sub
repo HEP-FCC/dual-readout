@@ -1,0 +1,14 @@
+universe = vanilla
+executable = condor_exe.sh
+initialdir = 0
+arguments = $(ProcId)
+output = log/$(ProcId).out
+error = log/$(ProcId).err
+log = log/$(ProcId).log
+request_memory = 3 GB
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = /path/to/build/CMakeFiles, /path/to/build/CMakeCache.txt, /path/to/build/HTCondor_env.sh, /path/to/build/condor_exe.sh, /path/to/build/init.mac, /path/to/build/run_ele.mac, /path/to/build/run_pi.mac, /path/to/build/run_calib.mac, /path/to/build/DRsim
+
+queue 500
