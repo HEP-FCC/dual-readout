@@ -16,7 +16,7 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
   G4ParticleDefinition* particle = track->GetDefinition();
 
   if ( particle == G4OpticalPhoton::OpticalPhotonDefinition() ) {
-    if (fpSteppingManager->GetphysIntLength()==0.) return; // not in optical material
+    if ( fpSteppingManager->GetphysIntLength()==0. ) return; // not in optical material
 
     auto currentProc = fpSteppingManager->GetfCurrentProcess();
     if ( currentProc->GetProcessType()!=fOptical || currentProc->GetProcessSubType()!=G4OpProcessSubType::fOpBoundary ) return; // not OpBoundary process
