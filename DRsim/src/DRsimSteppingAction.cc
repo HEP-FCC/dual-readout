@@ -4,6 +4,7 @@
 #include "G4ParticleTypes.hh"
 #include "G4VProcess.hh"
 #include "G4OpProcessSubType.hh"
+#include "G4OpBoundaryProcess.hh"
 
 DRsimSteppingAction::DRsimSteppingAction(DRsimEventAction* eventAction, DRsimStackingAction* stackAct)
 : G4UserSteppingAction(), fEventAction(eventAction), fStackAction(stackAct)
@@ -20,6 +21,10 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
 
     auto currentProc = fpSteppingManager->GetfCurrentProcess();
     if ( currentProc->GetProcessType()!=fOptical || currentProc->GetProcessSubType()!=G4OpProcessSubType::fOpBoundary ) return; // not OpBoundary process
+
+    G4OpBoundaryProcess* opProc = (G4OpBoundaryProcess*)currentProc;
+
+    if ( opProc->GetStatus()!=G4OpBoundaryProcessStatus::TotalInternalReflection ) return; // not total internal reflection
 
     if ( !IsFiberMaterial( track->GetMaterial()->GetName() ) ) return;
     if ( !IsFiberMaterial( track->GetNextMaterial()->GetName() ) ) return; // not in fibre
