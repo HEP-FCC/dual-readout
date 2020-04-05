@@ -234,7 +234,7 @@ void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
     G4VSolid* filterSolid = new G4Box("filterSolid",1.2/2.*mm,1.2/2.*mm,filterT/2.);
     PMTfilterLogical[i] = new G4LogicalVolume(filterSolid,FindMaterial("Glass"),"PMTfilterLogical");
 
-    DRsimFilterParameterisation* filterParam = new DRsimFilterParameterisation(fTowerXY.first,fTowerXY.second,FindMaterial("Gelatin"));
+    DRsimFilterParameterisation* filterParam = new DRsimFilterParameterisation(fTowerXY.first,fTowerXY.second,FindMaterial("Glass"),FindMaterial("Gelatin"));
     G4PVParameterised* filterPhysical = new G4PVParameterised("filterPhysical",PMTfilterLogical[i],filterlayerLogical,kXAxis,fTowerXY.first*fTowerXY.second,filterParam);
     new G4LogicalBorderSurface("filterSurf",filterPhysical,PMTcellPhysical,FindSurface("FilterSurf"));
 
@@ -301,7 +301,7 @@ void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
     G4VSolid* filterSolid = new G4Box("filterSolid",1.2/2.*mm,1.2/2.*mm,filterT/2.);
     PMTfilterLogical[i] = new G4LogicalVolume(filterSolid,FindMaterial("Glass"),"PMTfilterLogical");
 
-    DRsimFilterParameterisation* filterParam = new DRsimFilterParameterisation(fTowerXY.first,fTowerXY.second,FindMaterial("Gelatin"));
+    DRsimFilterParameterisation* filterParam = new DRsimFilterParameterisation(fTowerXY.first,fTowerXY.second,FindMaterial("Glass"),FindMaterial("Gelatin"));
     G4PVParameterised* filterPhysical = new G4PVParameterised("filterPhysical",PMTfilterLogical[i],filterlayerLogical,kXAxis,fTowerXY.first*fTowerXY.second,filterParam);
     new G4LogicalBorderSurface("filterSurf",filterPhysical,PMTcellPhysical,FindSurface("FilterSurf"));
 

@@ -9,7 +9,7 @@
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
 
-DRsimFilterParameterisation::DRsimFilterParameterisation(const G4int numx, const G4int numy, G4Material* filterMat)
+DRsimFilterParameterisation::DRsimFilterParameterisation(const G4int numx, const G4int numy, G4Material* glassMat, G4Material* filterMat)
 : G4VPVParameterisation()
 {
   for (G4int copyNo=0;copyNo<numx*numy;copyNo++) {
@@ -22,6 +22,7 @@ DRsimFilterParameterisation::DRsimFilterParameterisation(const G4int numx, const
   fNumx = numx;
   fNumy = numy;
   fFilterMat = filterMat;
+  fGlassMat = glassMat;
 }
 
 DRsimFilterParameterisation::~DRsimFilterParameterisation() {}
@@ -30,13 +31,11 @@ void DRsimFilterParameterisation::ComputeTransformation(const G4int copyNo, G4VP
   physVol->SetTranslation(G4ThreeVector(fXFilter[copyNo],fYFilter[copyNo],0.));
 }
 
-G4Material* DRsimFilterParameterisation::ComputeMaterial(const G4int copyNo, G4VPhysicalVolume* physVol, const G4VTouchable*) {
+G4Material* DRsimFilterParameterisation::ComputeMaterial(const G4int copyNo, G4VPhysicalVolume*, const G4VTouchable*) {
   G4int column = copyNo % fNumx;
   G4int row = copyNo / fNumx;
 
-  G4Material* notFilter = physVol->GetLogicalVolume()->GetMaterial();
-
   if ( !DRsimInterface::IsCerenkov(column,row) ) return fFilterMat;
 
-  return notFilter;
+  return fGlassMat;
 }

@@ -10,7 +10,7 @@
 
 class DRsimFilterParameterisation : public G4VPVParameterisation {
 public:
-  DRsimFilterParameterisation(const G4int numx, const G4int numy, G4Material* filterMat);
+  DRsimFilterParameterisation(const G4int numx, const G4int numy, G4Material* glassMat, G4Material* filterMat);
   virtual ~DRsimFilterParameterisation();
 
   virtual void ComputeTransformation(const G4int copyNo, G4VPhysicalVolume* physVol) const;
@@ -22,6 +22,7 @@ private:
   G4int fNumx;
   G4int fNumy;
   G4Material* fFilterMat;
+  G4Material* fGlassMat;
 };
 
 #endif
