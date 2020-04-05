@@ -108,6 +108,7 @@ public:
     std::vector<DRsimGenData> GenPtcs;
   };
 
+  static bool IsCerenkov(int col, int row);
 };
 
 #endif

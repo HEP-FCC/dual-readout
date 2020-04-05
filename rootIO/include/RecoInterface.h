@@ -59,8 +59,6 @@ public:
     int n_S;
     std::vector<RecoTowerData> towers;
   };
-
-  static bool IsCerenkov(int col, int row);
 };
 
 #endif

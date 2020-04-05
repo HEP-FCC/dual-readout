@@ -161,7 +161,6 @@ private:
 
   std::vector<G4float> fFiberX;
   std::vector<G4float> fFiberY;
-  std::vector<G4bool> fFiberWhich;
 
   G4ThreeVector v1;
   G4ThreeVector v2;
