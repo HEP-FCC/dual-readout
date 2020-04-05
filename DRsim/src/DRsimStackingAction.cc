@@ -77,6 +77,7 @@ void DRsimStackingAction::transportOp(const G4Step* step) {
   newTrack->SetStepLength( track->GetStepLength() );
   newTrack->SetVertexPosition( track->GetVertexPosition() + posShift );
   newTrack->SetVertexMomentumDirection( track->GetVertexMomentumDirection() );
+  newTrack->SetPolarization( track->GetPolarization() );
   newTrack->SetCreatorProcess( track->GetCreatorProcess() );
 
   stackManager->PushOneTrack(newTrack);

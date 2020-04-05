@@ -29,6 +29,8 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
     if ( !IsFiberMaterial( track->GetMaterial()->GetName() ) ) return;
     if ( !IsFiberMaterial( track->GetNextMaterial()->GetName() ) ) return; // not in fibre
 
+    if ( track->GetTouchableHandle()->GetHistoryDepth()!=3 ) return; // not in core
+
     fStackAction->transportOp(step);
   } else {
     G4int pdgID = particle->GetPDGEncoding();
@@ -73,5 +75,5 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
 }
 
 bool DRsimSteppingAction::IsFiberMaterial(G4String matName) {
-  return ( matName=="Polystyrene" || matName== "FluorinatedPolymer" || matName=="PMMA" );
+  return ( matName=="Polystyrene" || matName=="FluorinatedPolymer" || matName=="PMMA" );
 }
