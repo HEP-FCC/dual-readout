@@ -69,6 +69,8 @@ DRsimDetectorConstruction::DRsimDetectorConstruction()
   fVisAttrGray->SetVisibility(true);
   fVisAttrGreen = new G4VisAttributes(G4Colour(0.3,0.7,0.3));
   fVisAttrGreen->SetVisibility(true);
+  fVisAttrWhite = new G4VisAttributes(G4Colour(1.,1.,1.));
+  fVisAttrWhite->SetVisibility(true);
 }
 
 DRsimDetectorConstruction::~DRsimDetectorConstruction() {
@@ -235,6 +237,9 @@ void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4Logica
     PMTfilterLogical[i] = new G4LogicalVolume(filterSolid,FindMaterial("Glass"),"PMTfilterLogical");
 
     DRsimFilterParameterisation* filterParam = new DRsimFilterParameterisation(fTowerXY.first,fTowerXY.second,FindMaterial("Glass"),FindMaterial("Gelatin"));
+    filterParam->SetFilterVis(fVisAttrOrange);
+    filterParam->SetGlassVis(fVisAttrWhite);
+
     G4PVParameterised* filterPhysical = new G4PVParameterised("filterPhysical",PMTfilterLogical[i],filterlayerLogical,kXAxis,fTowerXY.first*fTowerXY.second,filterParam);
     new G4LogicalBorderSurface("filterSurf",filterPhysical,PMTcellPhysical,FindSurface("FilterSurf"));
 
@@ -269,7 +274,7 @@ void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
     dimE->Getpt(pt);
     fiberEndcap(i,fDThetaEndcap,towerLogical,fiberLogical,fiberLogical_);
 
-    int iTheta = dimE->GetRbool() ? i+52 : -i-52-1;
+    int iTheta = dimE->GetRbool() ? i+sNumBarrel : -i-sNumBarrel-1;
     float signedTowerTheta = dimE->GetRbool() ? towerTheta : -towerTheta;
     DRsimInterface::DRsimTowerProperty towerProp;
     towerProp.towerXY = fTowerXY;
@@ -302,6 +307,9 @@ void DRsimDetectorConstruction::Endcap(G4LogicalVolume* towerLogical[], G4Logica
     PMTfilterLogical[i] = new G4LogicalVolume(filterSolid,FindMaterial("Glass"),"PMTfilterLogical");
 
     DRsimFilterParameterisation* filterParam = new DRsimFilterParameterisation(fTowerXY.first,fTowerXY.second,FindMaterial("Glass"),FindMaterial("Gelatin"));
+    filterParam->SetFilterVis(fVisAttrOrange);
+    filterParam->SetGlassVis(fVisAttrWhite);
+
     G4PVParameterised* filterPhysical = new G4PVParameterised("filterPhysical",PMTfilterLogical[i],filterlayerLogical,kXAxis,fTowerXY.first*fTowerXY.second,filterParam);
     new G4LogicalBorderSurface("filterSurf",filterPhysical,PMTcellPhysical,FindSurface("FilterSurf"));
 

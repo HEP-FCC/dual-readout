@@ -64,6 +64,7 @@ private:
   G4VisAttributes* fVisAttrBlue;
   G4VisAttributes* fVisAttrGray;
   G4VisAttributes* fVisAttrGreen;
+  G4VisAttributes* fVisAttrWhite;
 
   G4double innerR;
   G4double towerH;

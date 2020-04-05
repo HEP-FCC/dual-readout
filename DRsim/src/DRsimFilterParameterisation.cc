@@ -31,11 +31,15 @@ void DRsimFilterParameterisation::ComputeTransformation(const G4int copyNo, G4VP
   physVol->SetTranslation(G4ThreeVector(fXFilter[copyNo],fYFilter[copyNo],0.));
 }
 
-G4Material* DRsimFilterParameterisation::ComputeMaterial(const G4int copyNo, G4VPhysicalVolume*, const G4VTouchable*) {
+G4Material* DRsimFilterParameterisation::ComputeMaterial(const G4int copyNo, G4VPhysicalVolume* physVol, const G4VTouchable*) {
   G4int column = copyNo % fNumx;
   G4int row = copyNo / fNumx;
 
-  if ( !DRsimInterface::IsCerenkov(column,row) ) return fFilterMat;
+  if ( !DRsimInterface::IsCerenkov(column,row) ) {
+    if (fFilterVis) physVol->GetLogicalVolume()->SetVisAttributes(fFilterVis);
+    return fFilterMat;
+  }
 
+  if (fGlassVis) physVol->GetLogicalVolume()->SetVisAttributes(fGlassVis);
   return fGlassMat;
 }

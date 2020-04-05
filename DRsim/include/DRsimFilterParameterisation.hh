@@ -16,6 +16,9 @@ public:
   virtual void ComputeTransformation(const G4int copyNo, G4VPhysicalVolume* physVol) const;
   virtual G4Material* ComputeMaterial(const G4int copyNo, G4VPhysicalVolume* physVol, const G4VTouchable* parentTouch);
 
+  void SetFilterVis(G4VisAttributes* filterVis) { fFilterVis = filterVis; }
+  void SetGlassVis(G4VisAttributes* glassVis) { fGlassVis = glassVis; }
+
 private:
   std::vector<G4double> fXFilter;
   std::vector<G4double> fYFilter;
@@ -23,6 +26,8 @@ private:
   G4int fNumy;
   G4Material* fFilterMat;
   G4Material* fGlassMat;
+  G4VisAttributes* fFilterVis;
+  G4VisAttributes* fGlassVis;
 };
 
 #endif
