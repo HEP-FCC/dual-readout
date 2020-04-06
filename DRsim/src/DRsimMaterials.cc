@@ -48,6 +48,7 @@ G4OpticalSurface* DRsimMaterials::GetOpticalSurface(const G4String surfName) {
 void DRsimMaterials::CreateMaterials() {
   fNistMan->FindOrBuildMaterial("G4_Galactic");
   fNistMan->FindOrBuildMaterial("G4_AIR");
+  fNistMan->FindOrBuildMaterial("G4_POLYVINYL_CHLORIDE");
 
   G4String symbol;
   G4double a, z, density;
@@ -63,6 +64,7 @@ void DRsimMaterials::CreateMaterials() {
 
   fVacuum = G4Material::GetMaterial("G4_Galactic");
   fAir = G4Material::GetMaterial("G4_AIR");
+  fPVC = G4Material::GetMaterial("G4_POLYVINYL_CHLORIDE");
 
   fFluoPoly = new G4Material("FluorinatedPolymer", density=1.43*g/cm3, ncomponents=2);
   fFluoPoly->AddElement(C, 2);

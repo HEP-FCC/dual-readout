@@ -77,8 +77,9 @@ private:
 
   G4ThreeVector pt[8]={G4ThreeVector()};
 
-  G4double PMTT;
-  G4double filterT;
+  G4double fPMTT;
+  G4double fFilterT;
+  G4double fSiPMT;
 
   dimensionB* dimB;
   dimensionE* dimE;

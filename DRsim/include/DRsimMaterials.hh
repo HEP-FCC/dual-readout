@@ -27,6 +27,7 @@ private:
   G4Material* fSi;
   G4Material* fGlass;
   G4Material* fGelatin;
+  G4Material* fPVC;
   G4OpticalSurface* fSiPMSurf;
   G4OpticalSurface* fFilterSurf;
 };
