@@ -5,6 +5,7 @@
 #include "G4VProcess.hh"
 #include "G4OpProcessSubType.hh"
 #include "G4OpBoundaryProcess.hh"
+#include "G4EmProcessSubType.hh"
 
 DRsimSteppingAction::DRsimSteppingAction(DRsimEventAction* eventAction, DRsimStackingAction* stackAct)
 : G4UserSteppingAction(), fEventAction(eventAction), fStackAction(stackAct)
@@ -18,6 +19,14 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
 
   if ( particle == G4OpticalPhoton::OpticalPhotonDefinition() ) {
     if ( fpSteppingManager->GetphysIntLength()==0. ) return; // not in optical material
+
+    if ( track->GetMaterial()->GetName()=="FluorinatedPolymer" || track->GetNextMaterial()->GetName()=="FluorinatedPolymer" ) {
+      auto creatorProcess = track->GetCreatorProcess();
+      if ( creatorProcess->GetProcessType()==fElectromagnetic && creatorProcess->GetProcessSubType()==G4EmProcessSubType::fScintillation ) {
+        track->SetTrackStatus(G4TrackStatus::fStopAndKill); // AdHoc treatment for Xtalk
+        return;
+      }
+    }
 
     auto currentProc = fpSteppingManager->GetfCurrentProcess();
     if ( currentProc->GetProcessType()!=fOptical || currentProc->GetProcessSubType()!=G4OpProcessSubType::fOpBoundary ) return; // not OpBoundary process
