@@ -58,31 +58,8 @@ DRsimPrimaryGeneratorAction::~DRsimPrimaryGeneratorAction() {
 }
 
 void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
-  if (!fUseHepMC && !fUseCalib) {
-    G4double y = (G4UniformRand()-0.5)*fRandX + fY_0;//- 3.142*cm;//
-    G4double z = (G4UniformRand()-0.5)*fRandY + fZ_0;//- 4.7135*cm;//10x10 mm^2
-    fOrg.set(0,y,z);
 
-    fParticleGun->SetParticlePosition(fOrg); // http://www.apc.univ-paris7.fr/~franco/g4doxy/html/classG4VPrimaryGenerator.html
-
-    fDirection.setREtaPhi(1.,0.,0.);
-    fDirection.rotateY(fTheta);
-    fDirection.rotateZ(fPhi);
-
-    fParticleGun->SetParticleMomentumDirection(fDirection);
-
-    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
-    fParticleGun->GeneratePrimaryVertex(event);
-    sIdxEvt = sNumEvt;
-    sNumEvt++;
-  } else {
-    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
-    DRsimRunAction::sHepMCreader->GeneratePrimaryVertex(event);
-    sIdxEvt = sNumEvt;
-    sNumEvt++;
-  }
   if (fUseCalib) {
-
     G4double x = 0;
     G4double y = (G4UniformRand()-0.5)*fRandX;
     G4double z = (G4UniformRand()-0.5)*fRandY;
@@ -120,7 +97,40 @@ void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
 
     fParticleGun->SetParticleMomentumDirection(fDirection);
     fParticleGun->GeneratePrimaryVertex(event);
+
+    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
+    fParticleGun->GeneratePrimaryVertex(event);
+    sIdxEvt = sNumEvt;
+    sNumEvt++;
+
+    return;
   }
+
+  if (fUseHepMC) {
+    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
+    DRsimRunAction::sHepMCreader->GeneratePrimaryVertex(event);
+    sIdxEvt = sNumEvt;
+    sNumEvt++;
+
+    return;
+  }
+
+  G4double y = (G4UniformRand()-0.5)*fRandX + fY_0;//- 3.142*cm;//
+  G4double z = (G4UniformRand()-0.5)*fRandY + fZ_0;//- 4.7135*cm;//10x10 mm^2
+  fOrg.set(0,y,z);
+
+  fParticleGun->SetParticlePosition(fOrg); // http://www.apc.univ-paris7.fr/~franco/g4doxy/html/classG4VPrimaryGenerator.html
+
+  fDirection.setREtaPhi(1.,0.,0.);
+  fDirection.rotateY(fTheta);
+  fDirection.rotateZ(fPhi);
+
+  fParticleGun->SetParticleMomentumDirection(fDirection);
+
+  G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
+  fParticleGun->GeneratePrimaryVertex(event);
+  sIdxEvt = sNumEvt;
+  sNumEvt++;
 }
 
 void DRsimPrimaryGeneratorAction::DefineCommands() {
