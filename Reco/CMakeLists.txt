@@ -33,3 +33,4 @@ foreach(_script ${Reco_SCRIPTS})
 endforeach()
 
 install(TARGETS Reco DESTINATION bin)
+install(FILES ${PROJECT_BINARY_DIR}/calib.csv DESTINATION .)
