@@ -43,31 +43,8 @@ target_link_libraries(
   rootIO
 )
 
-#----------------------------------------------------------------------------
-# Copy all scripts to the build directory, i.e. the directory in which we
-# build B5. This is so that we can run the executable directly because it
-# relies on these scripts being in the current working directory.
-#
-set(
-  DRsim_SCRIPTS
-  icons.mac
-  gui.mac
-  run.png
-  init.mac
-  init_vis.mac
-  run_ele.mac
-  run_pi.mac
-  run_hepmc.mac
-  vis.mac
-)
-
-foreach(_script ${DRsim_SCRIPTS})
-  configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
-    COPYONLY
-  )
-endforeach()
+file(GLOB DRsim_MACROS ${PROJECT_SOURCE_DIR}/*.mac)
+file(COPY ${DRsim_MACROS} DESTINATION ${PROJECT_BINARY_DIR})
 
 #----------------------------------------------------------------------------
 # Add program to the project targets
@@ -79,3 +56,4 @@ endforeach()
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
 install(TARGETS DRsim DESTINATION bin)
+install(FILES ${DRsim_MACROS} DESTINATION .)
