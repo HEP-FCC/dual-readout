@@ -22,6 +22,7 @@ private:
   G4String fFilename;
   G4bool fUseHepMC;
   G4bool fUseCalib;
+  G4bool fUseGPS;
 };
 
 #endif

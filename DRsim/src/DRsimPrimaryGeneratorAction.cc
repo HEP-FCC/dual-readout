@@ -15,15 +15,17 @@ int DRsimPrimaryGeneratorAction::sNumEvt = 0;
 G4ThreadLocal int DRsimPrimaryGeneratorAction::sIdxEvt = 0;
 
 using namespace std;
-DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4bool useHepMC, G4bool useCalib)
+DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4bool useHepMC, G4bool useCalib, G4bool useGPS)
 : G4VUserPrimaryGeneratorAction()
 {
   fSeed = seed;
   fUseHepMC = useHepMC;
   fUseCalib = useCalib;
+  fUseGPS = useGPS;
 
   if (!fUseHepMC) {
-    initPtcGun();
+    if (fUseGPS) initGPS();
+    else initPtcGun();
   }
 }
 
@@ -50,8 +52,13 @@ void DRsimPrimaryGeneratorAction::initPtcGun() {
   DefineCommands();
 }
 
+void DRsimPrimaryGeneratorAction::initGPS() {
+  fGPS = new G4GeneralParticleSource();
+}
+
 DRsimPrimaryGeneratorAction::~DRsimPrimaryGeneratorAction() {
   if (!fUseHepMC) {
+    if (fGPS) delete fGPS;
     if (fParticleGun) delete fParticleGun;
     if (fMessenger) delete fMessenger;
   }
@@ -100,6 +107,15 @@ void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
 
     G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
     fParticleGun->GeneratePrimaryVertex(event);
+    sIdxEvt = sNumEvt;
+    sNumEvt++;
+
+    return;
+  }
+
+  if (fGPS) {
+    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
+    fGPS->GeneratePrimaryVertex(event);
     sIdxEvt = sNumEvt;
     sNumEvt++;
 

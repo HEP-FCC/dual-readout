@@ -8,6 +8,7 @@
 #include "G4ParticleGun.hh"
 #include "G4ThreeVector.hh"
 #include "G4Types.hh"
+#include "G4GeneralParticleSource.hh"
 
 class G4GenericMessenger;
 class G4Event;
@@ -15,7 +16,7 @@ class G4ParticleDefinition;
 
 class DRsimPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
 public:
-  DRsimPrimaryGeneratorAction(G4int seed, G4bool useHepMC, G4bool useCalib);
+  DRsimPrimaryGeneratorAction(G4int seed, G4bool useHepMC, G4bool useCalib, G4bool useGPS);
   virtual ~DRsimPrimaryGeneratorAction();
 
   virtual void GeneratePrimaries(G4Event*);
@@ -37,11 +38,14 @@ public:
 private:
   void DefineCommands();
   void initPtcGun();
+  void initGPS();
 
   G4int fSeed;
   G4bool fUseHepMC;
   G4bool fUseCalib;
+  G4bool fUseGPS;
   G4ParticleGun* fParticleGun;
+  G4GeneralParticleSource* fGPS;
   G4GenericMessenger* fMessenger;
   G4ParticleDefinition* fElectron;
   G4ParticleDefinition* fPositron;
