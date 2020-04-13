@@ -58,9 +58,11 @@ void DRsimPrimaryGeneratorAction::initGPS() {
 
 DRsimPrimaryGeneratorAction::~DRsimPrimaryGeneratorAction() {
   if (!fUseHepMC) {
-    if (fGPS) delete fGPS;
-    if (fParticleGun) delete fParticleGun;
-    if (fMessenger) delete fMessenger;
+    if (fUseGPS) delete fGPS;
+    else {
+      if (fParticleGun) delete fParticleGun;
+      if (fMessenger) delete fMessenger;
+    }
   }
 }
 
