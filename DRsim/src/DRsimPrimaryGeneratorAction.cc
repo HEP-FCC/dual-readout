@@ -15,14 +15,17 @@ int DRsimPrimaryGeneratorAction::sNumEvt = 0;
 G4ThreadLocal int DRsimPrimaryGeneratorAction::sIdxEvt = 0;
 
 using namespace std;
-DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4bool useHepMC)
+DRsimPrimaryGeneratorAction::DRsimPrimaryGeneratorAction(G4int seed, G4bool useHepMC, G4bool useCalib, G4bool useGPS)
 : G4VUserPrimaryGeneratorAction()
 {
   fSeed = seed;
   fUseHepMC = useHepMC;
+  fUseCalib = useCalib;
+  fUseGPS = useGPS;
 
   if (!fUseHepMC) {
-    initPtcGun();
+    if (fUseGPS) initGPS();
+    else initPtcGun();
   }
 }
 
@@ -49,19 +52,52 @@ void DRsimPrimaryGeneratorAction::initPtcGun() {
   DefineCommands();
 }
 
+void DRsimPrimaryGeneratorAction::initGPS() {
+  fGPS = new G4GeneralParticleSource();
+}
+
 DRsimPrimaryGeneratorAction::~DRsimPrimaryGeneratorAction() {
   if (!fUseHepMC) {
-    if (fParticleGun) delete fParticleGun;
-    if (fMessenger) delete fMessenger;
+    if (fUseGPS) delete fGPS;
+    else {
+      if (fParticleGun) delete fParticleGun;
+      if (fMessenger) delete fMessenger;
+    }
   }
 }
 
 void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
-  if (!fUseHepMC) {
-    G4double y = (G4UniformRand()-0.5)*fRandX + fY_0;//- 3.142*cm;//
-    G4double z = (G4UniformRand()-0.5)*fRandY + fZ_0;//- 4.7135*cm;//10x10 mm^2
-    fOrg.set(0,y,z);
 
+  if (fUseCalib) {
+    G4double x = 0;
+    G4double y = (G4UniformRand()-0.5)*fRandX;
+    G4double z = (G4UniformRand()-0.5)*fRandY;
+
+    auto GunPosition = new G4ThreeVector(x, y, z);
+    GunPosition->rotateY(fTheta);
+    GunPosition->rotateZ(fPhi);
+
+    G4double xTowerFront = 0;
+    G4double yTowerFront = 0;
+    G4double zTowerFront = 0;
+
+    if (-fTheta < 0.98) {
+      xTowerFront = 180;
+      zTowerFront = 180*tan(-fTheta-1.5*M_PI/180);
+    } else {
+      G4double refLen = 180/cos(0.95077);
+      xTowerFront = refLen*cos(-fTheta-1.5*M_PI/180);
+      zTowerFront = refLen*sin(-fTheta-1.5*M_PI/180);
+    }
+
+    G4double xRelLen = xTowerFront;
+    G4double yRelLen = yTowerFront-fY_0/10;
+    G4double zRelLen = zTowerFront-fZ_0/10;
+
+    double NormLen = sqrt(xRelLen*xRelLen+yRelLen*yRelLen+zRelLen*zRelLen);
+    double LenRatio = 1-180/NormLen;
+
+    fOrg.set(GunPosition->getX()+10*(LenRatio*xRelLen), GunPosition->getY()+fY_0+10*(LenRatio*yRelLen),GunPosition->getZ()+fZ_0+10*(LenRatio*zRelLen));
     fParticleGun->SetParticlePosition(fOrg); // http://www.apc.univ-paris7.fr/~franco/g4doxy/html/classG4VPrimaryGenerator.html
 
     fDirection.setREtaPhi(1.,0.,0.);
@@ -69,17 +105,50 @@ void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
     fDirection.rotateZ(fPhi);
 
     fParticleGun->SetParticleMomentumDirection(fDirection);
+    fParticleGun->GeneratePrimaryVertex(event);
 
     G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
     fParticleGun->GeneratePrimaryVertex(event);
     sIdxEvt = sNumEvt;
     sNumEvt++;
-  } else {
+
+    return;
+  }
+
+  if (fGPS) {
+    G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
+    fGPS->GeneratePrimaryVertex(event);
+    sIdxEvt = sNumEvt;
+    sNumEvt++;
+
+    return;
+  }
+
+  if (fUseHepMC) {
     G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
     DRsimRunAction::sHepMCreader->GeneratePrimaryVertex(event);
     sIdxEvt = sNumEvt;
     sNumEvt++;
+
+    return;
   }
+
+  G4double y = (G4UniformRand()-0.5)*fRandX + fY_0;//- 3.142*cm;//
+  G4double z = (G4UniformRand()-0.5)*fRandY + fZ_0;//- 4.7135*cm;//10x10 mm^2
+  fOrg.set(0,y,z);
+
+  fParticleGun->SetParticlePosition(fOrg); // http://www.apc.univ-paris7.fr/~franco/g4doxy/html/classG4VPrimaryGenerator.html
+
+  fDirection.setREtaPhi(1.,0.,0.);
+  fDirection.rotateY(fTheta);
+  fDirection.rotateZ(fPhi);
+
+  fParticleGun->SetParticleMomentumDirection(fDirection);
+
+  G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
+  fParticleGun->GeneratePrimaryVertex(event);
+  sIdxEvt = sNumEvt;
+  sNumEvt++;
 }
 
 void DRsimPrimaryGeneratorAction::DefineCommands() {

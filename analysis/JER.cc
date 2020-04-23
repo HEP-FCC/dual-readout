@@ -18,6 +18,7 @@
 #include "TPaveStats.h"
 #include "TString.h"
 #include "TLorentzVector.h"
+#include "TGraph.h"
 
 #include <iostream>
 #include <string>
@@ -48,8 +49,6 @@ int main(int argc, char* argv[]) {
 
   TH1F* tE_DRjets = new TH1F("E_DRjets","Energy of DR corrected cluster;GeV;nJets",100,low,high);
   tE_DRjets->Sumw2(); tE_DRjets->SetLineColor(kBlack); tE_DRjets->SetLineWidth(2);
-  TH1F* tE_diff = new TH1F("E_diff","E_DR - E_GenJets;GeV;nJets",100,-high/2.,high/2.);
-  tE_diff->Sumw2(); tE_diff->SetLineColor(kBlack); tE_diff->SetLineWidth(2);
   TH1F* tE_diffTruth = new TH1F("E_diffTruth","E_DR - Edep;GeV;Evt",100,-high/2.,high/2.);
   tE_diffTruth->Sumw2(); tE_diffTruth->SetLineColor(kBlack); tE_diffTruth->SetLineWidth(2);
 
@@ -59,19 +58,6 @@ int main(int argc, char* argv[]) {
   tE_tot->Sumw2(); tE_tot->SetLineWidth(2);
   TH1F* tE_leak = new TH1F("Eleak","Energy leak;MeV;Evt",100,0.,1000.*high/2.);
   tE_leak->Sumw2(); tE_leak->SetLineWidth(2);
-
-  TH1F* tT_C = new TH1F("time_C","Cerenkov time;ns;p.e.",150,10.,70.);
-  tT_C->Sumw2(); tT_C->SetLineColor(kBlue); tT_C->SetLineWidth(2);
-  TH1F* tT_S = new TH1F("time_S","Scint time;ns;p.e.",150,10.,70.);
-  tT_S->Sumw2(); tT_S->SetLineColor(kRed); tT_S->SetLineWidth(2);
-  TH1F* tWav_S = new TH1F("wavlen_S","Scint wavelength;nm;p.e.",60,300.,900.);
-  tWav_S->Sumw2(); tWav_S->SetLineColor(kRed); tWav_S->SetLineWidth(2);
-  TH1F* tWav_C = new TH1F("wavlen_C","Cerenkov wavelength;nm;p.e.",60,300.,900.);
-  tWav_C->Sumw2(); tWav_C->SetLineColor(kBlue); tWav_C->SetLineWidth(2);
-  TH1F* tNhit_S = new TH1F("nHits_S","Number of Scint p.e./SiPM;p.e.;n",200,0.,200.);
-  tNhit_S->Sumw2(); tNhit_S->SetLineColor(kRed); tNhit_S->SetLineWidth(2);
-  TH1F* tNhit_C = new TH1F("nHits_C","Number of Cerenkov p.e./SiPM;p.e.;n",50,0.,50.);
-  tNhit_C->Sumw2(); tNhit_C->SetLineColor(kBlue); tNhit_C->SetLineWidth(2);
 
   RootInterface<RecoInterface::RecoEventData>* recoInterface = new RootInterface<RecoInterface::RecoEventData>(std::string(filename)+".root");
   recoInterface->set("Reco","RecoEventData");
@@ -91,6 +77,7 @@ int main(int argc, char* argv[]) {
   // fjGen.set(reader.m_tree,"GenJets");
 
   DRsimInterface::DRsimTimeStruct tmp;
+  std::vector<float> E_Ss,E_Cs;
 
   unsigned int entries = recoInterface->entries();
   while (recoInterface->numEvt() < entries) {
@@ -143,32 +130,6 @@ int main(int argc, char* argv[]) {
       Edep += edep.Edep;
     }
 
-    for (auto tower : drEvt.towers) {
-      for (auto sipm : tower.SiPMs) {
-        if ( DRsimInterface::IsCerenkov(sipm.x,sipm.y) ) {
-          tNhit_C->Fill(sipm.count);
-
-          for (const auto timepair : sipm.timeStruct) {
-            tT_C->Fill(timepair.first.first+0.05,timepair.second);
-          }
-          for (const auto wavpair : sipm.wavlenSpectrum) {
-            tWav_C->Fill(wavpair.first.first,wavpair.second);
-          }
-        } else {
-          tNhit_S->Fill(sipm.count);
-
-          for (const auto timepair : sipm.timeStruct) {
-            tT_S->Fill(timepair.first.first+0.05,timepair.second);
-            auto tmpPair = tmp.find(timepair.first);
-            if (tmpPair==tmp.end()) tmp.insert(timepair);
-          }
-          for (const auto wavpair : sipm.wavlenSpectrum) {
-            tWav_S->Fill(wavpair.first.first,wavpair.second);
-          }
-        }
-      }
-    }
-
     for (auto tower : evt.towers) {
       for (auto fiber : tower.fibers) {
         TVector3 vec(std::get<0>(fiber.pos),std::get<1>(fiber.pos),std::get<2>(fiber.pos));
@@ -182,7 +143,7 @@ int main(int argc, char* argv[]) {
       }
     }
 
-    double dR = M_PI/4.;
+    double dR = 0.8;
     auto fjG = functions::runFastjet(fjInputs_G,dR);
     auto fjFS = functions::runFastjet(fjInputs_S,dR);
     auto fjFC = functions::runFastjet(fjInputs_C,dR);
@@ -200,6 +161,11 @@ int main(int argc, char* argv[]) {
     tE_Cjets->Fill(fjFC.at(0).E);
     tE_GenJets->Fill(fjG.at(0).E);
 
+    TLorentzVector firstS4vec, firstC4vec, firstG4vec;
+    firstS4vec.SetPxPyPzE(fjFS.at(0).px,fjFS.at(0).py,fjFS.at(0).pz,fjFS.at(0).E);
+    firstC4vec.SetPxPyPzE(fjFC.at(0).px,fjFC.at(0).py,fjFC.at(0).pz,fjFC.at(0).E);
+    firstG4vec.SetPxPyPzE(fjG.at(0).px,fjG.at(0).py,fjG.at(0).pz,fjG.at(0).E);
+
     auto secondS = functions::findSecondary(fjFS,dR);
     auto secondC = functions::findSecondary(fjFC,dR);
     auto secondG = functions::findSecondary(fjG,dR);
@@ -214,29 +180,19 @@ int main(int argc, char* argv[]) {
     secondG4vec.SetPxPyPzE(secondG.px,secondG.py,secondG.pz,secondG.E);
 
     float E_DRjets1, E_DRjets2;
-    if (secondS4vec.DeltaR(secondC4vec) < dR) {
+    if ( secondS4vec.DeltaR(secondC4vec) < 0.1 && firstS4vec.DeltaR(firstC4vec) < 0.1 ) {
       E_DRjets1 = functions::E_DR(fjFC.at(0).E,fjFS.at(0).E);
       E_DRjets2 = functions::E_DR(secondC.E,secondS.E);
-    } else {
+
+      tE_DRjets->Fill(E_DRjets1); E_Ss.push_back(fjFS.at(0).E); E_Cs.push_back(fjFC.at(0).E);
+      tE_DRjets->Fill(E_DRjets2); E_Ss.push_back(secondS.E); E_Cs.push_back(secondC.E);
+    } else if ( secondS4vec.DeltaR(firstC4vec) < 0.1 && firstS4vec.DeltaR(secondC4vec) < 0.1 ) {
       E_DRjets2 = functions::E_DR(fjFC.at(0).E,secondS.E);
       E_DRjets1 = functions::E_DR(secondC.E,fjFS.at(0).E);
-    }
 
-    tE_DRjets->Fill(E_DRjets1);
-    tE_DRjets->Fill(E_DRjets2);
-
-    float E_diff1, E_diff2;
-    if (secondS4vec.DeltaR(secondG4vec) < dR) {
-      E_diff1 = E_DRjets1 - fjG.at(0).E;
-      E_diff2 = E_DRjets2 - secondG.E;
-    } else {
-      E_diff1 = E_DRjets1 - secondG.E;
-      E_diff2 = E_DRjets2 - fjG.at(0).E;
-    }
-
-    tE_diff->Fill(E_diff1);
-    tE_diff->Fill(E_diff2);
-
+      tE_DRjets->Fill(E_DRjets1); E_Ss.push_back(fjFS.at(0).E); E_Cs.push_back(fjFC.at(0).E);
+      tE_DRjets->Fill(E_DRjets2); E_Ss.push_back(secondS.E); E_Cs.push_back(secondC.E);
+    } else continue;
   } // event loop
 
   reader.close();
@@ -296,15 +252,12 @@ int main(int argc, char* argv[]) {
   tE_DRjets->Draw("");
   c->SaveAs(filename+"_EDRjets.png");
 
-  TF1* grE_diff = new TF1("diffFit","gaus",-high/2.,high/2.); grE_diff->SetLineColor(kBlack);
-  tE_diff->SetOption("p"); tE_diff->Fit(grE_diff,"R+&same");
-  tE_diff->Draw("");
-  c->SaveAs(filename+"_Ediff.png");
-
-  tT_C->Draw("Hist"); c->SaveAs(filename+"_tC.png");
-  tT_S->Draw("Hist"); c->SaveAs(filename+"_tS.png");
-  tWav_C->Draw("Hist"); c->SaveAs(filename+"_wavC.png");
-  tWav_S->Draw("Hist"); c->SaveAs(filename+"_wavS.png");
-  tNhit_C->Draw("Hist"); c->SaveAs(filename+"_nhitC.png");
-  tNhit_S->Draw("Hist"); c->SaveAs(filename+"_nhitS.png");
+  TGraph* grSvsC = new TGraph(entries,&(E_Ss[0]),&(E_Cs[0]));
+  grSvsC->SetTitle("SvsC;E_S;E_C");
+  grSvsC->SetMarkerSize(0.5); grSvsC->SetMarkerStyle(20);
+  grSvsC->GetXaxis()->SetRangeUser(0.,high);
+  grSvsC->GetYaxis()->SetRangeUser(0.,high);
+  grSvsC->SetMaximum(high);
+  grSvsC->SetMinimum(0.);
+  grSvsC->Draw("ap");
 }

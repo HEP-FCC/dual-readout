@@ -23,4 +23,11 @@ target_link_libraries(
   ${ROOT_LIBRARIES}
 )
 
-install(TARGETS rootIO LIBRARY DESTINATION lib)
+install(
+  TARGETS rootIO
+  LIBRARY DESTINATION lib
+)
+
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/librootIO_rdict.pcm ${CMAKE_CURRENT_BINARY_DIR}/librootIO.rootmap DESTINATION lib
+)

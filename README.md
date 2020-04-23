@@ -11,6 +11,17 @@ After fetching the repository, do
     cmake ..
     make -j4
 
+### Install
+For a case that needs to install the package (e.g. `condor` requires file transfer), one can install the package via
+
+    cmake -DCMAKE_INSTALL_PREFIX=<path_to_install_directory> ..
+    make -j4
+    make install
+    
+Note that to use the installed binary & library files, need to do following (assuming `$PWD=<path_to_install_directory>`)
+
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HEPMC_DIR/lib64:$FASTJET_DIR/lib:$PYTHIA_DIR/lib:$PWD/lib
+
 ### Running Pythia8
 In build/Gen,
 

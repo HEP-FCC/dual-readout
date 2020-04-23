@@ -38,3 +38,4 @@ foreach(_script ${P8ptcgen_SCRIPTS})
 endforeach()
 
 install(TARGETS P8ptcgen DESTINATION bin)
+install(FILES ${PROJECT_BINARY_DIR}/ptcgun.cmnd DESTINATION .)

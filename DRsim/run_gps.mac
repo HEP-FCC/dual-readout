@@ -1,0 +1,19 @@
+#This macro can not be executed standalone
+/DRsim/action/useGPS True
+
+/vis/disable
+/run/numberOfThreads 1
+/run/verbose 1
+/run/initialize
+
+/gps/particle pi+
+/gps/energy 20 GeV
+/gps/position 0 0 0 cm
+/gps/pos/type Plane
+/gps/pos/shape Circle
+/gps/pos/radius 1.0 cm
+/gps/ang/type beam1d
+/gps/ang/sigma_r 0.2 deg
+/gps/direction 0.999938285 0.0 0.0111098
+
+/run/beamOn 2

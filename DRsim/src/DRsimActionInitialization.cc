@@ -26,7 +26,7 @@ void DRsimActionInitialization::BuildForMaster() const {
 }
 
 void DRsimActionInitialization::Build() const {
-  SetUserAction(new DRsimPrimaryGeneratorAction(fSeed,fUseHepMC));
+  SetUserAction(new DRsimPrimaryGeneratorAction(fSeed,fUseHepMC,fUseCalib,fUseGPS));
   SetUserAction(new DRsimRunAction(fSeed,fFilename,fUseHepMC));
 
   DRsimEventAction* eventAction = new DRsimEventAction();
@@ -42,4 +42,12 @@ void DRsimActionInitialization::DefineCommands() {
   G4GenericMessenger::Command& ioCmd = fMessenger->DeclareProperty("useHepMC",fUseHepMC,"use HepMC");
   ioCmd.SetParameterName("useHepMC",true);
   ioCmd.SetDefaultValue("False");
+
+  G4GenericMessenger::Command& calibCmd = fMessenger->DeclareProperty("useCalib",fUseCalib,"use Calib");
+  calibCmd.SetParameterName("useCalib",true);
+  calibCmd.SetDefaultValue("False");
+
+  G4GenericMessenger::Command& gpsCmd = fMessenger->DeclareProperty("useGPS",fUseGPS,"use GPS");
+  gpsCmd.SetParameterName("useGPS",true);
+  gpsCmd.SetDefaultValue("False");
 }
