@@ -39,6 +39,8 @@ int main(int argc, char* argv[]) {
 
   unsigned int entries = recoInterface->entries();
   while (recoInterface->numEvt() < entries) {
+    if (recoInterface->numEvt() % 100 == 0) printf("Analyzing %dth event ...\n", recoInterface->numEvt());
+
     RecoInterface::RecoEventData evt;
     recoInterface->read(evt);
 
