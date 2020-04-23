@@ -115,7 +115,7 @@ void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
     return;
   }
 
-  if (fGPS) {
+  if (fUseGPS) {
     G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
     fGPS->GeneratePrimaryVertex(event);
     sIdxEvt = sNumEvt;
