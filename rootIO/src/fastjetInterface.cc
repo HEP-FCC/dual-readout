@@ -60,7 +60,7 @@ void fastjetInterface::writeJets(std::vector<fastjet::PseudoJet> jets) {
 
 void fastjetInterface::runFastjet(const std::vector<fastjet::PseudoJet>& input) {
   // FastJet
-  double dR = M_PI/2.;
+  double dR = 0.8;
   fastjet::JetDefinition jetDef(fastjet::ee_genkt_algorithm,dR,-1);
 
   // Run Fastjet algorithm
