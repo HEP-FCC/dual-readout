@@ -112,8 +112,8 @@ DRsimInterface::hitRange DRsimSiPMSD::findTimeRange(G4double stepTime) {
 }
 
 DRsimInterface::hitXY DRsimSiPMSD::findSiPMXY(G4int SiPMnum, DRsimInterface::hitXY towerXY) {
-  int x = SiPMnum/towerXY.second;
-  int y = SiPMnum%towerXY.second;
+  int x = SiPMnum%towerXY.first;
+  int y = SiPMnum/towerXY.first;
 
   return std::make_pair(x,y);
 }
