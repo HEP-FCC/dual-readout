@@ -7,8 +7,7 @@ fastjetInterface::fastjetData functions::findSecondary(std::vector<fastjetInterf
   primary4vec.SetPxPyPzE(primary.px,primary.py,primary.pz,primary.E);
 
   fastjetInterface::fastjetData secondary;
-  for (auto itr = vec.begin(); itr != vec.end(); ++itr) {
-    secondary = *itr;
+  for (auto secondary : vec) {
     TLorentzVector secondary4vec;
     secondary4vec.SetPxPyPzE(secondary.px,secondary.py,secondary.pz,secondary.E);
     if ( primary4vec.DeltaR(secondary4vec) > dR ) return secondary;
