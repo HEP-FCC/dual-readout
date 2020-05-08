@@ -3,7 +3,6 @@
 
 #include "DRsimInterface.h"
 #include "DRsimEventAction.hh"
-#include "DRsimStackingAction.hh"
 
 #include "G4UserSteppingAction.hh"
 #include "G4LogicalVolume.hh"
@@ -14,17 +13,14 @@ using namespace std;
 
 class DRsimSteppingAction : public G4UserSteppingAction {
 public:
-  DRsimSteppingAction(DRsimEventAction* eventAction, DRsimStackingAction* stackAct);
+  DRsimSteppingAction(DRsimEventAction* eventAction);
   virtual ~DRsimSteppingAction();
   virtual void UserSteppingAction(const G4Step*);
 
 private:
   DRsimEventAction* fEventAction;
-  DRsimStackingAction* fStackAction;
   DRsimInterface::DRsimEdepData fEdep;
   DRsimInterface::DRsimLeakageData fLeak;
-
-  bool IsFiberMaterial(G4String matName);
 
   G4VPhysicalVolume* GetMotherTower(G4TouchableHandle touchable) { return touchable->GetVolume(touchable->GetHistoryDepth()-1); }
   G4int GetTowerIPhi(G4VPhysicalVolume* motherTower_) { return motherTower_->GetCopyNo(); }

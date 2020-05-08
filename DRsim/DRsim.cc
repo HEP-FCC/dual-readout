@@ -10,6 +10,7 @@
 
 #include "G4UImanager.hh"
 #include "G4OpticalPhysics.hh"
+#include "G4FastSimulationPhysics.hh"
 #include "FTFP_BERT.hh"
 #include "Randomize.hh"
 
@@ -48,12 +49,18 @@ int main(int argc, char** argv) {
 
   // physics module
   G4VModularPhysicsList* physicsList = new FTFP_BERT;
+
   G4OpticalPhysics* opticalPhysics = new G4OpticalPhysics();
   physicsList->RegisterPhysics(opticalPhysics);
   opticalPhysics->Configure(kCerenkov, true);
   opticalPhysics->Configure(kScintillation, true);
   opticalPhysics->SetTrackSecondariesFirst(kCerenkov, true);
   opticalPhysics->SetTrackSecondariesFirst(kScintillation, true);
+
+  G4FastSimulationPhysics* fastsimPhysics = new G4FastSimulationPhysics();
+  fastsimPhysics->ActivateFastSimulation("opticalphoton");
+  physicsList->RegisterPhysics(fastsimPhysics);
+
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization

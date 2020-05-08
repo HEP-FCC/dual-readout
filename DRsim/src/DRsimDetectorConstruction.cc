@@ -3,6 +3,7 @@
 #include "DRsimCellParameterisation.hh"
 #include "DRsimFilterParameterisation.hh"
 #include "DRsimSiPMSD.hh"
+#include "DRsimFastOpTransportModel.hh"
 
 #include "G4VPhysicalVolume.hh"
 #include "G4PVPlacement.hh"
@@ -108,6 +109,9 @@ G4VPhysicalVolume* DRsimDetectorConstruction::Construct() {
   fiberC = new G4Tubs("fiberC",0,core_C_rMax,sTowerH/2.,0*deg,360.*deg);
   fiberS = new G4Tubs("fiberS",0,core_S_rMax,sTowerH/2.,0*deg,360.*deg);
 
+  fCerenRegion = new G4Region("cerenRegion");
+  fScintRegion = new G4Region("scintRegion");
+
   // barrel
 
   dimB = new dimensionB();
@@ -177,6 +181,11 @@ void DRsimDetectorConstruction::ConstructSDandField() {
     SDman->AddNewDetector(SiPMSDEL);
     PMTcathLogicalEL[i]->SetSensitiveDetector(SiPMSDEL);
   }
+
+  DRsimFastOpTransportModel* cerenModel = new DRsimFastOpTransportModel("fastOpTransportCeren",fCerenRegion);
+  DRsimFastOpTransportModel* scintModel = new DRsimFastOpTransportModel("fastOpTransportScint",fScintRegion);
+  cerenModel->SetFiberLength(DRsimDetectorConstruction::sTowerH);
+  scintModel->SetFiberLength(DRsimDetectorConstruction::sTowerH);
 }
 
 void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],
@@ -354,23 +363,37 @@ void DRsimDetectorConstruction::fiberBarrel(G4int i, G4double deltatheta_,G4Logi
 
     if ( DRsimInterface::IsCerenkov(column,row) ) { //c fibre
       intersect = new G4IntersectionSolid("fiber_",fiber,tower,0,G4ThreeVector(-fFiberX.at(j),-fFiberY.at(j),0.));
-      fiberLogical[i].push_back(new G4LogicalVolume(intersect,FindMaterial("FluorinatedPolymer"),name));
+      G4LogicalVolume* cladLogical = new G4LogicalVolume(intersect,FindMaterial("FluorinatedPolymer"),name);
+      fiberLogical[i].push_back(cladLogical);
       new G4PVPlacement(0,G4ThreeVector(fFiberX.at(j),fFiberY.at(j),0),fiberLogical[i].at(j),name,towerLogical[i],false,j,checkOverlaps);
 
       intersect_ = new G4IntersectionSolid("fiber_",fiberC,tower,0,G4ThreeVector(-fFiberX.at(j),-fFiberY.at(j),0.));
-      fiberLogical_[i].push_back(new G4LogicalVolume(intersect_,FindMaterial("PMMA"),name));
+      G4LogicalVolume* coreLogical = new G4LogicalVolume(intersect_,FindMaterial("PMMA"),name);
+      fiberLogical_[i].push_back(coreLogical);
       new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),fiberLogical_[i].at(j),name,fiberLogical[i].at(j),false,j,checkOverlaps);
+
+      fCerenRegion->AddRootLogicalVolume(cladLogical);
+      fCerenRegion->AddRootLogicalVolume(coreLogical);
+      cladLogical->SetRegion(fCerenRegion);
+      coreLogical->SetRegion(fCerenRegion);
 
       fiberLogical[i].at(j)->SetVisAttributes(fVisAttrGray);
       fiberLogical_[i].at(j)->SetVisAttributes(fVisAttrBlue);
     } else { // s fibre
       intersect = new G4IntersectionSolid("fiber_",fiber,tower,0,G4ThreeVector(-fFiberX.at(j),-fFiberY.at(j),0.));
-      fiberLogical[i].push_back(new G4LogicalVolume(intersect,FindMaterial("PMMA"),name));
+      G4LogicalVolume* cladLogical = new G4LogicalVolume(intersect,FindMaterial("PMMA"),name);
+      fiberLogical[i].push_back(cladLogical);
       new G4PVPlacement(0,G4ThreeVector(fFiberX.at(j),fFiberY.at(j),0),fiberLogical[i].at(j),name,towerLogical[i],false,j,checkOverlaps);
 
       intersect_ = new G4IntersectionSolid("fiber_",fiberS,tower,0,G4ThreeVector(-fFiberX.at(j),-fFiberY.at(j),0.));
-      fiberLogical_[i].push_back(new G4LogicalVolume(intersect_,FindMaterial("Polystyrene"),name));
+      G4LogicalVolume* coreLogical = new G4LogicalVolume(intersect_,FindMaterial("Polystyrene"),name);
+      fiberLogical_[i].push_back(coreLogical);
       new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),fiberLogical_[i].at(j),name,fiberLogical[i].at(j),false,j,checkOverlaps);
+
+      fScintRegion->AddRootLogicalVolume(cladLogical);
+      fScintRegion->AddRootLogicalVolume(coreLogical);
+      cladLogical->SetRegion(fScintRegion);
+      coreLogical->SetRegion(fScintRegion);
 
       fiberLogical[i].at(j)->SetVisAttributes(fVisAttrGray);
       fiberLogical_[i].at(j)->SetVisAttributes(fVisAttrOrange);
@@ -410,23 +433,37 @@ void DRsimDetectorConstruction::fiberEndcap(G4int i, G4double deltatheta_, G4Log
 
     if ( DRsimInterface::IsCerenkov(column,row) ) { //c fibre
       intersect = new G4IntersectionSolid("fiber_",fiber,tower,0,G4ThreeVector(-fFiberX.at(j),-fFiberY.at(j),0.));
-      fiberLogical[i].push_back(new G4LogicalVolume(intersect,FindMaterial("FluorinatedPolymer"),name));
+      G4LogicalVolume* cladLogical = new G4LogicalVolume(intersect,FindMaterial("FluorinatedPolymer"),name);
+      fiberLogical[i].push_back(cladLogical);
       new G4PVPlacement(0,G4ThreeVector(fFiberX.at(j),fFiberY.at(j),0),fiberLogical[i].at(j),name,towerLogical[i],false,j,checkOverlaps);
 
       intersect_ = new G4IntersectionSolid("fiber_",fiberC,tower,0,G4ThreeVector(-fFiberX.at(j),-fFiberY.at(j),0.));
-      fiberLogical_[i].push_back(new G4LogicalVolume(intersect_,FindMaterial("PMMA"),name));
+      G4LogicalVolume* coreLogical = new G4LogicalVolume(intersect_,FindMaterial("PMMA"),name);
+      fiberLogical_[i].push_back(coreLogical);
       new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),fiberLogical_[i].at(j),name,fiberLogical[i].at(j),false,j,checkOverlaps);
+
+      fCerenRegion->AddRootLogicalVolume(cladLogical);
+      fCerenRegion->AddRootLogicalVolume(coreLogical);
+      cladLogical->SetRegion(fCerenRegion);
+      coreLogical->SetRegion(fCerenRegion);
 
       fiberLogical[i].at(j)->SetVisAttributes(fVisAttrGray);
       fiberLogical_[i].at(j)->SetVisAttributes(fVisAttrBlue);
     } else { // s fibre
       intersect = new G4IntersectionSolid("fiber_",fiber,tower,0,G4ThreeVector(-fFiberX.at(j),-fFiberY.at(j),0.));
-      fiberLogical[i].push_back(new G4LogicalVolume(intersect,FindMaterial("PMMA"),name));
+      G4LogicalVolume* cladLogical = new G4LogicalVolume(intersect,FindMaterial("PMMA"),name);
+      fiberLogical[i].push_back(cladLogical);
       new G4PVPlacement(0,G4ThreeVector(fFiberX.at(j),fFiberY.at(j),0),fiberLogical[i].at(j),name,towerLogical[i],false,j,checkOverlaps);
 
       intersect_ = new G4IntersectionSolid("fiber_",fiberS,tower,0,G4ThreeVector(-fFiberX.at(j),-fFiberY.at(j),0.));
-      fiberLogical_[i].push_back(new G4LogicalVolume(intersect_,FindMaterial("Polystyrene"),name));
+      G4LogicalVolume* coreLogical = new G4LogicalVolume(intersect_,FindMaterial("Polystyrene"),name);
+      fiberLogical_[i].push_back(coreLogical);
       new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),fiberLogical_[i].at(j),name,fiberLogical[i].at(j),false,j,checkOverlaps);
+
+      fScintRegion->AddRootLogicalVolume(cladLogical);
+      fScintRegion->AddRootLogicalVolume(coreLogical);
+      cladLogical->SetRegion(fScintRegion);
+      coreLogical->SetRegion(fScintRegion);
 
       fiberLogical[i].at(j)->SetVisAttributes(fVisAttrGray);
       fiberLogical_[i].at(j)->SetVisAttributes(fVisAttrOrange);

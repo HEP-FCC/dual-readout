@@ -7,8 +7,8 @@
 #include "G4OpBoundaryProcess.hh"
 #include "G4EmProcessSubType.hh"
 
-DRsimSteppingAction::DRsimSteppingAction(DRsimEventAction* eventAction, DRsimStackingAction* stackAct)
-: G4UserSteppingAction(), fEventAction(eventAction), fStackAction(stackAct)
+DRsimSteppingAction::DRsimSteppingAction(DRsimEventAction* eventAction)
+: G4UserSteppingAction(), fEventAction(eventAction)
 {}
 
 DRsimSteppingAction::~DRsimSteppingAction() {}
@@ -18,8 +18,6 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
   G4ParticleDefinition* particle = track->GetDefinition();
 
   if ( particle == G4OpticalPhoton::OpticalPhotonDefinition() ) {
-    if ( fpSteppingManager->GetphysIntLength()==0. ) return; // not in optical material
-
     if ( track->GetMaterial()->GetName()=="FluorinatedPolymer" || track->GetNextMaterial()->GetName()=="FluorinatedPolymer" ) {
       auto creatorProcess = track->GetCreatorProcess();
       if ( creatorProcess->GetProcessType()==fElectromagnetic && creatorProcess->GetProcessSubType()==G4EmProcessSubType::fScintillation ) {
@@ -27,20 +25,6 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
         return;
       }
     }
-
-    auto currentProc = fpSteppingManager->GetfCurrentProcess();
-    if ( currentProc->GetProcessType()!=fOptical || currentProc->GetProcessSubType()!=G4OpProcessSubType::fOpBoundary ) return; // not OpBoundary process
-
-    G4OpBoundaryProcess* opProc = (G4OpBoundaryProcess*)currentProc;
-
-    if ( opProc->GetStatus()!=G4OpBoundaryProcessStatus::TotalInternalReflection ) return; // not total internal reflection
-
-    if ( !IsFiberMaterial( track->GetMaterial()->GetName() ) ) return;
-    if ( !IsFiberMaterial( track->GetNextMaterial()->GetName() ) ) return; // not in fibre
-
-    if ( track->GetTouchableHandle()->GetHistoryDepth()!=3 ) return; // not in core
-
-    fStackAction->transportOp(step);
   } else {
     G4int pdgID = particle->GetPDGEncoding();
     G4StepPoint* presteppoint = step->GetPreStepPoint();
@@ -81,8 +65,4 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
   }
 
   return;
-}
-
-bool DRsimSteppingAction::IsFiberMaterial(G4String matName) {
-  return ( matName=="Polystyrene" || matName=="FluorinatedPolymer" || matName=="PMMA" );
 }

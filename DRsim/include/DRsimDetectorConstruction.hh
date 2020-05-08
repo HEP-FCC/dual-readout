@@ -16,6 +16,7 @@
 #include "G4GenericMessenger.hh"
 #include "G4FieldManager.hh"
 #include "G4ThreeVector.hh"
+#include "G4Region.hh"
 
 #include "dimensionB.hh"
 #include "dimensionE.hh"
@@ -65,6 +66,9 @@ private:
   G4VisAttributes* fVisAttrGray;
   G4VisAttributes* fVisAttrGreen;
   G4VisAttributes* fVisAttrWhite;
+
+  G4Region* fScintRegion;
+  G4Region* fCerenRegion;
 
   G4double innerR;
   G4double towerH;
