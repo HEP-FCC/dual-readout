@@ -8,6 +8,7 @@
 DRsimFastOpTransportModel::DRsimFastOpTransportModel(G4String name, G4Region* envelope)
 : G4VFastSimulationModel(name,envelope) {
   fOpBoundaryProc = NULL;
+  fCoreMaterial = NULL;
   fProcAssigned = false;
   fFiberLength = 0.;
   fSafety = 2;
@@ -16,7 +17,6 @@ DRsimFastOpTransportModel::DRsimFastOpTransportModel(G4String name, G4Region* en
   fTransportUnit = 0.;
   fFiberAxis = G4ThreeVector(0);
   fKill = false;
-  fDoAbsorption = true;
   fNtotIntRefl = 0;
   fTrackId = 0;
 
@@ -32,20 +32,11 @@ G4bool DRsimFastOpTransportModel::IsApplicable(const G4ParticleDefinition& type)
 G4bool DRsimFastOpTransportModel::ModelTrigger(const G4FastTrack& fasttrack) {
   const G4Track* track = fasttrack.GetPrimaryTrack();
 
-  auto matPropTable = track->GetMaterial()->GetMaterialPropertiesTable();
-  auto nextMatPropTable = track->GetNextMaterial()->GetMaterialPropertiesTable();
+  auto matPropTable = fCoreMaterial->GetMaterialPropertiesTable();
 
-  if ( !matPropTable || !nextMatPropTable ) return false;
+  if ( !matPropTable ) return false;
 
-  if ( !matPropTable->GetProperty(kABSLENGTH) && !nextMatPropTable->GetProperty(kABSLENGTH) ) {
-    fDoAbsorption = false;
-  } else {
-    fDoAbsorption = true;
-  }
-
-  if ( fDoAbsorption && !matPropTable->GetProperty(kABSLENGTH) ) return false;
-
-  if ( !checkTotalInternalReflection(track) ) return false;
+  if ( !checkTotalInternalReflection(track) ) return false; // nothing to do if the previous status is not total internal reflection
 
   G4TouchableHandle theTouchable = track->GetTouchableHandle();
   auto fiberPos = theTouchable->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0.,0.,0.));
@@ -79,7 +70,7 @@ G4bool DRsimFastOpTransportModel::ModelTrigger(const G4FastTrack& fasttrack) {
     return false;
   }
 
-  if (fDoAbsorption) {
+  if ( matPropTable->GetProperty(kABSLENGTH) ) {
     double attLength = matPropTable->GetProperty(kABSLENGTH)->Value( track->GetDynamicParticle()->GetTotalMomentum() );
     double nInteractionLength = fTrkLength*fNtransport/attLength;
     double nInteractionLengthLeft = -std::log( G4UniformRand() );
@@ -169,7 +160,6 @@ void DRsimFastOpTransportModel::reset() {
   fTransportUnit = 0.;
   fFiberAxis = G4ThreeVector(0);
   fKill = false;
-  fDoAbsorption = true;
   fNtotIntRefl = 0;
   fTrackId = 0;
 }

@@ -185,7 +185,9 @@ void DRsimDetectorConstruction::ConstructSDandField() {
   DRsimFastOpTransportModel* cerenModel = new DRsimFastOpTransportModel("fastOpTransportCeren",fCerenRegion);
   DRsimFastOpTransportModel* scintModel = new DRsimFastOpTransportModel("fastOpTransportScint",fScintRegion);
   cerenModel->SetFiberLength(DRsimDetectorConstruction::sTowerH);
+  cerenModel->SetCoreMaterial(FindMaterial("PMMA"));
   scintModel->SetFiberLength(DRsimDetectorConstruction::sTowerH);
+  scintModel->SetCoreMaterial(FindMaterial("Polystyrene"));
 }
 
 void DRsimDetectorConstruction::Barrel(G4LogicalVolume* towerLogical[], G4LogicalVolume* PMTGLogical[], G4LogicalVolume* PMTfilterLogical[], G4LogicalVolume* PMTcellLogical[],

@@ -5,6 +5,7 @@
 #include "G4OpBoundaryProcess.hh"
 #include "G4GenericMessenger.hh"
 #include "G4OpBoundaryProcess.hh"
+#include "G4Material.hh"
 
 class DRsimFastOpTransportModel : public G4VFastSimulationModel {
 public:
@@ -16,6 +17,7 @@ public:
   virtual void DoIt(const G4FastTrack&, G4FastStep&);
 
   void SetFiberLength(G4double length) { fFiberLength = length; }
+  void SetCoreMaterial(G4Material* mat) { fCoreMaterial = mat; }
 
 private:
   void DefineCommands();
@@ -26,6 +28,7 @@ private:
 
   G4GenericMessenger* fMessenger;
   G4OpBoundaryProcess* fOpBoundaryProc;
+  G4Material* fCoreMaterial;
   G4bool fProcAssigned;
 
   G4double fFiberLength;
@@ -35,7 +38,6 @@ private:
   G4double fTransportUnit;
   G4ThreeVector fFiberAxis;
   G4bool fKill;
-  G4bool fDoAbsorption;
   G4int fNtotIntRefl;
   G4int fTrackId;
 };
