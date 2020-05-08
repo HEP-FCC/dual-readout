@@ -23,6 +23,7 @@ private:
   void DefineCommands();
 
   bool checkTotalInternalReflection(const G4Track* track);
+  G4double CalculateVelocityForOpticalPhoton(const G4Track* track);
   void setOpBoundaryProc(const G4Track* track);
   void reset();
 

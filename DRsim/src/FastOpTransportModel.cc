@@ -97,7 +97,7 @@ void FastOpTransportModel::DoIt(const G4FastTrack& fasttrack, G4FastStep& fastst
     return;
   }
 
-  double velocity = track->CalculateVelocityForOpticalPhoton();
+  double velocity = CalculateVelocityForOpticalPhoton(track);
   double timeUnit = fTrkLength/velocity;
   auto posShift = fTransportUnit*fNtransport*fFiberAxis;
   double timeShift = timeUnit*fNtransport;
@@ -152,6 +152,32 @@ void FastOpTransportModel::setOpBoundaryProc(const G4Track* track) {
   }
 
   return;
+}
+
+G4double FastOpTransportModel::CalculateVelocityForOpticalPhoton(const G4Track* track) {
+  G4double velocity = CLHEP::c_light;
+  G4bool update_groupvel = false;
+  G4MaterialPropertyVector* groupvel = nullptr;
+
+  // check if previous step is in the same volume
+  // and get new GROUPVELOCITY table if necessary
+  if ( (fCoreMaterial!=nullptr) && (groupvel==nullptr) ) {
+    if ( fCoreMaterial->GetMaterialPropertiesTable() != nullptr ) {
+      groupvel = fCoreMaterial->GetMaterialPropertiesTable()->GetProperty("GROUPVEL");
+    }
+    update_groupvel = true;
+  }
+
+  if ( groupvel != nullptr ) {
+    // light velocity = c/(rindex+d(rindex)/d(log(E_phot)))
+    // values stored in GROUPVEL material properties vector
+    G4double current_momentum = track->GetDynamicParticle()->GetTotalMomentum();
+    if ( update_groupvel ) {
+      velocity = groupvel->Value(current_momentum);
+    }
+  }
+
+  return velocity;
 }
 
 void FastOpTransportModel::reset() {
