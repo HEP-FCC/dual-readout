@@ -1,11 +1,11 @@
-#include "DRsimFastOpTransportModel.hh"
+#include "FastOpTransportModel.hh"
 
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTypes.hh"
 #include "G4ProcessManager.hh"
 #include "G4OpProcessSubType.hh"
 
-DRsimFastOpTransportModel::DRsimFastOpTransportModel(G4String name, G4Region* envelope)
+FastOpTransportModel::FastOpTransportModel(G4String name, G4Region* envelope)
 : G4VFastSimulationModel(name,envelope) {
   fOpBoundaryProc = NULL;
   fCoreMaterial = NULL;
@@ -23,13 +23,13 @@ DRsimFastOpTransportModel::DRsimFastOpTransportModel(G4String name, G4Region* en
   DefineCommands();
 }
 
-DRsimFastOpTransportModel::~DRsimFastOpTransportModel() {}
+FastOpTransportModel::~FastOpTransportModel() {}
 
-G4bool DRsimFastOpTransportModel::IsApplicable(const G4ParticleDefinition& type) {
+G4bool FastOpTransportModel::IsApplicable(const G4ParticleDefinition& type) {
   return &type == G4OpticalPhoton::OpticalPhotonDefinition();
 }
 
-G4bool DRsimFastOpTransportModel::ModelTrigger(const G4FastTrack& fasttrack) {
+G4bool FastOpTransportModel::ModelTrigger(const G4FastTrack& fasttrack) {
   const G4Track* track = fasttrack.GetPrimaryTrack();
 
   auto matPropTable = fCoreMaterial->GetMaterialPropertiesTable();
@@ -87,7 +87,7 @@ G4bool DRsimFastOpTransportModel::ModelTrigger(const G4FastTrack& fasttrack) {
   return true;
 }
 
-void DRsimFastOpTransportModel::DoIt(const G4FastTrack& fasttrack, G4FastStep& faststep) {
+void FastOpTransportModel::DoIt(const G4FastTrack& fasttrack, G4FastStep& faststep) {
   auto track = fasttrack.GetPrimaryTrack();
 
   if (fKill) {
@@ -113,7 +113,7 @@ void DRsimFastOpTransportModel::DoIt(const G4FastTrack& fasttrack, G4FastStep& f
   return;
 }
 
-bool DRsimFastOpTransportModel::checkTotalInternalReflection(const G4Track* track) {
+bool FastOpTransportModel::checkTotalInternalReflection(const G4Track* track) {
   if (!fProcAssigned) { // locate OpBoundaryProcess only once
     setOpBoundaryProc(track);
   }
@@ -136,7 +136,7 @@ bool DRsimFastOpTransportModel::checkTotalInternalReflection(const G4Track* trac
   return false;
 }
 
-void DRsimFastOpTransportModel::setOpBoundaryProc(const G4Track* track) {
+void FastOpTransportModel::setOpBoundaryProc(const G4Track* track) {
   G4ProcessManager* pm = track->GetDefinition()->GetProcessManager();
   auto postStepProcessVector = pm->GetPostStepProcessVector();
 
@@ -154,7 +154,7 @@ void DRsimFastOpTransportModel::setOpBoundaryProc(const G4Track* track) {
   return;
 }
 
-void DRsimFastOpTransportModel::reset() {
+void FastOpTransportModel::reset() {
   fTrkLength = 0.;
   fNtransport = 0.;
   fTransportUnit = 0.;
@@ -164,7 +164,7 @@ void DRsimFastOpTransportModel::reset() {
   fTrackId = 0;
 }
 
-void DRsimFastOpTransportModel::DefineCommands() {
+void FastOpTransportModel::DefineCommands() {
   fMessenger = new G4GenericMessenger(this, "/DRsim/fastOp/", "fast Op transport model control");
   G4GenericMessenger::Command& safetyCmd = fMessenger->DeclareProperty("safety",fSafety,"min number of total internal reflection");
   safetyCmd.SetParameterName("safety",true);

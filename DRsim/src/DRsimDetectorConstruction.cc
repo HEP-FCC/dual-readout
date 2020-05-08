@@ -3,7 +3,7 @@
 #include "DRsimCellParameterisation.hh"
 #include "DRsimFilterParameterisation.hh"
 #include "DRsimSiPMSD.hh"
-#include "DRsimFastOpTransportModel.hh"
+#include "FastOpTransportModel.hh"
 
 #include "G4VPhysicalVolume.hh"
 #include "G4PVPlacement.hh"
@@ -182,8 +182,8 @@ void DRsimDetectorConstruction::ConstructSDandField() {
     PMTcathLogicalEL[i]->SetSensitiveDetector(SiPMSDEL);
   }
 
-  DRsimFastOpTransportModel* cerenModel = new DRsimFastOpTransportModel("fastOpTransportCeren",fCerenRegion);
-  DRsimFastOpTransportModel* scintModel = new DRsimFastOpTransportModel("fastOpTransportScint",fScintRegion);
+  FastOpTransportModel* cerenModel = new FastOpTransportModel("fastOpTransportCeren",fCerenRegion);
+  FastOpTransportModel* scintModel = new FastOpTransportModel("fastOpTransportScint",fScintRegion);
   cerenModel->SetFiberLength(DRsimDetectorConstruction::sTowerH);
   cerenModel->SetCoreMaterial(FindMaterial("PMMA"));
   scintModel->SetFiberLength(DRsimDetectorConstruction::sTowerH);

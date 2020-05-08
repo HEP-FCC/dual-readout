@@ -1,5 +1,5 @@
-#ifndef DRsimFastOpTransportModel_h
-#define DRsimFastOpTransportModel_h 1
+#ifndef FastOpTransportModel_h
+#define FastOpTransportModel_h 1
 
 #include "G4VFastSimulationModel.hh"
 #include "G4OpBoundaryProcess.hh"
@@ -7,10 +7,10 @@
 #include "G4OpBoundaryProcess.hh"
 #include "G4Material.hh"
 
-class DRsimFastOpTransportModel : public G4VFastSimulationModel {
+class FastOpTransportModel : public G4VFastSimulationModel {
 public:
-  DRsimFastOpTransportModel(G4String, G4Region*);
-  ~DRsimFastOpTransportModel();
+  FastOpTransportModel(G4String, G4Region*);
+  ~FastOpTransportModel();
 
   virtual G4bool IsApplicable(const G4ParticleDefinition&);
   virtual G4bool ModelTrigger(const G4FastTrack&);
