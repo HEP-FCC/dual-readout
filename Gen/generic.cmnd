@@ -6,6 +6,9 @@
 ! 1) Settings used in the main program.
 Main:numberOfEvents = 2            ! number of events to generate
 Main:timesAllowErrors = 1          ! how many aborts before run stops
+Main:spareParm1 = 1.5              ! Maximum |eta| of final state particles
+Main:spareParm2 = 0.01             ! Maximum energy fraction of particles outside eta range
+Main:spareFlag1 = true             ! on/off filter
 
 ! 2) Settings related to output in init(), next() and stat().
 Init:showChangedSettings = on      ! list changed settings
