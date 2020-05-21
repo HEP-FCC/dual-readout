@@ -24,12 +24,24 @@ target_link_libraries(
   ${CMAKE_DL_LIBS}
 )
 
-set(
-  P8ptcgen_SCRIPTS
-  ptcgun.cmnd
+add_executable(P8generic P8generic.cc ${sources} ${headers})
+target_link_libraries(
+  P8generic
+  ${PYTHIA_DIR}/lib/libpythia8.a
+  ${HEPMC_DIR}/lib64/libHepMC3.so
+  ${HEPMC_DIR}/lib64/libHepMC3rootIO.so
+  ${FASTJET_DIR}/lib/libfastjet.so
+  rootIO
+  ${CMAKE_DL_LIBS}
 )
 
-foreach(_script ${P8ptcgen_SCRIPTS})
+set(
+  P8_SCRIPTS
+  ptcgun.cmnd
+  generic.cmnd
+)
+
+foreach(_script ${P8_SCRIPTS})
   configure_file(
     ${PROJECT_SOURCE_DIR}/${_script}
     ${PROJECT_BINARY_DIR}/${_script}
@@ -37,5 +49,5 @@ foreach(_script ${P8ptcgen_SCRIPTS})
   )
 endforeach()
 
-install(TARGETS P8ptcgen DESTINATION bin)
-install(FILES ${PROJECT_BINARY_DIR}/ptcgun.cmnd DESTINATION .)
+install(TARGETS P8ptcgen P8generic DESTINATION bin)
+install(FILES ${PROJECT_BINARY_DIR}/ptcgun.cmnd ${PROJECT_BINARY_DIR}/generic.cmnd DESTINATION .)

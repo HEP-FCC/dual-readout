@@ -7,8 +7,7 @@ fastjetInterface::fastjetData functions::findSecondary(std::vector<fastjetInterf
   primary4vec.SetPxPyPzE(primary.px,primary.py,primary.pz,primary.E);
 
   fastjetInterface::fastjetData secondary;
-  for (auto itr = vec.begin(); itr != vec.end(); ++itr) {
-    secondary = *itr;
+  for (auto secondary : vec) {
     TLorentzVector secondary4vec;
     secondary4vec.SetPxPyPzE(secondary.px,secondary.py,secondary.pz,secondary.E);
     if ( primary4vec.DeltaR(secondary4vec) > dR ) return secondary;
@@ -21,6 +20,12 @@ fastjetInterface::fastjetData functions::findSecondary(std::vector<fastjetInterf
 float functions::E_DR(float E_C, float E_S) {
   float hOe_C = 0.2484; float hOe_S = 0.8342;
   float chi = (1.-hOe_S)/(1.-hOe_C);
+
+  return (E_S - chi*E_C)/(1 - chi);
+}
+
+float functions::E_DR291(float E_C, float E_S) {
+  float chi = 0.291;
 
   return (E_S - chi*E_C)/(1 - chi);
 }

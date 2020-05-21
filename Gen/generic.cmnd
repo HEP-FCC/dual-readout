@@ -1,0 +1,53 @@
+! This file contains commands to be read in for a Pythia8 run.
+! Lines not beginning with a letter or digit are comments.
+! Names are case-insensitive  -  but spellings-sensitive!
+! The settings here are illustrative, not always physics-motivated.
+
+! 1) Settings used in the main program.
+Main:numberOfEvents = 2            ! number of events to generate
+Main:timesAllowErrors = 1          ! how many aborts before run stops
+Main:spareParm1 = 1.5              ! Maximum |eta| of final state particles
+Main:spareParm2 = 0.01             ! Maximum energy fraction of particles outside eta range
+Main:spareFlag1 = true             ! on/off filter
+
+! 2) Settings related to output in init(), next() and stat().
+Init:showChangedSettings = on      ! list changed settings
+Init:showChangedParticleData = on  ! list changed particle data
+Next:numberCount = 1               ! print message every n events
+Next:numberShowInfo = 1            ! print event information n times
+Next:numberShowProcess = 1         ! print process record n times
+Next:numberShowEvent = 1           ! print event record n times
+Stat:showPartonLevel = on          ! additional statistics on MPI
+
+! 3) Beam parameter settings. Values below agree with default ones.
+Beams:idA = 11                     ! first beam
+Beams:idB = -11                    ! second beam
+Beams:eCM = 250.                   ! CM energy of collision
+
+! 4) Settings for the hard-process generation.
+
+! Example 1: t-tbar production.
+#Top:ffbar2ttbar(s:gmZ) = on       ! Scatterings f fbar → t tbar by s-channel exchange of a gamma^*/Z^0 boson.
+#Top:ffbar2tqbar(s:W) = on         ! Scatterings f fbar' → t q'' by s-channel exchange of a W^+- boson.
+
+! Example 2: Z0 production; should set mMin.
+#WeakSingleBoson:ffbar2gmZ = on    ! f fbar -> gamma*/Z0
+#PhaseSpace:mHatMin = 50.
+
+! Example 3: gauge boson pair production; set pTmin (default).
+WeakDoubleBoson:ffbar2ZW = on      ! f fbar -> Z0 W+-
+WeakDoubleBoson:ffbar2WW = on      ! f fbar -> W+ W-
+WeakDoubleBoson:ffbar2gmZgmZ = on  ! f fbar' → gamma^*/Z^0 gamma^*/Z^0
+PhaseSpace:pTHatMin = 20.          ! minimal pT scale in process
+
+! see http://home.thep.lu.se/~torbjorn/pythia82html/ProcessSelection.html for further process selections.
+
+! 5) Switch on/off the key event generation steps.
+#PartonLevel:ISR = off             ! no initial-state radiation
+#PartonLevel:FSR = off             ! no final-state radiation
+#HadronLevel:Hadronize = off       ! no hadronization
+#HadronLevel:Decay = off           ! no decays
+
+! 6) Other settings. Can be expanded as desired.
+#ParticleDecays:limitTau0 = on     ! set long-lived particle stable ...
+#ParticleDecays:tau0Max = 10       ! ... if c*tau0 > 10 mm
