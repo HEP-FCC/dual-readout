@@ -4,6 +4,7 @@
 #include "HepMC3/Print.h"
 #include "HepMC3/WriterRootTree.h"
 #include "Pythia8ToHepMC3.h"
+#include "P8filter.h"
 
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/PseudoJet.hh"
@@ -53,19 +54,23 @@ int main(int argc, char* argv[]) {
   // Extract settings to be used in the main program.
   int    nEvent    = pythia.mode("Main:numberOfEvents");
   int    nAbort    = pythia.mode("Main:timesAllowErrors");
+  double etaMax    = pythia.parm("Main:spareParm1");
+  double thres     = pythia.parm("Main:spareParm2");
+  bool   useFilter = pythia.flag("Main:spareFlag1");
 
   // Initialization.
   pythia.init();
 
   fjInterface.init(rootOutput.m_tree,"GenJets");
+  P8filter filter(useFilter, etaMax, thres);
 
   // FastJet
   std::vector<fastjet::PseudoJet> fjInputs;
 
   // Begin event loop.
   int iAbort = 0;
-  for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
-
+  int numStored = 0;
+  while ( numStored != nEvent ) {
     // Generate event.
     if (!pythia.next()) {
 
@@ -80,6 +85,10 @@ int main(int argc, char* argv[]) {
       cout << " Event generation aborted prematurely, owing to error!\n";
       break;
     }
+
+    bool passed = filter.filter(pythia.event, pythia.info);
+
+    if ( !passed ) continue;
 
     // Construct new empty HepMC event and fill it.
     // Units will be as chosen for HepMC build, but can be changed
@@ -115,13 +124,15 @@ int main(int argc, char* argv[]) {
     delete hepmcevt;
 
     // List first few events.
-    if (iEvent < 1) {
+    if (numStored < 1) {
       event.list(true);
       // Also list junctions.
       event.listJunctions();
     }
+    numStored++;
   // End of event loop. Statistics.
   }
+
   rootOutput.close();
   pythia.stat();
 

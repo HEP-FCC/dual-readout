@@ -28,6 +28,7 @@ int main(int argc, char* argv[]) {
   TString filename = argv[1];
   float low = std::stof(argv[2]);
   float high = std::stof(argv[3]);
+  float cen = std::stof(argv[4]);
 
   gStyle->SetOptFit(1);
 
@@ -39,6 +40,13 @@ int main(int argc, char* argv[]) {
   tE_S->Sumw2(); tE_S->SetLineColor(kRed); tE_S->SetLineWidth(2);
   TH1F* tE_DR = new TH1F("E_DR","Dual-readout corrected Energy;GeV;Evt",100,2.*low,2.*high);
   tE_DR->Sumw2(); tE_DR->SetLineColor(kBlack); tE_DR->SetLineWidth(2);
+  TH1F* tP_leak = new TH1F("Pleak","Momentum leak;MeV;Evt",100,0.,1000.*high);
+  tP_leak->Sumw2(); tP_leak->SetLineWidth(2);
+  TH1F* tP_leak_nu = new TH1F("Pleak_nu","Neutrino energy leak;MeV;Evt",100,0.,1000.*high);
+  tP_leak_nu->Sumw2(); tP_leak_nu->SetLineWidth(2);
+
+  TH1F* tE_tot = new TH1F("Etot","Total energy;GeV;Evt",100,2.*low,2.*high);
+  tE_tot->Sumw2(); tE_tot->SetLineWidth(2);
 
   TH1F* tE_Sjets = new TH1F("E_Sjets","Energy of Scint cluster;GeV;nJets",100,low,high);
   tE_Sjets->Sumw2(); tE_Sjets->SetLineColor(kRed); tE_Sjets->SetLineWidth(2);
@@ -46,18 +54,8 @@ int main(int argc, char* argv[]) {
   tE_Cjets->Sumw2(); tE_Cjets->SetLineColor(kBlue); tE_Cjets->SetLineWidth(2);
   TH1F* tE_GenJets = new TH1F("E_GenJets","Energy of GenJets;GeV;nJets",100,low,high);
   tE_GenJets->Sumw2(); tE_GenJets->SetLineColor(kBlack); tE_GenJets->SetLineWidth(2);
-
   TH1F* tE_DRjets = new TH1F("E_DRjets","Energy of DR corrected cluster;GeV;nJets",100,low,high);
   tE_DRjets->Sumw2(); tE_DRjets->SetLineColor(kBlack); tE_DRjets->SetLineWidth(2);
-  TH1F* tE_diffTruth = new TH1F("E_diffTruth","E_DR - Edep;GeV;Evt",100,-high/2.,high/2.);
-  tE_diffTruth->Sumw2(); tE_diffTruth->SetLineColor(kBlack); tE_diffTruth->SetLineWidth(2);
-
-  TH1F* tdR_jets = new TH1F("dR_jets","#Delta R between S & C jets;#Delta R;nJets",100,0.,5.);
-  tdR_jets->Sumw2(); tdR_jets->SetLineWidth(2);
-  TH1F* tE_tot = new TH1F("Etot","Total energy;GeV;Evt",100,2.*low,2.*high);
-  tE_tot->Sumw2(); tE_tot->SetLineWidth(2);
-  TH1F* tE_leak = new TH1F("Eleak","Energy leak;MeV;Evt",100,0.,1000.*high/2.);
-  tE_leak->Sumw2(); tE_leak->SetLineWidth(2);
 
   RootInterface<RecoInterface::RecoEventData>* recoInterface = new RootInterface<RecoInterface::RecoEventData>(std::string(filename)+".root");
   recoInterface->set("Reco","RecoEventData");
@@ -76,7 +74,7 @@ int main(int argc, char* argv[]) {
   // fastjetInterface fjGen;
   // fjGen.set(reader.m_tree,"GenJets");
 
-  DRsimInterface::DRsimTimeStruct tmp;
+  int nLeak = 0;
   std::vector<float> E_Ss,E_Cs;
 
   unsigned int entries = recoInterface->entries();
@@ -108,9 +106,23 @@ int main(int argc, char* argv[]) {
       fjInputs_G.push_back( fastjet::PseudoJet(mom.px(),mom.py(),mom.pz(),mom.e()) );
     }
 
-    float Eleak = 0.;
+    float Pleak = 0.;
+    float Eleak_nu = 0.;
     for (auto leak : drEvt.leaks) {
-      Eleak += leak.E;
+      TLorentzVector leak4vec;
+      leak4vec.SetPxPyPzE(leak.px,leak.py,leak.pz,leak.E);
+      if ( std::abs(leak.pdgId)==12 || std::abs(leak.pdgId)==14 || std::abs(leak.pdgId)==16 ) {
+        Eleak_nu += leak4vec.P();
+      } else {
+        Pleak += leak4vec.P();
+      }
+    }
+    tP_leak->Fill(Pleak);
+    tP_leak_nu->Fill(Eleak_nu);
+
+    if (Pleak > 2.*1000.*0.1*cen) {
+      nLeak++;
+      continue;
     }
 
     // std::vector<fastjetInterface::fastjetData> fjTS;
@@ -150,48 +162,63 @@ int main(int argc, char* argv[]) {
 
     tEdep->Fill(Edep);
     tE_tot->Fill(Etot);
-    tE_leak->Fill(Eleak);
 
     tE_C->Fill(evt.E_C);
     tE_S->Fill(evt.E_S);
     tE_DR->Fill(evt.E_DR);
-    tE_diffTruth->Fill(evt.E_DR-Edep/1000.);
 
-    tE_Sjets->Fill(fjFS.at(0).E);
-    tE_Cjets->Fill(fjFC.at(0).E);
-    tE_GenJets->Fill(fjG.at(0).E);
+    auto firstS = fjFS.at(0);
+    auto firstC = fjFC.at(0);
+    auto firstG = fjG.at(0);
 
     TLorentzVector firstS4vec, firstC4vec, firstG4vec;
-    firstS4vec.SetPxPyPzE(fjFS.at(0).px,fjFS.at(0).py,fjFS.at(0).pz,fjFS.at(0).E);
-    firstC4vec.SetPxPyPzE(fjFC.at(0).px,fjFC.at(0).py,fjFC.at(0).pz,fjFC.at(0).E);
-    firstG4vec.SetPxPyPzE(fjG.at(0).px,fjG.at(0).py,fjG.at(0).pz,fjG.at(0).E);
+    firstS4vec.SetPxPyPzE(firstS.px,firstS.py,firstS.pz,firstS.E);
+    firstC4vec.SetPxPyPzE(firstC.px,firstC.py,firstC.pz,firstC.E);
+    firstG4vec.SetPxPyPzE(firstG.px,firstG.py,firstG.pz,firstG.E);
 
     auto secondS = functions::findSecondary(fjFS,dR);
     auto secondC = functions::findSecondary(fjFC,dR);
     auto secondG = functions::findSecondary(fjG,dR);
-
-    tE_Sjets->Fill(secondS.E);
-    tE_Cjets->Fill(secondC.E);
-    tE_GenJets->Fill(secondG.E);
 
     TLorentzVector secondS4vec, secondC4vec, secondG4vec;
     secondS4vec.SetPxPyPzE(secondS.px,secondS.py,secondS.pz,secondS.E);
     secondC4vec.SetPxPyPzE(secondC.px,secondC.py,secondC.pz,secondC.E);
     secondG4vec.SetPxPyPzE(secondG.px,secondG.py,secondG.pz,secondG.E);
 
+    if (firstG.E < (0.9*cen)) continue;
+    if (secondG.E < (0.9*cen)) continue;
+
+    tE_Sjets->Fill(firstS.E);
+    tE_Cjets->Fill(firstC.E);
+    tE_GenJets->Fill(firstG.E);
+
+    tE_Sjets->Fill(secondS.E);
+    tE_Cjets->Fill(secondC.E);
+    tE_GenJets->Fill(secondG.E);
+
     float E_DRjets1, E_DRjets2;
     if ( secondS4vec.DeltaR(secondC4vec) < 0.1 && firstS4vec.DeltaR(firstC4vec) < 0.1 ) {
-      E_DRjets1 = functions::E_DR(fjFC.at(0).E,fjFS.at(0).E);
+      E_DRjets1 = functions::E_DR(firstC.E,firstS.E);
       E_DRjets2 = functions::E_DR(secondC.E,secondS.E);
 
-      tE_DRjets->Fill(E_DRjets1); E_Ss.push_back(fjFS.at(0).E); E_Cs.push_back(fjFC.at(0).E);
-      tE_DRjets->Fill(E_DRjets2); E_Ss.push_back(secondS.E); E_Cs.push_back(secondC.E);
-    } else if ( secondS4vec.DeltaR(firstC4vec) < 0.1 && firstS4vec.DeltaR(secondC4vec) < 0.1 ) {
-      E_DRjets2 = functions::E_DR(fjFC.at(0).E,secondS.E);
-      E_DRjets1 = functions::E_DR(secondC.E,fjFS.at(0).E);
+      tE_DRjets->Fill(E_DRjets1);
+      tE_DRjets->Fill(E_DRjets2);
 
-      tE_DRjets->Fill(E_DRjets1); E_Ss.push_back(fjFS.at(0).E); E_Cs.push_back(fjFC.at(0).E);
-      tE_DRjets->Fill(E_DRjets2); E_Ss.push_back(secondS.E); E_Cs.push_back(secondC.E);
+      E_Ss.push_back(firstS.E);
+      E_Cs.push_back(firstC.E);
+      E_Ss.push_back(secondS.E);
+      E_Cs.push_back(secondC.E);
+    } else if ( secondS4vec.DeltaR(firstC4vec) < 0.1 && firstS4vec.DeltaR(secondC4vec) < 0.1 ) {
+      E_DRjets2 = functions::E_DR(firstC.E,secondS.E);
+      E_DRjets1 = functions::E_DR(secondC.E,firstS.E);
+
+      tE_DRjets->Fill(E_DRjets1);
+      tE_DRjets->Fill(E_DRjets2);
+
+      E_Ss.push_back(firstS.E);
+      E_Cs.push_back(firstC.E);
+      E_Ss.push_back(secondS.E);
+      E_Cs.push_back(secondC.E);
     } else continue;
   } // event loop
 
@@ -203,7 +230,6 @@ int main(int argc, char* argv[]) {
 
   tEdep->Draw("Hist"); c->SaveAs(filename+"_Edep.png");
   tE_tot->Draw("Hist"); c->SaveAs(filename+"_Etot.png");
-  tE_leak->Draw("Hist"); c->SaveAs(filename+"_Eleak.png");
 
   c->cd();
   tE_S->Draw("Hist"); c->Update();
@@ -223,10 +249,6 @@ int main(int argc, char* argv[]) {
   TF1* grE_DR = new TF1("Efit","gaus",2.*low,2.*high); grE_DR->SetLineColor(kBlack);
   tE_DR->SetOption("p"); tE_DR->Fit(grE_DR,"R+&same");
   tE_DR->Draw(""); c->SaveAs(filename+"_Ecorr.png");
-
-  TF1* grE_diffTruth = new TF1("EdiffTruthFit","gaus",-high/2.,high/2.); grE_diffTruth->SetLineColor(kBlack);
-  tE_diffTruth->SetOption("p"); tE_diffTruth->Fit(grE_diffTruth,"R+&same");
-  tE_diffTruth->Draw(""); c->SaveAs(filename+"_EdiffTruth.png");
 
   tE_Sjets->Draw(""); c->Update();
   TPaveStats* statsE_Sjets = (TPaveStats*)c->GetPrimitive("stats");
@@ -252,12 +274,16 @@ int main(int argc, char* argv[]) {
   tE_DRjets->Draw("");
   c->SaveAs(filename+"_EDRjets.png");
 
-  TGraph* grSvsC = new TGraph(entries,&(E_Ss[0]),&(E_Cs[0]));
+  c->SetLogy(1);
+  tP_leak->Draw("Hist"); c->SaveAs(filename+"_Pleak.png");
+  tP_leak_nu->Draw("Hist"); c->SaveAs(filename+"_Pleak_nu.png");
+  c->SetLogy(0);
+
+  TGraph* grSvsC = new TGraph(entries-nLeak,&(E_Ss[0]),&(E_Cs[0]));
   grSvsC->SetTitle("SvsC;E_S;E_C");
   grSvsC->SetMarkerSize(0.5); grSvsC->SetMarkerStyle(20);
-  grSvsC->GetXaxis()->SetRangeUser(0.,high);
+  grSvsC->GetXaxis()->SetLimits(0.,high);
   grSvsC->GetYaxis()->SetRangeUser(0.,high);
-  grSvsC->SetMaximum(high);
-  grSvsC->SetMinimum(0.);
   grSvsC->Draw("ap");
+  c->SaveAs(filename+"_SvsC.png");
 }
