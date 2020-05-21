@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
 
     for (auto tower = drEvt.towers.begin(); tower != drEvt.towers.end(); ++tower) {
       for (auto sipm = tower->SiPMs.begin(); sipm != tower->SiPMs.end(); ++sipm) {
-        if ( RecoInterface::IsCerenkov(sipm->x,sipm->y) ) {
+        if ( DRsimInterface::IsCerenkov(sipm->x,sipm->y) ) {
           tNhit_C->Fill(sipm->count);
 
           for (const auto timepair : sipm->timeStruct) {
