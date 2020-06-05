@@ -105,7 +105,6 @@ void DRsimPrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
     fDirection.rotateZ(fPhi);
 
     fParticleGun->SetParticleMomentumDirection(fDirection);
-    fParticleGun->GeneratePrimaryVertex(event);
 
     G4AutoLock lock(&DRsimPrimaryGeneratorMutex);
     fParticleGun->GeneratePrimaryVertex(event);
