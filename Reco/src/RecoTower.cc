@@ -7,8 +7,8 @@
 
 RecoTower::RecoTower() {
   fFiber = new RecoFiber();
-  fSF_C = 0.886;
-  fSF_S = 0.8815;
+  fSF_C = 1.;
+  fSF_S = 1.;
 }
 
 RecoTower::~RecoTower() {
