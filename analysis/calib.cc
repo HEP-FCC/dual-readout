@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
         for(auto TmpItr = timeItr.begin(); TmpItr != timeItr.end(); ++TmpItr) {
           auto timeData = *TmpItr;
-          if(RecoInterface::IsCerenkov(sipmData[i].x, sipmData[i].y)) {
+          if(DRsimInterface::IsCerenkov(sipmData[i].x, sipmData[i].y)) {
             tCtime->Fill((timeData.first.first + timeData.first.second)/2, timeData.second);
             if(fEta == iEta && fPhi == iPhi) Ctime->Fill((timeData.first.first + timeData.first.second)/2, timeData.second);
             if (timeData.first.first < Cthres) {
