@@ -32,7 +32,7 @@ void RecoTower::readCSV(std::string filename) {
 void RecoTower::reconstruct(const DRsimInterface::DRsimTowerData& tower, RecoInterface::RecoEventData& evt) {
   RecoInterface::RecoTowerData recoTower(tower);
 
-  if (getAbsITheta(recoTower.theta.first) > fCalibs.size()) {
+  if (getAbsITheta(recoTower.theta.first) > (int)fCalibs.size()) {
     fData = recoTower;
     return;
   }
