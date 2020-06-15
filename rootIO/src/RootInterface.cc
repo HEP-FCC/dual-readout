@@ -31,7 +31,7 @@ void RootInterface<T>::set(const std::string& name, const std::string& title) {
 
 template <typename T>
 void RootInterface<T>::fill(const T* evt) {
-  *fEventData = *evt;
+  *fEventData = std::move(*evt);
   fTree->Fill();
 }
 

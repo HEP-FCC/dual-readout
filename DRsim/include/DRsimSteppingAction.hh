@@ -18,17 +18,18 @@ public:
 
 private:
   DRsimEventAction* fEventAction;
-  DRsimInterface::DRsimEdepData fEdep;
   DRsimInterface::DRsimLeakageData fLeak;
-  
+  bool fIsR;
+  bool fIsB;
+
   G4VPhysicalVolume* GetMotherTower(G4TouchableHandle touchable) { return touchable->GetVolume(touchable->GetHistoryDepth()-1); }
 
   G4int GetTowerITheta(G4String towerName) {
     G4int towerITheta_ = std::stoi(towerName.substr(3));
-    bool IsR = (towerName.find("R")==std::string::npos) ? false : true;
-    bool IsB = (towerName.find("B")==std::string::npos) ? false : true;
-    if(!IsB) towerITheta_ += 52;
-    if(!IsR) towerITheta_ = -towerITheta_-1;
+    fIsR = (towerName.find("R")==std::string::npos) ? false : true;
+    fIsB = (towerName.find("B")==std::string::npos) ? false : true;
+    if(!fIsB) towerITheta_ += 52;
+    if(!fIsR) towerITheta_ = -towerITheta_-1;
 
     return towerITheta_;
   }

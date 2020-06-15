@@ -28,10 +28,16 @@ int DRsimDetectorConstruction::sNumBarrel = 52;
 int DRsimDetectorConstruction::sNumEndcap = 40;
 int DRsimDetectorConstruction::sNumZRot = 283;
 
+DRsimDetectorConstruction* DRsimDetectorConstruction::fInstance = 0;
+
 DRsimDetectorConstruction::DRsimDetectorConstruction()
 : G4VUserDetectorConstruction(), fMessenger(0), fMaterials(NULL) {
   DefineCommands();
   DefineMaterials();
+
+  if (fInstance==0) {
+    fInstance = this;
+  }
 
   clad_C_rMin = 0.49*mm;
   clad_C_rMax = 0.50*mm;
@@ -81,6 +87,10 @@ DRsimDetectorConstruction::~DRsimDetectorConstruction() {
   delete fVisAttrBlue;
   delete fVisAttrGray;
   delete fVisAttrGreen;
+}
+
+DRsimDetectorConstruction* DRsimDetectorConstruction::GetInstance() {
+  return fInstance;
 }
 
 void DRsimDetectorConstruction::DefineMaterials() {
@@ -436,4 +446,11 @@ void DRsimDetectorConstruction::fiberEndcap(G4int i, G4double deltatheta_, G4Log
       fiberLogical_[i].at(j)->SetVisAttributes(fVisAttrOrange);
     }
   }
+}
+
+DRsimInterface::hitXY DRsimDetectorConstruction::findSiPMXY(G4int SiPMnum, DRsimInterface::hitXY towerXY) {
+  int x = SiPMnum/towerXY.second;
+  int y = SiPMnum%towerXY.second;
+
+  return std::make_pair(x,y);
 }
