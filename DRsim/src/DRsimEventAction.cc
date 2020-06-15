@@ -141,17 +141,35 @@ void DRsimEventAction::fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc) {
   fEventData->GenPtcs.push_back(GenData);
 }
 
-void DRsimEventAction::fillEdeps(DRsimInterface::DRsimEdepData edepData) {
+void DRsimEventAction::fillEdeps(DRsimInterface::DRsimEdepData& edepData, DRsimInterface::DRsimEdepFiberData& fiberData, bool IsFiber) {
   toweriTiP towerTP = std::make_pair(edepData.iTheta,edepData.iPhi);
   auto towerIter = fEdepMap.find(towerTP);
 
   if ( towerIter==fEdepMap.end() ) {
+    if (IsFiber) edepData.fibers.push_back(fiberData);
     fEdepMap.insert(std::make_pair(towerTP,edepData));
   } else {
     towerIter->second.Edep += edepData.Edep;
     towerIter->second.EdepEle += edepData.EdepEle;
     towerIter->second.EdepGamma += edepData.EdepGamma;
     towerIter->second.EdepCharged += edepData.EdepCharged;
+
+    if (IsFiber) {
+      bool found = false;
+      for (auto theFiber : towerIter->second.fibers) {
+        if (theFiber.fiberNum==fiberData.fiberNum) {
+          theFiber.Edep += fiberData.Edep;
+          theFiber.EdepEle += fiberData.EdepEle;
+          theFiber.EdepGamma += fiberData.EdepGamma;
+          theFiber.EdepCharged += fiberData.EdepCharged;
+          found = true;
+
+          break;
+        }
+      }
+
+      if (!found) towerIter->second.fibers.push_back(fiberData);
+    }
   }
 }
 

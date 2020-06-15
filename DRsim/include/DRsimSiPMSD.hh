@@ -41,7 +41,6 @@ private:
 
   DRsimInterface::hitRange findWavRange(G4double en);
   DRsimInterface::hitRange findTimeRange(G4double stepTime);
-  DRsimInterface::hitXY findSiPMXY(G4int SiPMnum, DRsimInterface::hitXY towerXY);
 };
 
 #endif

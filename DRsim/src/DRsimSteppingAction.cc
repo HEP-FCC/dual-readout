@@ -1,4 +1,5 @@
 #include "DRsimSteppingAction.hh"
+#include "DRsimDetectorConstruction.hh"
 
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTypes.hh"
@@ -50,18 +51,48 @@ void DRsimSteppingAction::UserSteppingAction(const G4Step* step) {
 
     if ( matName=="G4_Galactic" || matName=="Air" ) return;
 
+    DRsimInterface::DRsimEdepData theEdep = DRsimInterface::DRsimEdepData();
+
     G4VPhysicalVolume* motherTower = GetMotherTower(theTouchable);
-    fEdep.iTheta = GetTowerITheta(motherTower->GetName());
-    fEdep.iPhi = GetTowerIPhi(motherTower);
+    auto towerName = motherTower->GetName();
+    theEdep.iTheta = GetTowerITheta(towerName);
+    theEdep.iPhi = GetTowerIPhi(motherTower);
 
     G4double pdgCharge = particle->GetPDGCharge();
 
-    fEdep.Edep = step->GetTotalEnergyDeposit();
-    fEdep.EdepEle = (std::abs(pdgID)==11) ? fEdep.Edep : 0.;
-    fEdep.EdepGamma = (std::abs(pdgID)==22) ? fEdep.Edep : 0.;
-    fEdep.EdepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? fEdep.Edep : 0.;
+    theEdep.Edep = step->GetTotalEnergyDeposit();
+    theEdep.EdepEle = (std::abs(pdgID)==11) ? theEdep.Edep : 0.;
+    theEdep.EdepGamma = (std::abs(pdgID)==22) ? theEdep.Edep : 0.;
+    theEdep.EdepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? theEdep.Edep : 0.;
 
-    if ( fEdep.Edep > 0. ) fEventAction->fillEdeps(fEdep);
+    bool IsFiber = false;
+    DRsimInterface::DRsimEdepFiberData theFiber = DRsimInterface::DRsimEdepFiberData();
+
+    if ( (matName=="Polystyrene" || matName=="PMMA") && theTouchable->GetHistoryDepth()==3 ) {
+      IsFiber = true;
+
+      auto theDetector = DRsimDetectorConstruction::GetInstance();
+      DRsimInterface::DRsimTowerProperty theTower;
+      G4int towerITheta = std::stoi(towerName.substr(3));
+
+      if (fIsR && fIsB) theTower = theDetector->GetTowerPropBR().at(towerITheta);
+      else if (!fIsR && fIsB) theTower = theDetector->GetTowerPropBL().at(towerITheta);
+      else if (fIsR && !fIsB) theTower = theDetector->GetTowerPropER().at(towerITheta);
+      else if (!fIsR && !fIsB) theTower = theDetector->GetTowerPropEL().at(towerITheta);
+
+      theFiber.fiberNum = theTouchable->GetCopyNumber();
+      auto fiberXY = DRsimDetectorConstruction::findSiPMXY(theFiber.fiberNum, theTower.towerXY);
+      theFiber.x = fiberXY.first;
+      theFiber.y = fiberXY.second;
+      theFiber.IsCerenkov = (matName=="Polystyrene") ? false : true;
+
+      theFiber.Edep = step->GetTotalEnergyDeposit();
+      theFiber.EdepEle = (std::abs(pdgID)==11) ? theFiber.Edep : 0.;
+      theFiber.EdepGamma = (std::abs(pdgID)==22) ? theFiber.Edep : 0.;
+      theFiber.EdepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? theFiber.Edep : 0.;
+    }
+
+    if ( theEdep.Edep > 0. ) fEventAction->fillEdeps(theEdep,theFiber,IsFiber);
   }
 
   return;

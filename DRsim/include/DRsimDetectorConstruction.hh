@@ -33,10 +33,27 @@ public:
   virtual G4VPhysicalVolume* Construct();
   virtual void ConstructSDandField();
 
+  static DRsimDetectorConstruction* GetInstance();
+
   static int sNumBarrel;
   static int sNumEndcap;
   static int sNumZRot;
   static double sTowerH;
+
+private:
+  DRsimInterface::hitXY fTowerXY;
+  std::vector<DRsimInterface::DRsimTowerProperty> fTowerBL;
+  std::vector<DRsimInterface::DRsimTowerProperty> fTowerBR;
+  std::vector<DRsimInterface::DRsimTowerProperty> fTowerEL;
+  std::vector<DRsimInterface::DRsimTowerProperty> fTowerER;
+
+public:
+  const std::vector<DRsimInterface::DRsimTowerProperty>& GetTowerPropBL() { return fTowerBL; }
+  const std::vector<DRsimInterface::DRsimTowerProperty>& GetTowerPropBR() { return fTowerBR; }
+  const std::vector<DRsimInterface::DRsimTowerProperty>& GetTowerPropEL() { return fTowerEL; }
+  const std::vector<DRsimInterface::DRsimTowerProperty>& GetTowerPropER() { return fTowerER; }
+
+  static DRsimInterface::hitXY findSiPMXY(G4int SiPMnum, DRsimInterface::hitXY towerXY);
 
 private:
   void DefineCommands();
@@ -53,6 +70,8 @@ private:
     G4LogicalVolume* PMTcathLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[], std::vector<DRsimInterface::DRsimTowerProperty>& towerProps);
 
   void fiberEndcap(G4int i, G4double deltatheta, G4LogicalVolume* towerLogical[], std::vector<G4LogicalVolume*> fiberLogical[], std::vector<G4LogicalVolume*> fiberLogical_[]);
+
+  static DRsimDetectorConstruction* fInstance;
 
   G4bool checkOverlaps;
   G4GenericMessenger* fMessenger;
@@ -138,12 +157,6 @@ private:
   vector<G4LogicalVolume*> fiberLogical_ER_[40];
   vector<G4LogicalVolume*> fiberLogical_EL[40];
   vector<G4LogicalVolume*> fiberLogical_EL_[40];
-
-  DRsimInterface::hitXY fTowerXY;
-  std::vector<DRsimInterface::DRsimTowerProperty> fTowerBL;
-  std::vector<DRsimInterface::DRsimTowerProperty> fTowerBR;
-  std::vector<DRsimInterface::DRsimTowerProperty> fTowerEL;
-  std::vector<DRsimInterface::DRsimTowerProperty> fTowerER;
 
   G4double clad_C_rMin;
   G4double clad_C_rMax;

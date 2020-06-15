@@ -55,8 +55,22 @@ public:
     std::vector<DRsimSiPMData> SiPMs;
   };
 
+  struct DRsimEdepFiberData {
+    DRsimEdepFiberData();
+    virtual ~DRsimEdepFiberData() {};
+
+    int fiberNum;
+    int x;
+    int y;
+    bool IsCerenkov;
+    float Edep;
+    float EdepEle;
+    float EdepGamma;
+    float EdepCharged;
+  };
+
   struct DRsimEdepData {
-    DRsimEdepData() {};
+    DRsimEdepData();
     virtual ~DRsimEdepData() {};
 
     float Edep;
@@ -65,6 +79,7 @@ public:
     float EdepCharged;
     int iTheta;
     int iPhi;
+    std::vector<DRsimEdepFiberData> fibers;
   };
 
   struct DRsimLeakageData {

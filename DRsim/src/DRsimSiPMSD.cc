@@ -59,7 +59,7 @@ G4bool DRsimSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
     hit->SetTowerInnerR(fInnerR);
     hit->SetTowerH(fTowerH);
     hit->SetTowerDTheta(fDTheta);
-    hit->SetSiPMXY(findSiPMXY(SiPMnum,fTowerXY));
+    hit->SetSiPMXY(DRsimDetectorConstruction::findSiPMXY(SiPMnum,fTowerXY));
     hit->SetSiPMpos(step->GetPostStepPoint()->GetTouchableHandle()->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0.,0.,0.)));
 
     fHitCollection->insert(hit);
@@ -109,11 +109,4 @@ DRsimInterface::hitRange DRsimSiPMSD::findTimeRange(G4double stepTime) {
   else if (i==fTimeBin+1) return std::make_pair(fTimeEnd,99999.);
 
   return std::make_pair( fTimeStart+(float)(i-1)*fTimeStep, fTimeStart+(float)i*fTimeStep );
-}
-
-DRsimInterface::hitXY DRsimSiPMSD::findSiPMXY(G4int SiPMnum, DRsimInterface::hitXY towerXY) {
-  int x = SiPMnum%towerXY.first;
-  int y = SiPMnum/towerXY.first;
-
-  return std::make_pair(x,y);
 }
