@@ -20,8 +20,12 @@ namespace ddDRcalo {
     void setDescription(dd4hep::Detector* description) { fDescription = description; }
 
     void construct();
+    bool IsCerenkov(int col, int row);
+    std::pair<int,int> GetColRowFromCopyNo(int copyNo, int numx);
 
   private:
+    void implementFibers(dd4hep::Volume& tower, dd4hep::Trap& trap);
+
     xml_comp_t* fX_towerDim;
     dd4hep::Assembly* fExperimentalHall;
     dd4hep::Detector* fDescription;

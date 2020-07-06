@@ -20,22 +20,21 @@ namespace ddDRcalo {
 
     auto paramBarrel = DRparamBarrel();
     double currentTheta = 0.;
-    paramBarrel.SetIsRHS(true);
     paramBarrel.SetInnerX(x_towerDim.rmin());
     paramBarrel.SetTowerH(x_towerDim.height());
     paramBarrel.SetNumZRot(x_towerDim.nphi());
     paramBarrel.SetPMTT(0.);
 
-    DRconstructor constructor;
+    auto constructor = DRconstructor();
     constructor.setXTowerDim(&x_towerDim);
     constructor.setExpHall(&experimentalHall);
     constructor.setDRparam(&paramBarrel);
     constructor.setDescription(&description);
 
+    paramBarrel.SetIsRHS(true);
     constructor.construct(); // Barrel right
 
     paramBarrel.SetIsRHS(false);
-
     constructor.construct(); // Barrel left
 
     dd4hep::PlacedVolume hallPlace = description.pickMotherVolume(drDet).placeVolume(experimentalHall);
