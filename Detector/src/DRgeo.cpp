@@ -17,19 +17,28 @@ namespace ddDRcalo {
     dd4hep::Assembly experimentalHall("hall");
     // Get the dimensions defined in the xml-tree
     xml_comp_t x_towerDim ( x_det.child( _U(trap) ) );
+    xml_comp_t x_sipmDim ( x_det.child( _Unicode(sipmDim) ) );
+
+    dd4hep::OpticalSurfaceManager surfMgr = description.surfaceManager();
+    dd4hep::OpticalSurface sipmSurfProp = surfMgr.opticalSurface("/world/"+name+"#SiPMSurf");
+    dd4hep::OpticalSurface filterSurfProp = surfMgr.opticalSurface("/world/"+name+"#FilterSurf");
 
     auto paramBarrel = DRparamBarrel();
     double currentTheta = 0.;
     paramBarrel.SetInnerX(x_towerDim.rmin());
     paramBarrel.SetTowerH(x_towerDim.height());
     paramBarrel.SetNumZRot(x_towerDim.nphi());
-    paramBarrel.SetPMTT(0.);
+    paramBarrel.SetSipmHeight(x_sipmDim.height());
 
     auto constructor = DRconstructor();
     constructor.setXTowerDim(&x_towerDim);
     constructor.setExpHall(&experimentalHall);
     constructor.setDRparam(&paramBarrel);
     constructor.setDescription(&description);
+    constructor.setXSipmDim(&x_sipmDim);
+    constructor.setDetElement(&drDet);
+    constructor.setSipmSurf(&sipmSurfProp);
+    constructor.setFilterSurf(&filterSurfProp);
 
     paramBarrel.SetIsRHS(true);
     constructor.construct(); // Barrel right

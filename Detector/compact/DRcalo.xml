@@ -493,14 +493,14 @@
   </properties>
 
   <surfaces>
-    <alt___opticalsurface name="SiPMSurf" finish="polished" model="glisur" type="dielectric_metal">
+    <opticalsurface name="/world/DRcaloBarrel#SiPMSurf" finish="polished" model="glisur" type="dielectric_metal">
       <property name="REFLECTIVITY" ref="refl_SiPM"/>
       <property name="EFFICIENCY" ref="eff_SiPM"/>
-    </alt___opticalsurface>
-    <alt___opticalsurface name="FilterSurf" finish="polished" model="glisur" type="dielectric_dielectric">
+    </opticalsurface>
+    <opticalsurface name="/world/DRcaloBarrel#FilterSurf" finish="polished" model="glisur" type="dielectric_dielectric">
       <property name="REFLECTIVITY" ref="filterRef"/>
       <property name="TRANSMITTANCE" ref="filterEff"/>
-    </alt___opticalsurface>
+    </opticalsurface>
   </surfaces>
 
   <!-- <include ref="DRmaterials.xml"/> -->
@@ -566,14 +566,23 @@
 
   <display>
     <vis name="TowerVis" alpha="1." r="0.7" g="0.4" b="0.1" showDaughters="true" visible="true"/>
-    <vis name="CerenVis" alpha="0.5" r="0.3" g="0.6" b="0.9" showDaughters="true" visible="true"/>
-    <vis name="ScintVis" alpha="0.5" r="1.0" g="0.8" b="0.1" showDaughters="true" visible="true"/>
-    <vis name="CladVis" alpha="0.5" r="0.0" g="0.5" b="0.5" showDaughters="true" visible="true"/>
+    <vis name="CerenVis" alpha="0.5" r="0.3" g="0.6" b="0.9" showDaughters="true" visible="false"/>
+    <vis name="ScintVis" alpha="0.5" r="1.0" g="0.8" b="0.1" showDaughters="true" visible="false"/>
+    <vis name="CladVis" alpha="0.5" r="0.0" g="0.5" b="0.5" showDaughters="true" visible="false"/>
+    <vis name="GenericVis" alpha="0.8" r="0.5" g="0.5" b="0.5" showDaughters="true" visible="true"/>
+    <vis name="GlassVis" alpha="0.5" r="0.0" g="0.1" b="0.9" showDaughters="true" visible="true"/>
+    <vis name="WaferVis" alpha="1." r="0.0" g="0.9" b="0.2" showDaughters="true" visible="true"/>
+    <vis name="filterVis" alpha="0.5" r="0.9" g="0.8" b="0.1" showDaughters="true" visible="true"/>
   </display>
 
   <!-- this is where we actually define our detector: -->
   <detectors>
-    <detector id="1" name="towerDim" type="ddDRcalo">
+    <detector id="1" name="DRcaloBarrel" type="ddDRcalo">
+      <sipmDim height="0.3*mm" material="PolyvinylChloride" vis="GenericVis">
+        <sipmGlass height="0.28*mm" material="DR_PyrexGlass" vis="GlassVis"/>
+        <sipmWafer height="0.01*mm" material="Silicon" vis="WaferVis"/>
+        <filter height="0.01*mm" material="Gelatin" vis="filterVis"/>
+      </sipmDim>
       <trap height="2.*m" rmin="1.8*m" nphi="283" material="Copper" vis="TowerVis" distance="1.5*mm" dx="1.2*mm">
         <cladC name="cladC" rmax="0.5*mm" rmin="0.49*mm" material="FluorinatedPolymer" vis="CladVis"/>
         <coreC name="coreC" rmax="0.5*mm" rmin="0.49*mm" material="PMMA" vis="CerenVis"/> <!--also cladS-->

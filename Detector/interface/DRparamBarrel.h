@@ -19,10 +19,11 @@ namespace ddDRcalo {
     void SetNumZRot(int num) { fNumZRot = num; fPhiZRot = 2*M_PI/(double)num; }
     void SetDeltaTheta(double theta) { fDeltaTheta = theta; }
     void SetThetaOfCenter(double theta) { fThetaOfCenter = theta; }
-    void SetPMTT(double PMTT) { fPMTT = PMTT; }
+    void SetSipmHeight(double SipmHeight) { fSipmHeight = SipmHeight; }
 
     bool GetIsRHS() { return fIsRHS; }
     double GetCurrentInnerR() { return fCurrentInnerR; }
+    double GetSipmHeight() { return fSipmHeight; }
     TVector3 GetV1() { return fV1; }
     TVector3 GetV2() { return fV2; }
     TVector3 GetV3() { return fV3; }
@@ -34,11 +35,12 @@ namespace ddDRcalo {
     double GetBl2() { return fV4.X()*std::tan(fPhiZRot/2.); }
     double GetTl2() { return fV2.X()*std::tan(fPhiZRot/2.); }
 
-    TVector3 GetTowerCenter(int numPhi);
-
-    TVector3 GetSipmLayerCenter(int numPhi);
+    dd4hep::RotationZYX GetRotationZYX(int numPhi);
+    dd4hep::Position GetTowerPos(int numPhi);
+    dd4hep::Position GetSipmLayerPos(int numPhi);
 
     dd4hep::Transform3D GetTransform3D(int numPhi);
+    dd4hep::Transform3D GetSipmTransform3D(int numPhi);
 
     void init();
 
@@ -56,7 +58,7 @@ namespace ddDRcalo {
     TVector3 fV2;
     TVector3 fV3;
     TVector3 fV4;
-    double fPMTT;
+    double fSipmHeight;
 
     double fInnerY;
     double fCurrentInnerHalf;
