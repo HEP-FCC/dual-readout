@@ -23,7 +23,7 @@ dd4hep_print("|++> Building ddDRcalo test")
 dd4hep_configure_output()
 
 include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/interface
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 dd4hep_add_plugin(ddDRcalo SOURCES src/*.cpp
