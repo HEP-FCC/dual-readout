@@ -22,6 +22,7 @@ namespace ddDRcalo {
     void setDetElement(dd4hep::DetElement* drDet) { fDetElement = drDet; }
     void setSipmSurf(dd4hep::OpticalSurface* sipmSurf) { fSipmSurf = sipmSurf; }
     void setFilterSurf(dd4hep::OpticalSurface* filterSurf) { fFilterSurf = filterSurf; }
+    void setSensDet(dd4hep::SensitiveDetector* sensDet) { fSensDet = sensDet; }
 
     void construct();
     bool IsCerenkov(int col, int row);
@@ -37,6 +38,7 @@ namespace ddDRcalo {
     dd4hep::Detector* fDescription;
     DRparamBarrel* fParamBarrel;
     dd4hep::DetElement* fDetElement;
+    dd4hep::SensitiveDetector* fSensDet;
     dd4hep::OpticalSurface* fSipmSurf;
     dd4hep::OpticalSurface* fFilterSurf;
 

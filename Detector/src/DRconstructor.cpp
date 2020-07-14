@@ -7,6 +7,7 @@ ddDRcalo::DRconstructor::DRconstructor() {
   fParamBarrel = nullptr;
   fDescription = nullptr;
   fDetElement = nullptr;
+  fSensDet = nullptr;
   fSipmSurf = nullptr;
   fFilterSurf = nullptr;
   fNumx = 0;
@@ -46,7 +47,7 @@ void ddDRcalo::DRconstructor::construct() {
 
     implementSipms(sipmLayerVol);
 
-    for (int nPhi = 0; nPhi < 1/*fX_towerDim->nphi()*/; nPhi++) {
+    for (int nPhi = 0; nPhi < 2/*fX_towerDim->nphi()*/; nPhi++) {
       dd4hep::PlacedVolume towerPhys = fExperimentalHall->placeVolume( towerVol, fTowerNoLR*fX_towerDim->nphi()+nPhi, fParamBarrel->GetTransform3D(nPhi) );
       towerPhys.addPhysVolID("tower",fTowerNoLR*fX_towerDim->nphi()+nPhi);
 
@@ -152,8 +153,13 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
     dd4hep::Box sipmWaferBox( sipmSize/2., sipmSize/2., x_wafer.height()/2. );
     dd4hep::Volume sipmWaferVol( "sipmWafer", sipmWaferBox, fDescription->material(x_wafer.materialStr()) );
     sipmWaferVol.setVisAttributes(*fDescription, x_wafer.visStr());
-    sipmEnvelopVol.placeVolume( sipmWaferVol, j, dd4hep::Position(0., 0., (fParamBarrel->GetSipmHeight()-x_wafer.height())/2.) );
+    dd4hep::PlacedVolume sipmWaferPlaced = sipmEnvelopVol.placeVolume( sipmWaferVol, j, dd4hep::Position(0., 0., (fParamBarrel->GetSipmHeight()-x_wafer.height())/2.) );
     dd4hep::SkinSurface(*fDescription, *fDetElement, "SiPMSurf_Tower"+std::to_string(fTowerNoLR)+"SiPM"+std::to_string(j), *fSipmSurf, sipmWaferVol);
+
+    if (x_wafer.isSensitive()) {
+      sipmWaferVol.setSensitiveDetector(*fSensDet);
+      sipmWaferPlaced.addPhysVolID("SiPM",j);
+    }
 
     if ( IsCerenkov(column,row) ) { //c channel
       dd4hep::Box sipmGlassBox( sipmSize/2., sipmSize/2., (x_glass.height()+x_filter.height())/2. );

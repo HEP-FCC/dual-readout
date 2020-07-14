@@ -563,7 +563,6 @@
     </material>
   </materials>
 
-
   <display>
     <vis name="TowerVis" alpha="1." r="0.7" g="0.4" b="0.1" showDaughters="true" visible="true"/>
     <vis name="CerenVis" alpha="0.5" r="0.3" g="0.6" b="0.9" showDaughters="true" visible="false"/>
@@ -577,10 +576,10 @@
 
   <!-- this is where we actually define our detector: -->
   <detectors>
-    <detector id="1" name="DRcaloBarrel" type="ddDRcalo">
+    <detector id="1" name="DRcaloBarrel" type="ddDRcalo" readout="DRcaloBarrelHits">
       <sipmDim height="0.3*mm" material="PolyvinylChloride" vis="GenericVis">
         <sipmGlass height="0.28*mm" material="DR_PyrexGlass" vis="GlassVis"/>
-        <sipmWafer height="0.01*mm" material="Silicon" vis="WaferVis"/>
+        <sipmWafer height="0.01*mm" material="Silicon" vis="WaferVis" sensitive="true"/>
         <filter height="0.01*mm" material="Gelatin" vis="filterVis"/>
       </sipmDim>
       <trap height="2.*m" rmin="1.8*m" nphi="283" material="Copper" vis="TowerVis" distance="1.5*mm" dx="1.2*mm">
@@ -649,9 +648,10 @@
     </detector>
   </detectors>
 
-  <!-- <readouts>
-    <readout name="BubbleDeviceHits">
-      <id>system:6,tank:2,bubble:2,x:12:-6,y:24:-6</id>
+  <readouts>
+    <readout name="DRcaloBarrelHits">
+      <segmentation type="NoSegmentation"/>
+      <id>system:1</id>
     </readout>
-  </readouts> -->
+  </readouts>
 </lccdd>

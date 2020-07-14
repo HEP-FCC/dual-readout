@@ -13,6 +13,7 @@ namespace ddDRcalo {
     std::string  name  = x_det.nameStr();
     // Create the detector element
     dd4hep::DetElement drDet( name, x_det.id() );
+    sensDet.setType("ddDRcalo");
     // Get the world volume
     dd4hep::Assembly experimentalHall("hall");
     // Get the dimensions defined in the xml-tree
@@ -39,6 +40,7 @@ namespace ddDRcalo {
     constructor.setDetElement(&drDet);
     constructor.setSipmSurf(&sipmSurfProp);
     constructor.setFilterSurf(&filterSurfProp);
+    constructor.setSensDet(&sensDet);
 
     paramBarrel.SetIsRHS(true);
     constructor.construct(); // Barrel right

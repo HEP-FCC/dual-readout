@@ -464,12 +464,12 @@
 </properties>
 
 <surfaces>
-  <alt___opticalsurface name="SiPMSurf" finish="polished" model="glisur" type="dielectric_metal">
+  <opticalsurface name="/world/DRcaloBarrel#SiPMSurf" finish="polished" model="glisur" type="dielectric_metal">
     <property name="REFLECTIVITY" ref="refl_SiPM"/>
     <property name="EFFICIENCY" ref="eff_SiPM"/>
-  </alt___opticalsurface>
-  <alt___opticalsurface name="FilterSurf" finish="polished" model="glisur" type="dielectric_dielectric">
+  </opticalsurface>
+  <opticalsurface name="/world/DRcaloBarrel#FilterSurf" finish="polished" model="glisur" type="dielectric_dielectric">
     <property name="REFLECTIVITY" ref="filterRef"/>
     <property name="TRANSMITTANCE" ref="filterEff"/>
-  </alt___opticalsurface>
+  </opticalsurface>
 </surfaces>
