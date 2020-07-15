@@ -13,7 +13,9 @@ namespace ddDRcalo {
     std::string  name  = x_det.nameStr();
     // Create the detector element
     dd4hep::DetElement drDet( name, x_det.id() );
-    sensDet.setType("ddDRcalo");
+    // set the sensitive detector type to the DD4hep calorimeter
+    dd4hep::xml::Dimension sensDetType = xmlElement.child(_Unicode(sensitive));
+    sensDet.setType(sensDetType.typeStr());
     // Get the world volume
     dd4hep::Assembly experimentalHall("hall");
     // Get the dimensions defined in the xml-tree

@@ -9,6 +9,7 @@ set(PYTHIA_DIR "$ENV{PYTHIA_DIR}")
 set(FASTJET_DIR "$ENV{FASTJET_DIR}")
 
 add_subdirectory(rootIO)
+add_subdirectory(Detector)
 add_subdirectory(DRsim)
 add_subdirectory(Gen)
 add_subdirectory(Reco)

@@ -576,7 +576,8 @@
 
   <!-- this is where we actually define our detector: -->
   <detectors>
-    <detector id="1" name="DRcaloBarrel" type="ddDRcalo" readout="DRcaloBarrelHits">
+    <detector id="1" name="DRcaloBarrel" type="ddDRcalo" readout="DRcaloSiPMreadout">
+      <sensitive type="DRcaloSiPMSD"/>
       <sipmDim height="0.3*mm" material="PolyvinylChloride" vis="GenericVis">
         <sipmGlass height="0.28*mm" material="DR_PyrexGlass" vis="GlassVis"/>
         <sipmWafer height="0.01*mm" material="Silicon" vis="WaferVis" sensitive="true"/>
@@ -649,9 +650,9 @@
   </detectors>
 
   <readouts>
-    <readout name="DRcaloBarrelHits">
+    <readout name="DRcaloSiPMreadout">
       <segmentation type="NoSegmentation"/>
-      <id>system:1</id>
+      <id>theta:-6,phi:9,x:6,y:6</id>
     </readout>
   </readouts>
 </lccdd>
