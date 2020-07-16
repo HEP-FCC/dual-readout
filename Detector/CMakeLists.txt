@@ -16,3 +16,4 @@ dd4hep_configure_output()
 
 add_subdirectory(DRcalo)
 add_subdirectory(DRsensitive)
+add_subdirectory(DRsegmentation)
