@@ -7,10 +7,11 @@
 #include "G4ParticleTypes.hh"
 
 ddDRcalo::DRcaloSiPMSD::DRcaloSiPMSD(const std::string aName, const std::string aReadoutName, const dd4hep::Segmentation& aSeg)
-: G4VSensitiveDetector(aName), fHitCollection(0), fSeg(aSeg), fHCID(-1),
+: G4VSensitiveDetector(aName), fHitCollection(0), fHCID(-1),
 fWavBin(120), fTimeBin(600), fWavlenStart(900.), fWavlenEnd(300.), fTimeStart(10.), fTimeEnd(70.)
 {
   collectionName.insert(aReadoutName);
+  fSeg = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( aSeg.segmentation() );
   fWavlenStep = (fWavlenStart-fWavlenEnd)/(float)fWavBin;
   fTimeStep = (fTimeEnd-fTimeStart)/(float)fTimeBin;
 }
@@ -26,7 +27,10 @@ void ddDRcalo::DRcaloSiPMSD::Initialize(G4HCofThisEvent* hce) {
 G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
   if(step->GetTrack()->GetDefinition() != G4OpticalPhoton::OpticalPhotonDefinition()) return false;
 
-  uint64_t SiPMnum = static_cast<uint64_t>(step->GetPostStepPoint()->GetTouchable()->GetVolume(1)->GetCopyNo());
+  auto SiPMnum = fSeg->convertLast32to64(step->GetPostStepPoint()->GetTouchable()->GetVolume()->GetCopyNo());
+  auto towerNum = fSeg->convertFirst32to64(step->GetPostStepPoint()->GetTouchable()->GetVolume(2)->GetCopyNo());
+  auto volId = towerNum | SiPMnum;
+
   G4int nofHits = fHitCollection->entries();
   G4double hitTime = step->GetPostStepPoint()->GetGlobalTime();
   G4double energy = step->GetTrack()->GetTotalEnergy();
@@ -34,7 +38,7 @@ G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
   ddDRcalo::DRcaloSiPMHit* hit = NULL;
 
   for (G4int i = 0; i < nofHits; i++) {
-    if ( (*fHitCollection)[i]->GetSiPMnum()==SiPMnum ) {
+    if ( (*fHitCollection)[i]->GetSiPMnum()==volId ) {
       hit = (*fHitCollection)[i];
       break;
     }
@@ -45,7 +49,7 @@ G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
 
     G4ThreeVector pos = step->GetPostStepPoint()->GetTouchableHandle()->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0.,0.,0.));
 
-    hit->SetSiPMnum(SiPMnum);
+    hit->SetSiPMnum(volId);
     hit->SetSiPMpos( dd4hep::Position(pos.x(),pos.y(),pos.z()) ); // CLHEP::Hep3Vector to ROOT::Math::XYZVector
 
     fHitCollection->insert(hit);

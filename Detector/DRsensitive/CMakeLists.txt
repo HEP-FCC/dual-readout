@@ -23,6 +23,7 @@ add_library(ddDRsensitive SHARED ${sources})
 target_include_directories(ddDRsensitive PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${DD4hep_DIR}/include)
 target_link_libraries(
   ddDRsensitive
+  ddDRsegmentation
   ${Geant4_LIBRARIES}
   rootIO
   DD4hep::DDCore

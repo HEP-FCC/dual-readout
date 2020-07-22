@@ -50,6 +50,26 @@ public:
   bool IsTower(const CellID& aCellID) const;
   bool IsSiPM(const CellID& aCellID) const;
 
+  int getFirst32bits(const CellID& aCellID) const { return (int)aCellID; }
+  int getLast32bits(const CellID& aCellID) const;
+  CellID convertFirst32to64(const int aId32) const { return (CellID)aId32; }
+  CellID convertLast32to64(const int aId32) const;
+
+  // Methods for 32bit to 64bit en/decoder
+  int numEta(const int& aId32) const { return numEta( convertFirst32to64(aId32) ); }
+  int numPhi(const int& aId32) const { return numPhi( convertFirst32to64(aId32) ); }
+
+  int numX(const int& aId32) const { return numX( convertLast32to64(aId32) ); }
+  int numY(const int& aId32) const { return numY( convertLast32to64(aId32) ); }
+
+  int x(const int& aId32) const { return x( convertLast32to64(aId32) ); }
+  int y(const int& aId32) const { return y( convertLast32to64(aId32) ); }
+
+  bool IsCerenkov(const int& aId32) const { return IsCerenkov( convertLast32to64(aId32) ); }
+
+  bool IsTower(const int& aId32) const { return IsTower( convertLast32to64(aId32) ); }
+  bool IsSiPM(const int& aId32) const { return IsSiPM( convertLast32to64(aId32) ); }
+
   inline const std::string& fieldNameNumEta() const { return fNumEtaId; }
   inline const std::string& fieldNameNumPhi() const { return fNumPhiId; }
   inline const std::string& fieldNameNumX() const { return fNumXId; }

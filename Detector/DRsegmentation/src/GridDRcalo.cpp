@@ -1,5 +1,7 @@
 #include "GridDRcalo.h"
 
+#include <climits>
+
 namespace dd4hep {
 namespace DDSegmentation {
 
@@ -140,6 +142,20 @@ bool GridDRcalo::IsTower(const CellID& aCellID) const {
 bool GridDRcalo::IsSiPM(const CellID& aCellID) const {
   VolumeID module = static_cast<VolumeID>(_decoder->get(aCellID, fModule));
   return module==1;
+}
+
+int GridDRcalo::getLast32bits(const CellID& aCellID) const {
+  CellID aId64 = aCellID >> sizeof(int)*CHAR_BIT;
+  int aId32 = (int)aId64;
+
+  return aId32;
+}
+
+CellID GridDRcalo::convertLast32to64(const int aId32) const {
+  CellID aId64 = (CellID)aId32;
+  aId64 <<= sizeof(int)*CHAR_BIT;
+
+  return aId64;
 }
 
 REGISTER_SEGMENTATION(GridDRcalo)

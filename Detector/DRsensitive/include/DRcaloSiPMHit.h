@@ -9,6 +9,7 @@
 #include "G4ThreeVector.hh"
 
 #include "DD4hep/Objects.h"
+#include "DD4hep/Segmentations.h"
 
 namespace ddDRcalo {
   class DRcaloSiPMHit : public G4VHit {
@@ -30,8 +31,8 @@ namespace ddDRcalo {
     void photonCount() { fPhotons++; }
     unsigned long GetPhotonCount() const { return fPhotons; }
 
-    void SetSiPMnum(uint64_t n) { fSiPMnum = n; }
-    uint64_t GetSiPMnum() const { return fSiPMnum; }
+    void SetSiPMnum(dd4hep::DDSegmentation::CellID n) { fSiPMnum = n; }
+    dd4hep::DDSegmentation::CellID GetSiPMnum() const { return fSiPMnum; }
 
     void SetSiPMpos(dd4hep::Position pos) { fSiPMpos = pos; }
     dd4hep::Position GetSiPMpos() const { return fSiPMpos; }
@@ -43,7 +44,7 @@ namespace ddDRcalo {
     DRsimInterface::DRsimTimeStruct GetTimeStruct() const { return fTimeStruct; }
 
   private:
-    uint64_t fSiPMnum;
+    dd4hep::DDSegmentation::CellID fSiPMnum;
     unsigned long fPhotons;
     dd4hep::Position fSiPMpos;
     DRsimInterface::DRsimWavlenSpectrum fWavlenSpectrum;

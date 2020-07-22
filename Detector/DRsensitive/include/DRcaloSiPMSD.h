@@ -3,6 +3,7 @@
 
 #include "DRcaloSiPMHit.h"
 #include "DRsimInterface.h"
+#include "GridDRcalo.h"
 #include "DD4hep/Segmentations.h"
 
 #include "G4VSensitiveDetector.hh"
@@ -22,7 +23,7 @@ namespace ddDRcalo {
 
   private:
     DRcaloSiPMHitsCollection* fHitCollection;
-    dd4hep::Segmentation fSeg;
+    dd4hep::DDSegmentation::GridDRcalo* fSeg;
     G4int fHCID;
 
     G4int fWavBin;

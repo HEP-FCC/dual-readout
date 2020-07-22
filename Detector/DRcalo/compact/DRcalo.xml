@@ -652,7 +652,8 @@
   <readouts>
     <readout name="DRcaloSiPMreadout">
       <segmentation type="GridDRcalo"/>
-      <id>system:2,eta:-8,phi:9,xmax:6,ymax:6,x:6,y:6,c:1,module:2</id>
+      <!-- Mendatory to use the first 32 bits for tower infos & the last 32 bits for fiber/SiPM infos -->
+      <id>system:2,eta:-8,phi:9,xmax:32:6,ymax:6,x:6,y:6,c:1,module:2</id>
     </readout>
   </readouts>
 </lccdd>

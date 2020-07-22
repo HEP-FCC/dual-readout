@@ -2,6 +2,7 @@
 #define DRconstructor_h 1
 
 #include "DRparamBarrel.h"
+#include "GridDRcaloHandle.h"
 
 #include "DD4hep/DetFactoryHelper.h"
 #include "DD4hep/OpticalSurfaces.h"
@@ -22,10 +23,12 @@ namespace ddDRcalo {
     void setDetElement(dd4hep::DetElement* drDet) { fDetElement = drDet; }
     void setSipmSurf(dd4hep::OpticalSurface* sipmSurf) { fSipmSurf = sipmSurf; }
     void setFilterSurf(dd4hep::OpticalSurface* filterSurf) { fFilterSurf = filterSurf; }
-    void setSensDet(dd4hep::SensitiveDetector* sensDet) { fSensDet = sensDet; }
+    void setSensDet(dd4hep::SensitiveDetector* sensDet) {
+      fSensDet = sensDet;
+      fSegmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( sensDet->readout().segmentation().segmentation() );
+    }
 
     void construct();
-    bool IsCerenkov(int col, int row);
     std::pair<int,int> GetColRowFromCopyNo(int copyNo, int numx);
 
   private:
@@ -41,6 +44,7 @@ namespace ddDRcalo {
     dd4hep::SensitiveDetector* fSensDet;
     dd4hep::OpticalSurface* fSipmSurf;
     dd4hep::OpticalSurface* fFilterSurf;
+    dd4hep::DDSegmentation::GridDRcalo* fSegmentation;
 
     std::vector<float> fGridX, fGridY;
     int fNumx, fNumy;
