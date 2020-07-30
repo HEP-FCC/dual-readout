@@ -3,7 +3,10 @@
 #include "fastjetInterface.h"
 #include "RecoTower.h"
 
+#include "GeoSvc.h"
+
 #include <iostream>
+#include <stdexcept>
 
 int main(int argc, char* argv[]) {
   std::string filenum = std::string(argv[1]);
@@ -21,6 +24,8 @@ int main(int argc, char* argv[]) {
 
   RootInterface<DRsimInterface::DRsimEventData>* drInterface = new RootInterface<DRsimInterface::DRsimEventData>(filename+"_"+filenum+".root");
   drInterface->set("DRsim","DRsimEventData");
+
+  auto geoSvc = new GeoSvc({"/home/ko/Desktop/Study/dual-readout/install/bin/compact/DRcalo.xml"});
 
   RecoTower* recoTower = new RecoTower();
   recoTower->readCSV();

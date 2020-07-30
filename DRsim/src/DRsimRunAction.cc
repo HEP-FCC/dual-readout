@@ -27,7 +27,7 @@ DRsimRunAction::DRsimRunAction(G4int seed, G4String filename, G4bool useHepMC)
   }
 
   if (fUseHepMC && !sHepMCreader) {
-    sHepMCreader = new HepMCG4Reader(fSeed,fFilename);
+    sHepMCreader = new HepMCG4Reader(fSeed,fFilename); // activated in the worker node (by macro command)
   }
 }
 

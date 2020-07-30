@@ -2,7 +2,7 @@
 #include "DRsimPrimaryGeneratorAction.hh"
 #include "DRsimRunAction.hh"
 #include "DRsimEventAction.hh"
-#include "DRsimSteppingAction.hh"
+#include "SimG4DRcaloSteppingAction.h"
 
 #include "G4GenericMessenger.hh"
 
@@ -12,6 +12,11 @@ DRsimActionInitialization::DRsimActionInitialization(G4int seed, G4String filena
 {
   fSeed = seed;
   fFilename = filename;
+
+  // G4GenericMessenger::Command::SetDefaultValue does not work on the master thread, remain uninitialized
+  fUseHepMC = false;
+  fUseCalib = false;
+  fUseGPS = false;
 
   DefineCommands();
 }
@@ -31,20 +36,20 @@ void DRsimActionInitialization::Build() const {
   DRsimEventAction* eventAction = new DRsimEventAction();
   SetUserAction(eventAction);
 
-  SetUserAction(new DRsimSteppingAction(eventAction));
+  SimG4DRcaloSteppingAction* steppingAction = new SimG4DRcaloSteppingAction();
+  steppingAction->setEventData( eventAction->getEventData() );
+
+  SetUserAction(steppingAction);
 }
 
 void DRsimActionInitialization::DefineCommands() {
   fMessenger = new G4GenericMessenger(this, "/DRsim/action/", "action initialization control");
   G4GenericMessenger::Command& ioCmd = fMessenger->DeclareProperty("useHepMC",fUseHepMC,"use HepMC");
-  ioCmd.SetParameterName("useHepMC",true);
-  ioCmd.SetDefaultValue("False");
+  ioCmd.SetParameterName("useHepMC",true,true);
 
   G4GenericMessenger::Command& calibCmd = fMessenger->DeclareProperty("useCalib",fUseCalib,"use Calib");
-  calibCmd.SetParameterName("useCalib",true);
-  calibCmd.SetDefaultValue("False");
+  calibCmd.SetParameterName("useCalib",true,true);
 
   G4GenericMessenger::Command& gpsCmd = fMessenger->DeclareProperty("useGPS",fUseGPS,"use GPS");
-  gpsCmd.SetParameterName("useGPS",true);
-  gpsCmd.SetDefaultValue("False");
+  gpsCmd.SetParameterName("useGPS",true,true);
 }

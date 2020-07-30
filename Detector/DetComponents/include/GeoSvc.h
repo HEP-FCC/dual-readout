@@ -12,7 +12,7 @@ class GeoSvc {
 
 public:
   /// Default constructor
-  GeoSvc(const std::string& name);
+  GeoSvc(std::vector<std::string> names);
 
   /// Destructor
   virtual ~GeoSvc();
@@ -28,6 +28,8 @@ public:
   // receive Geant4 Geometry
   G4VUserDetectorConstruction* getGeant4Geo();
 
+  static GeoSvc* GetInstance();
+
 private:
   /// Pointer to the interface to the DD4hep geometry
   dd4hep::Detector* m_dd4hepgeo;
@@ -35,6 +37,8 @@ private:
   std::shared_ptr<G4VUserDetectorConstruction> m_geant4geo;
   /// XML-files with the detector description
   std::vector<std::string> m_xmlFileNames;
+
+  static GeoSvc* fInstance;
 };
 
 #endif // GEOSVC_H

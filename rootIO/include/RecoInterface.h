@@ -13,13 +13,11 @@ public:
     RecoFiberData(const DRsimInterface::DRsimSiPMData& sipmIn);
     ~RecoFiberData() {};
 
-    bool IsCerenkov;
+    long long int fiberNum;
     float E;
     float Ecorr;
     int n;
     float t;
-    int x;
-    int y;
     float depth;
     DRsimInterface::threeVector pos;
   };
@@ -36,13 +34,10 @@ public:
     float E_DRcorr;
     int n_C;
     int n_S;
-    std::pair<int,float> theta;
-    std::pair<int,float> phi;
+    int iTheta;
+    int iPhi;
     int numx;
     int numy;
-    float innerR;
-    float towerH;
-    float dTheta;
     std::vector<RecoFiberData> fibers;
   };
 

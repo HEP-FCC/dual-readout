@@ -33,9 +33,7 @@ public:
     virtual ~DRsimSiPMData() {};
 
     int count;
-    int SiPMnum;
-    int x;
-    int y;
+    long long int SiPMnum;
     threeVector pos;
     DRsimTimeStruct timeStruct;
     DRsimWavlenSpectrum wavlenSpectrum;
@@ -45,24 +43,21 @@ public:
     DRsimTowerData() {};
     virtual ~DRsimTowerData() {};
 
-    std::pair<int,float> towerTheta;
-    std::pair<int,float> towerPhi;
+    int iTheta;
+    int iPhi;
     int numx;
     int numy;
-    float innerR;
-    float towerH;
-    float dTheta;
     std::vector<DRsimSiPMData> SiPMs;
   };
 
   struct DRsimEdepFiberData {
     DRsimEdepFiberData();
+    DRsimEdepFiberData(long long int fiberId64, float edep, float edepEle, float edepGamma, float edepCharged);
     virtual ~DRsimEdepFiberData() {};
 
-    int fiberNum;
-    int x;
-    int y;
-    bool IsCerenkov;
+    void accumulate(float edep, float edepEle, float edepGamma, float edepCharged);
+
+    long long int fiberNum;
     float Edep;
     float EdepEle;
     float EdepGamma;
@@ -71,7 +66,10 @@ public:
 
   struct DRsimEdepData {
     DRsimEdepData();
+    DRsimEdepData(int theta, int phi, float edep, float edepEle, float edepGamma, float edepCharged);
     virtual ~DRsimEdepData() {};
+
+    void accumulate(float edep, float edepEle, float edepGamma, float edepCharged);
 
     float Edep;
     float EdepEle;
@@ -115,6 +113,8 @@ public:
   struct DRsimEventData {
     DRsimEventData() {};
     virtual ~DRsimEventData() {};
+
+    void clear();
 
     int event_number;
     std::vector<DRsimTowerData> towers;

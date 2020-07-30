@@ -17,6 +17,8 @@ target_link_libraries(
   ${FASTJET_DIR}/lib/libfastjet.so
   rootIO
   ${CMAKE_DL_LIBS}
+  DetComponents
+  ddDRsegmentation
 )
 
 set(

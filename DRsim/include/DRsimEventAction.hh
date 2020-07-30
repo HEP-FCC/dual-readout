@@ -2,7 +2,7 @@
 #define DRsimEventAction_h 1
 
 #include "DRsimInterface.h"
-#include "DRsimSiPMHit.hh"
+#include "SimG4SaveDRcaloHits.h"
 
 #include "G4UserEventAction.hh"
 #include "G4HCofThisEvent.hh"
@@ -18,20 +18,17 @@ public:
   virtual void BeginOfEventAction(const G4Event*);
   virtual void EndOfEventAction(const G4Event*);
 
-  void fillEdeps(DRsimInterface::DRsimEdepData& edepData, DRsimInterface::DRsimEdepFiberData& fiberData, bool IsFiber);
-  void fillLeaks(DRsimInterface::DRsimLeakageData leakData);
+  DRsimInterface::DRsimEventData* getEventData() { return fEventData; }
 
 private:
   void clear();
-  void fillHits(DRsimSiPMHit* hit);
   void fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc);
   void queue();
 
-  DRsimInterface::DRsimEventData* fEventData;
-  std::map<toweriTiP, DRsimInterface::DRsimTowerData> fTowerMap;
-  std::map<toweriTiP, DRsimInterface::DRsimEdepData> fEdepMap;
+  SimG4SaveDRcaloHits* fSaveHits;
 
-  std::vector<G4int> fSiPMCollID;
+  DRsimInterface::DRsimEventData* fEventData;
+  std::map<toweriTiP, DRsimInterface::DRsimEdepData> fEdepMap;
 };
 
 #endif

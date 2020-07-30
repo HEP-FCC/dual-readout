@@ -20,7 +20,7 @@ void ddDRcalo::DRconstructor::construct() {
   double currentTheta = 0.;
   int towerNo = 0;
   for (xml_coll_t x_dThetaColl(*fX_towerDim,_U(deltatheta)); x_dThetaColl; ++x_dThetaColl, ++towerNo ) {
-    // if (towerNo > 0) continue;
+    if (towerNo > 5) continue;
 
     xml_comp_t x_deltaTheta = x_dThetaColl;
 
@@ -32,31 +32,42 @@ void ddDRcalo::DRconstructor::construct() {
     fParamBarrel->init();
     fTowerNoLR = fParamBarrel->GetIsRHS() ? towerNo : -towerNo-1;
 
+    dd4hep::Trap assemblyEnvelop( (fX_towerDim->height()+fParamBarrel->GetSipmHeight())/2., 0., 0., fParamBarrel->GetH1(), fParamBarrel->GetBl1(), fParamBarrel->GetTl1(), 0.,
+                                  fParamBarrel->GetH2sipm(), fParamBarrel->GetBl2sipm(), fParamBarrel->GetTl2sipm(), 0. );
+
     dd4hep::Trap tower( fX_towerDim->height()/2., 0., 0., fParamBarrel->GetH1(), fParamBarrel->GetBl1(), fParamBarrel->GetTl1(), 0.,
                         fParamBarrel->GetH2(), fParamBarrel->GetBl2(), fParamBarrel->GetTl2(), 0. );
 
     dd4hep::Volume towerVol( "tower", tower, fDescription->material(fX_towerDim->materialStr()) );
     towerVol.setVisAttributes(*fDescription, fX_towerDim->visStr());
 
-    if (towerNo != 0 && towerNo != 47) continue;
+    // if (towerNo!=0 && towerNo!=1 && towerNo!=45) continue;
 
-    implementFibers(towerVol,tower);
+    implementFibers(towerVol,tower); // need to reduce time consumption!
 
-    dd4hep::Box sipmLayer( fParamBarrel->GetH2(), fParamBarrel->GetBl2(), fParamBarrel->GetSipmHeight()/2. );
+    dd4hep::Box sipmLayer( fParamBarrel->GetBl2(), fParamBarrel->GetH2(), fParamBarrel->GetSipmHeight()/2. );
     dd4hep::Volume sipmLayerVol( "sipmLayer", sipmLayer, fDescription->material(fX_sipmDim->materialStr()) );
     sipmLayerVol.setVisAttributes(*fDescription, fX_sipmDim->visStr());
 
     implementSipms(sipmLayerVol);
 
-    for (int nPhi = 0; nPhi < 2/*fX_towerDim->nphi()*/; nPhi++) {
-      auto towerId64 = fSegmentation->volumeID( fTowerNoLR, nPhi );
+    for (int nPhi = 0; nPhi < fX_towerDim->nphi(); nPhi++) {
+      auto towerId64 = fSegmentation->setVolumeID( fTowerNoLR, nPhi );
       int towerId32 = fSegmentation->getFirst32bits(towerId64);
 
-      dd4hep::PlacedVolume towerPhys = fExperimentalHall->placeVolume( towerVol, towerId32, fParamBarrel->GetTransform3D(nPhi) );
-      towerPhys.addPhysVolID("tower", towerId32);
+      // copy number of assemblyVolume is unpredictable, use dummy volume to make use of copy number of afterwards
+      dd4hep::Volume assemblyEnvelopVol( "assembly", assemblyEnvelop, fDescription->material("Vacuum") );
+      fExperimentalHall->placeVolume( assemblyEnvelopVol, fParamBarrel->GetAssembleTransform3D(nPhi) );
 
-      dd4hep::PlacedVolume sipmLayerPhys = fExperimentalHall->placeVolume( sipmLayerVol, towerId32, fParamBarrel->GetSipmTransform3D(nPhi) );
-      sipmLayerPhys.addPhysVolID("sipmLayer", towerId32);
+      dd4hep::PlacedVolume towerPhys = assemblyEnvelopVol.placeVolume( towerVol, towerId32, dd4hep::Position(0.,0.,-fParamBarrel->GetSipmHeight()/2.) );
+      towerPhys.addPhysVolID("eta", fTowerNoLR);
+      towerPhys.addPhysVolID("phi", nPhi);
+      towerPhys.addPhysVolID("module", 0);
+
+      dd4hep::PlacedVolume sipmLayerPhys = assemblyEnvelopVol.placeVolume( sipmLayerVol, towerId32, dd4hep::Position(0.,0.,fX_towerDim->height()/2.) );
+      sipmLayerPhys.addPhysVolID("eta", fTowerNoLR);
+      sipmLayerPhys.addPhysVolID("phi", nPhi);
+      sipmLayerPhys.addPhysVolID("module", 0);
     }
   }
 }
@@ -73,8 +84,8 @@ void ddDRcalo::DRconstructor::implementFibers(dd4hep::Volume& towerVol, dd4hep::
   float sipmSize = fX_towerDim->dx();
   float gridSize = fX_towerDim->distance();
 
-  fNumx = static_cast<int>( std::floor( ( fParamBarrel->GetH2()*2. - sipmSize )/gridSize ) ) + 1; // in eta direction
-  fNumy = static_cast<int>( std::floor( ( fParamBarrel->GetBl2()*2. - sipmSize )/gridSize ) ) + 1; // in phi direction
+  fNumx = static_cast<int>( std::floor( ( fParamBarrel->GetBl2()*2. - sipmSize )/gridSize ) ) + 1; // in eta direction
+  fNumy = static_cast<int>( std::floor( ( fParamBarrel->GetH2()*2. - sipmSize )/gridSize ) ) + 1; // in phi direction
 
   fGridX.clear();
   fGridY.clear();
@@ -97,7 +108,7 @@ void ddDRcalo::DRconstructor::implementFibers(dd4hep::Volume& towerVol, dd4hep::
     dd4hep::Position pos = dd4hep::Position(fGridX.at(j),fGridY.at(j),0.);
     dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
 
-    auto fiberId64 = fSegmentation->volumeID(fTowerNoLR, 0, fNumx, fNumy, column, row);
+    auto fiberId64 = fSegmentation->setVolumeID(fTowerNoLR, 0, fNumx, fNumy, column, row);
     int fiberId32 = fSegmentation->getLast32bits(fiberId64);
 
     if ( fSegmentation->IsCerenkov(column,row) ) { //c fibre
@@ -142,51 +153,58 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
   xml_comp_t x_filter ( fX_sipmDim->child( _Unicode(filter) ) );
 
   float sipmSize = fX_towerDim->dx();
+  double sipmHeight = fParamBarrel->GetSipmHeight() - x_filter.height();
+
+  // Glass box
+  dd4hep::Box sipmEnvelop(sipmSize/2., sipmSize/2., sipmHeight/2.);
+  dd4hep::Volume sipmEnvelopVol( "sipmEnvelop", sipmEnvelop, fDescription->material(x_glass.materialStr()) );
+  sipmEnvelopVol.setVisAttributes(*fDescription, fX_sipmDim->visStr());
+
+  // Photosensitive wafer
+  dd4hep::Box sipmWaferBox( sipmSize/2., sipmSize/2., x_wafer.height()/2. );
+  dd4hep::Volume sipmWaferVol( "sipmWafer", sipmWaferBox, fDescription->material(x_wafer.materialStr()) );
+  sipmWaferVol.setVisAttributes(*fDescription, x_wafer.visStr());
+  dd4hep::SkinSurface(*fDescription, *fDetElement, "SiPMSurf_Tower"+std::to_string(fTowerNoLR), *fSipmSurf, sipmWaferVol);
+  sipmEnvelopVol.placeVolume( sipmWaferVol, dd4hep::Position(0., 0., (sipmHeight-x_wafer.height())/2.) );
+
+  if (x_wafer.isSensitive()) {
+    sipmWaferVol.setSensitiveDetector(*fSensDet);
+  }
+
+  // Kodak filter
+  dd4hep::Box filterBox( sipmSize/2., sipmSize/2., x_filter.height()/2. );
+  dd4hep::Volume filterVol( "filter", filterBox, fDescription->material(x_filter.materialStr()) );
+  filterVol.setVisAttributes(*fDescription, x_filter.visStr());
 
   for (unsigned int j = 0; j < fGridX.size(); j++) {
     auto colrow = GetColRowFromCopyNo(static_cast<int>(j), fNumx);
     int column = colrow.first;
     int row = colrow.second;
 
-    dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
-    dd4hep::Position pos = dd4hep::Position(fGridX.at(j),fGridY.at(j),0.);
-    dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
-
-    auto sipmId64 = fSegmentation->volumeID(fTowerNoLR, 0, fNumx, fNumy, column, row);
+    auto sipmId64 = fSegmentation->setVolumeID(fTowerNoLR, 0, fNumx, fNumy, column, row);
     int sipmId32 = fSegmentation->getLast32bits(sipmId64);
 
-    dd4hep::Box sipmEnvelop(sipmSize/2., sipmSize/2., fParamBarrel->GetSipmHeight()/2.);
-    dd4hep::Volume sipmEnvelopVol( "sipmEnvelop", sipmEnvelop, fDescription->material(x_glass.materialStr()) );
-    sipmEnvelopVol.setVisAttributes(*fDescription, fX_sipmDim->visStr());
-    sipmLayerVol.placeVolume( sipmEnvelopVol, trans );
+    dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
+    dd4hep::Position pos = dd4hep::Position(fGridX.at(j),fGridY.at(j),-x_filter.height()/2.);
+    if ( !fSegmentation->IsCerenkov(column,row) ) pos = dd4hep::Position(fGridX.at(j),fGridY.at(j),x_filter.height()/2.);
+    dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
 
-    dd4hep::Box sipmWaferBox( sipmSize/2., sipmSize/2., x_wafer.height()/2. );
-    dd4hep::Volume sipmWaferVol( "sipmWafer", sipmWaferBox, fDescription->material(x_wafer.materialStr()) );
-    sipmWaferVol.setVisAttributes(*fDescription, x_wafer.visStr());
-    dd4hep::PlacedVolume sipmWaferPlaced = sipmEnvelopVol.placeVolume( sipmWaferVol, sipmId32, dd4hep::Position(0., 0., (fParamBarrel->GetSipmHeight()-x_wafer.height())/2.) );
-    dd4hep::SkinSurface(*fDescription, *fDetElement, "SiPMSurf_Tower"+std::to_string(fTowerNoLR)+"SiPM"+std::to_string(j), *fSipmSurf, sipmWaferVol);
+    auto sipmEnvelopPlaced = sipmLayerVol.placeVolume( sipmEnvelopVol, sipmId32, trans );
+    sipmEnvelopPlaced.addPhysVolID("eta",fTowerNoLR);
+    sipmEnvelopPlaced.addPhysVolID("phi",0); // initialize by dummy
+    sipmEnvelopPlaced.addPhysVolID("xmax",fNumx);
+    sipmEnvelopPlaced.addPhysVolID("ymax",fNumy);
+    sipmEnvelopPlaced.addPhysVolID("x",column);
+    sipmEnvelopPlaced.addPhysVolID("y",row);
+    sipmEnvelopPlaced.addPhysVolID("c",fSegmentation->IsCerenkov(column,row));
+    sipmEnvelopPlaced.addPhysVolID("module",1);
 
-    if (x_wafer.isSensitive()) {
-      sipmWaferVol.setSensitiveDetector(*fSensDet);
-      sipmWaferPlaced.addPhysVolID("SiPM",sipmId32);
-    }
+    if ( !fSegmentation->IsCerenkov(column,row) ) { //s channel
+      dd4hep::Position posFilter = dd4hep::Position(fGridX.at(j),fGridY.at(j),-sipmHeight/2.);
+      dd4hep::Transform3D transFilter = dd4hep::Transform3D(rot,posFilter);
 
-    if ( fSegmentation->IsCerenkov(column,row) ) { //c channel
-      dd4hep::Box sipmGlassBox( sipmSize/2., sipmSize/2., (x_glass.height()+x_filter.height())/2. );
-      dd4hep::Volume sipmGlassVol( "sipmGlass", sipmGlassBox, fDescription->material(x_glass.materialStr()) );
-      sipmGlassVol.setVisAttributes(*fDescription, x_glass.visStr());
-      sipmEnvelopVol.placeVolume( sipmGlassVol, dd4hep::Position(0., 0., -x_wafer.height()/2.) );
-    } else { // s channel
-      dd4hep::Box sipmGlassBox( sipmSize/2., sipmSize/2., x_glass.height()/2. );
-      dd4hep::Volume sipmGlassVol( "sipmGlass", sipmGlassBox, fDescription->material(x_glass.materialStr()) );
-      sipmGlassVol.setVisAttributes(*fDescription, x_glass.visStr());
-      dd4hep::PlacedVolume sipmGlassPlaced = sipmEnvelopVol.placeVolume( sipmGlassVol, dd4hep::Position(0., 0., (x_filter.height()-x_wafer.height())/2.) );
-
-      dd4hep::Box filterBox( sipmSize/2., sipmSize/2., x_filter.height()/2. );
-      dd4hep::Volume filterVol( "filter", filterBox, fDescription->material(x_filter.materialStr()) );
-      filterVol.setVisAttributes(*fDescription, x_filter.visStr());
-      dd4hep::PlacedVolume filterPlaced = sipmEnvelopVol.placeVolume( filterVol, dd4hep::Position(0., 0., -(fParamBarrel->GetSipmHeight()-x_filter.height())/2.) );
-      dd4hep::BorderSurface(*fDescription, *fDetElement, "FilterSurf_Tower"+std::to_string(fTowerNoLR)+"SiPM"+std::to_string(j), *fFilterSurf, filterPlaced, sipmGlassPlaced);
+      dd4hep::PlacedVolume filterPlaced = sipmLayerVol.placeVolume( filterVol, sipmId32, transFilter );
+      dd4hep::BorderSurface(*fDescription, *fDetElement, "FilterSurf_Tower"+std::to_string(fTowerNoLR)+"SiPM"+std::to_string(j), *fFilterSurf, filterPlaced, sipmEnvelopPlaced);
     }
   }
 }

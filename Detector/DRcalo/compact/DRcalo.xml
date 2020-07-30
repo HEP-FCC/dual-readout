@@ -551,6 +551,7 @@
       <property name="FASTCOMPONENT" ref="scintFast_PS"/>
       <constant name="SCINTILLATIONYIELD" value="13.9/keV"/>
       <constant name="FASTTIMECONSTANT" value="2.8*ns"/>
+      <constant name="RESOLUTIONSCALE" value="1."/>
     </material>
     <material name="DR_PyrexGlass">
       <D type="density" value="2.23" unit="g/cm3"/>
@@ -579,7 +580,7 @@
     <detector id="1" name="DRcaloBarrel" type="ddDRcalo" readout="DRcaloSiPMreadout">
       <sensitive type="DRcaloSiPMSD"/>
       <sipmDim height="0.3*mm" material="PolyvinylChloride" vis="GenericVis">
-        <sipmGlass height="0.28*mm" material="DR_PyrexGlass" vis="GlassVis"/>
+        <sipmGlass material="DR_PyrexGlass" vis="GlassVis"/>
         <sipmWafer height="0.01*mm" material="Silicon" vis="WaferVis" sensitive="true"/>
         <filter height="0.01*mm" material="Gelatin" vis="filterVis"/>
       </sipmDim>

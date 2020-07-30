@@ -39,8 +39,8 @@ namespace dd4hep {
       return access()->implementation->cellID(local, global, volID);
     }
 
-    inline VolumeID volumeID(int numEta, int numPhi) const { return access()->implementation->volumeID(numEta,numPhi); }
-    inline VolumeID volumeID(int numEta, int numPhi, int numX, int numY, int x, int y) const { return access()->implementation->volumeID(numEta, numPhi, numX, numY, x, y); }
+    inline VolumeID setVolumeID(int numEta, int numPhi) const { return access()->implementation->setVolumeID(numEta,numPhi); }
+    inline VolumeID setVolumeID(int numEta, int numPhi, int numX, int numY, int x, int y) const { return access()->implementation->setVolumeID(numEta, numPhi, numX, numY, x, y); }
 
     // Get the identifier number of a mother tower in eta or phi direction
     inline int numEta(const CellID& aCellID) const { return access()->implementation->numEta(aCellID); }

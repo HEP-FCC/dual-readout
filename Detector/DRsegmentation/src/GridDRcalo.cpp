@@ -53,7 +53,7 @@ CellID GridDRcalo::cellID(const Vector3D& /* localPosition */, const Vector3D& g
   return vID;
 }
 
-VolumeID GridDRcalo::volumeID(int numEta, int numPhi) const {
+VolumeID GridDRcalo::setVolumeID(int numEta, int numPhi) const {
   VolumeID numEtaId = static_cast<VolumeID>(numEta);
   VolumeID numPhiId = static_cast<VolumeID>(numPhi);
   VolumeID vID = 0;
@@ -66,7 +66,7 @@ VolumeID GridDRcalo::volumeID(int numEta, int numPhi) const {
   return vID;
 }
 
-VolumeID GridDRcalo::volumeID(int numEta, int numPhi, int numX, int numY, int x, int y) const {
+VolumeID GridDRcalo::setVolumeID(int numEta, int numPhi, int numX, int numY, int x, int y) const {
   VolumeID numEtaId = static_cast<VolumeID>(numEta);
   VolumeID numPhiId = static_cast<VolumeID>(numPhi);
   VolumeID numXId = static_cast<VolumeID>(numX);

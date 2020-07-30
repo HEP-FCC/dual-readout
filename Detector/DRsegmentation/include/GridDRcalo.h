@@ -29,8 +29,8 @@ public:
   virtual CellID cellID(const Vector3D& aLocalPosition, const Vector3D& aGlobalPosition,
                         const VolumeID& aVolumeID) const;
 
-  VolumeID volumeID(int numEta, int numPhi) const;
-  VolumeID volumeID(int numEta, int numPhi, int numX, int numY, int x, int y) const;
+  VolumeID setVolumeID(int numEta, int numPhi) const;
+  VolumeID setVolumeID(int numEta, int numPhi, int numX, int numY, int x, int y) const;
 
   // Get the identifier number of a mother tower in eta or phi direction
   int numEta(const CellID& aCellID) const;

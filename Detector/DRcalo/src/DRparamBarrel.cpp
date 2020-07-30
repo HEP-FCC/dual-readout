@@ -33,6 +33,7 @@ void ddDRcalo::DRparamBarrel::init() {
   fInnerY = 2*fInnerX*std::tan(M_PI/(double)fNumZRot);
   fCurrentInnerHalf = fCurrentInnerR*std::tan(fDeltaTheta/2.);
   fCurrentOuterHalf = (fCurrentInnerR+fTowerH)*std::tan(fDeltaTheta/2.);
+  fCurrentOuterHalfSipm = (fCurrentInnerR+fTowerH+fSipmHeight)*std::tan(fDeltaTheta/2.);
 
   fV1 = TVector3(
     std::cos(fThetaOfCenter)*fCurrentInnerR+std::sin(fThetaOfCenter)*fCurrentInnerR*std::tan(fDeltaTheta/2.),
@@ -57,6 +58,18 @@ void ddDRcalo::DRparamBarrel::init() {
     0.,
     std::sin(fThetaOfCenter)*(fCurrentInnerR+fTowerH)+std::cos(fThetaOfCenter)*(fCurrentInnerR+fTowerH)*std::tan(fDeltaTheta/2.)
   );
+
+  fV2sipm = TVector3(
+    std::cos(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)+std::sin(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)*std::tan(fDeltaTheta/2.),
+    0.,
+    std::sin(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)-std::cos(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)*std::tan(fDeltaTheta/2.)
+  );
+
+  fV4sipm = TVector3(
+    std::cos(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)-std::sin(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)*std::tan(fDeltaTheta/2.),
+    0.,
+    std::sin(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)+std::cos(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)*std::tan(fDeltaTheta/2.)
+  );
 }
 
 dd4hep::RotationZYX ddDRcalo::DRparamBarrel::GetRotationZYX(int numPhi) {
@@ -80,6 +93,17 @@ dd4hep::Position ddDRcalo::DRparamBarrel::GetTowerPos(int numPhi) {
   return pos;
 }
 
+dd4hep::Position ddDRcalo::DRparamBarrel::GetAssemblePos(int numPhi) {
+  double numPhi_ = (double)numPhi;
+  double x = std::cos(numPhi_*fPhiZRot)*fCurrentCenter.X()*(fCurrentCenter.Mag()+fSipmHeight/2.)/fCurrentCenter.Mag();
+  double y = std::sin(numPhi_*fPhiZRot)*fCurrentCenter.X()*(fCurrentCenter.Mag()+fSipmHeight/2.)/fCurrentCenter.Mag();
+  double z_abs = fCurrentCenter.Z()*(fCurrentCenter.Mag()+fSipmHeight/2.)/fCurrentCenter.Mag();
+  double z = fIsRHS ? z_abs : -z_abs;
+  dd4hep::Position pos = dd4hep::Position(x,y,z);
+
+  return pos;
+}
+
 dd4hep::Position ddDRcalo::DRparamBarrel::GetSipmLayerPos(int numPhi) {
   double numPhi_ = (double)numPhi;
   double x = std::cos(numPhi_*fPhiZRot)*fCurrentCenter.X()*(fCurrentCenter.Mag()+fTowerH/2.+fSipmHeight/2.)/fCurrentCenter.Mag();
@@ -94,6 +118,13 @@ dd4hep::Position ddDRcalo::DRparamBarrel::GetSipmLayerPos(int numPhi) {
 dd4hep::Transform3D ddDRcalo::DRparamBarrel::GetTransform3D(int numPhi) {
   auto rot = GetRotationZYX(numPhi);
   auto pos = GetTowerPos(numPhi);
+
+  return dd4hep::Transform3D(rot,pos);
+}
+
+dd4hep::Transform3D ddDRcalo::DRparamBarrel::GetAssembleTransform3D(int numPhi) {
+  auto rot = GetRotationZYX(numPhi);
+  auto pos = GetAssemblePos(numPhi);
 
   return dd4hep::Transform3D(rot,pos);
 }

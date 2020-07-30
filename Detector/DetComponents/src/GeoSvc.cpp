@@ -6,8 +6,16 @@
 
 #include "DD4hep/Printout.h"
 
-GeoSvc::GeoSvc(const std::string& name)
-: m_dd4hepgeo(0), m_geant4geo(0) {}
+GeoSvc* GeoSvc::fInstance = 0;
+
+GeoSvc::GeoSvc(std::vector<std::string> names)
+: m_dd4hepgeo(0), m_geant4geo(0), m_xmlFileNames(names) {
+  initialize();
+
+  if (fInstance==0) {
+    fInstance = this;
+  }
+}
 
 GeoSvc::~GeoSvc() {
   if (m_dd4hepgeo){
@@ -25,11 +33,17 @@ void GeoSvc::initialize() {
   return;
 }
 
+GeoSvc* GeoSvc::GetInstance() {
+  return fInstance;
+}
+
 void GeoSvc::buildDD4HepGeo() {
   // we retrieve the the static instance of the DD4HEP::Geometry
   m_dd4hepgeo = &(dd4hep::Detector::getInstance());
 
   // load geometry
+  if (m_xmlFileNames.size()==0) throw std::runtime_error("List of xml file names is empty!");
+
   for (auto& filename : m_xmlFileNames) {
     std::cout << "loading geometry from file:  '" << filename << "'" << std::endl;
     m_dd4hepgeo->fromCompact(filename);

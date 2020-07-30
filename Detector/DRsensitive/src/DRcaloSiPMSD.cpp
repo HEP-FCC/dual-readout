@@ -1,6 +1,9 @@
 #include "DRcaloSiPMSD.h"
 #include "DRcaloSiPMHit.h"
 
+#include "DDG4/Geant4Mapping.h"
+#include "DDG4/Geant4VolumeManager.h"
+
 #include "G4HCofThisEvent.hh"
 #include "G4SDManager.hh"
 #include "G4ParticleDefinition.hh"
@@ -27,8 +30,10 @@ void ddDRcalo::DRcaloSiPMSD::Initialize(G4HCofThisEvent* hce) {
 G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
   if(step->GetTrack()->GetDefinition() != G4OpticalPhoton::OpticalPhotonDefinition()) return false;
 
-  auto SiPMnum = fSeg->convertLast32to64(step->GetPostStepPoint()->GetTouchable()->GetVolume()->GetCopyNo());
-  auto towerNum = fSeg->convertFirst32to64(step->GetPostStepPoint()->GetTouchable()->GetVolume(2)->GetCopyNo());
+  auto theTouchable = step->GetPostStepPoint()->GetTouchable();
+
+  auto towerNum = fSeg->convertFirst32to64( theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 ) );
+  auto SiPMnum = fSeg->convertLast32to64( theTouchable->GetCopyNumber(1) );
   auto volId = towerNum | SiPMnum;
 
   G4int nofHits = fHitCollection->entries();

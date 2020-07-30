@@ -1,5 +1,7 @@
 #include <iostream>
-#include "DRsimDetectorConstruction.hh"
+
+#include "GeoSvc.h"
+
 #include "DRsimActionInitialization.hh"
 
 #ifdef G4MULTITHREADED
@@ -45,7 +47,9 @@ int main(int argc, char** argv) {
   #endif
 
   // Mandatory user initialization classes
-  runManager->SetUserInitialization(new DRsimDetectorConstruction());
+  auto geoSvc = new GeoSvc({"/home/ko/Desktop/Study/dual-readout/install/bin/compact/DRcalo.xml"});
+
+  runManager->SetUserInitialization(geoSvc->getGeant4Geo());
 
   // physics module
   G4VModularPhysicsList* physicsList = new FTFP_BERT;

@@ -6,13 +6,33 @@
 #include "Riostream.h"
 
 RecoTower::RecoTower() {
+  m_geoSvc = GeoSvc::GetInstance();
+  m_readoutName = "DRcaloSiPMreadout";
+
+  initialize();
+
   fFiber = new RecoFiber();
+  fFiber->setSegmentation(fSeg);
   fSF_C = 1.;
   fSF_S = 1.;
 }
 
 RecoTower::~RecoTower() {
   if (fFiber) delete fFiber;
+}
+
+void RecoTower::initialize() {
+  auto lcdd = m_geoSvc->lcdd();
+  auto allReadouts = lcdd->readouts();
+  if (allReadouts.find(m_readoutName) == allReadouts.end()) {
+    throw std::runtime_error("Readout " + m_readoutName + " not found! Please check tool configuration.");
+  } else {
+    std::cout << "Reading EDM from the collection " << m_readoutName << std::endl;
+  }
+
+  fSeg = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(m_readoutName).segmentation().segmentation());
+
+  return;
 }
 
 void RecoTower::readCSV(std::string filename) {
@@ -32,13 +52,13 @@ void RecoTower::readCSV(std::string filename) {
 void RecoTower::reconstruct(const DRsimInterface::DRsimTowerData& tower, RecoInterface::RecoEventData& evt) {
   RecoInterface::RecoTowerData recoTower(tower);
 
-  if (getAbsITheta(recoTower.theta.first) >= (int)fCalibs.size()) {
+  if (getAbsITheta(recoTower.iTheta) >= (int)fCalibs.size()) {
     fData = recoTower;
     return;
   }
 
-  fFiber->setCalibC( fSF_C*fCalibs.at(getAbsITheta(recoTower.theta.first)).first );
-  fFiber->setCalibS( fSF_S*fCalibs.at(getAbsITheta(recoTower.theta.first)).second );
+  fFiber->setCalibC( fSF_C*fCalibs.at(getAbsITheta(recoTower.iTheta)).first );
+  fFiber->setCalibS( fSF_S*fCalibs.at(getAbsITheta(recoTower.iTheta)).second );
 
   for (auto sipmItr = tower.SiPMs.begin(); sipmItr != tower.SiPMs.end(); ++sipmItr) {
     auto sipm = *sipmItr;
@@ -46,7 +66,7 @@ void RecoTower::reconstruct(const DRsimInterface::DRsimTowerData& tower, RecoInt
     fFiber->reconstruct(sipm,recoTower);
 
     auto theFiber = fFiber->getFiber();
-    if (theFiber.IsCerenkov) {
+    if (fSeg->IsCerenkov(theFiber.fiberNum)) {
       recoTower.E_C += theFiber.E;
       recoTower.n_C += theFiber.n;
     } else {

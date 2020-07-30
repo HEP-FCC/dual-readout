@@ -45,6 +45,7 @@
     <property name="FASTCOMPONENT" ref="scintFast_PS"/>
     <constant name="SCINTILLATIONYIELD" value="13.9/keV"/>
     <constant name="FASTTIMECONSTANT" value="2.8*ns"/>
+    <constant name="RESOLUTIONSCALE" value="1."/>
   </material>
   <material name="DR_PyrexGlass">
     <D type="density" value="2.23" unit="g/cm3"/>

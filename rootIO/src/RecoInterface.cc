@@ -1,13 +1,10 @@
 #include "RecoInterface.h"
 
 RecoInterface::RecoTowerData::RecoTowerData(const DRsimInterface::DRsimTowerData& towerIn) {
-  theta = towerIn.towerTheta;
-  phi = towerIn.towerPhi;
+  iTheta = towerIn.iTheta;
+  iPhi = towerIn.iPhi;
   numx = towerIn.numx;
   numy = towerIn.numy;
-  innerR = towerIn.innerR;
-  towerH = towerIn.towerH;
-  dTheta = towerIn.dTheta;
 
   E_C = 0.;
   E_S = 0.;
@@ -19,10 +16,8 @@ RecoInterface::RecoTowerData::RecoTowerData(const DRsimInterface::DRsimTowerData
 }
 
 RecoInterface::RecoFiberData::RecoFiberData(const DRsimInterface::DRsimSiPMData& sipmIn) {
-  IsCerenkov = DRsimInterface::IsCerenkov(sipmIn.x,sipmIn.y);
+  fiberNum = sipmIn.SiPMnum;
   n = sipmIn.count;
-  x = sipmIn.x;
-  y = sipmIn.y;
   pos = sipmIn.pos;
 
   E = 0.;

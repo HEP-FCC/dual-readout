@@ -19,7 +19,7 @@ RecoFiber::RecoFiber() {
 void RecoFiber::reconstruct(const DRsimInterface::DRsimSiPMData& sipm, RecoInterface::RecoTowerData& recoTower) {
   RecoInterface::RecoFiberData recoFiber(sipm);
 
-  if (recoFiber.IsCerenkov) {
+  if (fSeg->IsCerenkov(recoFiber.fiberNum)) {
     recoFiber.n = cutXtalk(sipm);
     recoFiber.E = (float)recoFiber.n / fCalibC;
     recoFiber.Ecorr = recoFiber.E;
@@ -50,9 +50,9 @@ float RecoFiber::setTmax(const DRsimInterface::DRsimSiPMData& sipm) {
 }
 
 float RecoFiber::setDepth(const float tmax, const RecoInterface::RecoTowerData& recoTower) {
-  float depth = ( recoTower.innerR/300. + recoTower.towerH/fSpeed - tmax )/( fEffSpeedInv );
+  float depth = ( 1800./300. + 2000./fSpeed - tmax )/( fEffSpeedInv ); // #TODO fix hardcoding, only works at the first few towers
   if (depth < 0.) return 0.;
-  else if (depth > recoTower.towerH) return recoTower.towerH;
+  else if (depth > 2000.) return 2000.;
   else return depth;
 }
 
@@ -71,7 +71,7 @@ void RecoFiber::addFjInputs(const RecoInterface::RecoFiberData& recoFiber) {
   TVector3 vec(std::get<0>(recoFiber.pos),std::get<1>(recoFiber.pos),std::get<2>(recoFiber.pos));
   TVector3 p = recoFiber.E*vec.Unit();
 
-  if (recoFiber.IsCerenkov) {
+  if (fSeg->IsCerenkov(recoFiber.fiberNum)) {
     fFjInputs_C.push_back( fastjet::PseudoJet(p.x(),p.y(),p.z(),recoFiber.E) );
   } else {
     fFjInputs_S.push_back( fastjet::PseudoJet(p.x(),p.y(),p.z(),recoFiber.E) );

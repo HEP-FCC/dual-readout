@@ -5,6 +5,9 @@
 #include "DRsimInterface.h"
 #include "fastjet/PseudoJet.hh"
 
+#include "GeoSvc.h"
+#include "GridDRcalo.h"
+
 class RecoFiber {
 public:
   RecoFiber();
@@ -21,11 +24,15 @@ public:
   void addFjInputs(const RecoInterface::RecoFiberData& recoFiber);
   void clear();
 
+  void setSegmentation(dd4hep::DDSegmentation::GridDRcalo* seg) { fSeg = seg; }
+
 private:
   float setTmax(const DRsimInterface::DRsimSiPMData& sipm);
   float setDepth(const float tmax, const RecoInterface::RecoTowerData& recoTower);
   int cutXtalk(const DRsimInterface::DRsimSiPMData& sipm);
 
+  dd4hep::DDSegmentation::GridDRcalo* fSeg;
+  
   RecoInterface::RecoFiberData fData;
   std::vector<fastjet::PseudoJet> fFjInputs_S;
   std::vector<fastjet::PseudoJet> fFjInputs_Scorr;

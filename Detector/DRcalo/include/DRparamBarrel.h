@@ -35,11 +35,17 @@ namespace ddDRcalo {
     double GetBl2() { return fV4.X()*std::tan(fPhiZRot/2.); }
     double GetTl2() { return fV2.X()*std::tan(fPhiZRot/2.); }
 
+    double GetH2sipm() { return fCurrentOuterHalfSipm; }
+    double GetBl2sipm() { return fV4sipm.X()*std::tan(fPhiZRot/2.); }
+    double GetTl2sipm() { return fV2sipm.X()*std::tan(fPhiZRot/2.); }
+
     dd4hep::RotationZYX GetRotationZYX(int numPhi);
     dd4hep::Position GetTowerPos(int numPhi);
+    dd4hep::Position GetAssemblePos(int numPhi);
     dd4hep::Position GetSipmLayerPos(int numPhi);
 
     dd4hep::Transform3D GetTransform3D(int numPhi);
+    dd4hep::Transform3D GetAssembleTransform3D(int numPhi);
     dd4hep::Transform3D GetSipmTransform3D(int numPhi);
 
     void init();
@@ -58,11 +64,14 @@ namespace ddDRcalo {
     TVector3 fV2;
     TVector3 fV3;
     TVector3 fV4;
+    TVector3 fV2sipm;
+    TVector3 fV4sipm;
     double fSipmHeight;
 
     double fInnerY;
     double fCurrentInnerHalf;
     double fCurrentOuterHalf;
+    double fCurrentOuterHalfSipm;
   };
 }
 

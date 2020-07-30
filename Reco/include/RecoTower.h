@@ -6,6 +6,9 @@
 #include "DRsimInterface.h"
 #include "fastjet/PseudoJet.hh"
 
+#include "GeoSvc.h"
+#include "GridDRcalo.h"
+
 #include <utility>
 #include <vector>
 #include <iostream>
@@ -20,10 +23,18 @@ public:
   RecoFiber* getFiber() { return fFiber; }
   RecoInterface::RecoTowerData getTower() { return fData; }
 
+  void initialize();
+
   static float E_DR(float E_C, float E_S);
 
 private:
   int getAbsITheta(const int iTheta);
+
+  /// Pointer to the geometry service
+  GeoSvc* m_geoSvc;
+  dd4hep::DDSegmentation::GridDRcalo* fSeg;
+  /// Name of the readout
+  std::string m_readoutName;
 
   RecoFiber* fFiber;
   RecoInterface::RecoTowerData fData;
