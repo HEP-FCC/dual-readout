@@ -28,7 +28,6 @@ private:
   SimG4SaveDRcaloHits* fSaveHits;
 
   DRsimInterface::DRsimEventData* fEventData;
-  std::map<toweriTiP, DRsimInterface::DRsimEdepData> fEdepMap;
 };
 
 #endif

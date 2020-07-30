@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
   #endif
 
   // Mandatory user initialization classes
-  auto geoSvc = new GeoSvc({"/home/ko/Desktop/Study/dual-readout/install/bin/compact/DRcalo.xml"});
+  auto geoSvc = new GeoSvc({"./bin/compact/DRcalo.xml"});
 
   runManager->SetUserInitialization(geoSvc->getGeant4Geo());
 

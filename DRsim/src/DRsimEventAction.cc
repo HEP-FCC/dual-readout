@@ -41,10 +41,6 @@ void DRsimEventAction::clear() {
 void DRsimEventAction::EndOfEventAction(const G4Event* event) {
   fSaveHits->saveOutput(event);
 
-  // for (const auto& edepMap : fEdepMap) {
-  //   fEventData->Edeps.push_back(edepMap.second);
-  // }
-
   for (int iVtx = 0; iVtx < event->GetNumberOfPrimaryVertex(); iVtx++) {
     G4PrimaryVertex* vtx = event->GetPrimaryVertex(iVtx);
 

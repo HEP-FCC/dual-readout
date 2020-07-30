@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
   RootInterface<DRsimInterface::DRsimEventData>* drInterface = new RootInterface<DRsimInterface::DRsimEventData>(filename+"_"+filenum+".root");
   drInterface->set("DRsim","DRsimEventData");
 
-  auto geoSvc = new GeoSvc({"/home/ko/Desktop/Study/dual-readout/install/bin/compact/DRcalo.xml"});
+  auto geoSvc = new GeoSvc({"./bin/compact/DRcalo.xml"});
 
   RecoTower* recoTower = new RecoTower();
   recoTower->readCSV();

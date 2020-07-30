@@ -27,7 +27,6 @@ namespace ddDRcalo {
     dd4hep::OpticalSurface filterSurfProp = surfMgr.opticalSurface("/world/"+name+"#FilterSurf");
 
     auto paramBarrel = DRparamBarrel();
-    double currentTheta = 0.;
     paramBarrel.SetInnerX(x_towerDim.rmin());
     paramBarrel.SetTowerH(x_towerDim.height());
     paramBarrel.SetNumZRot(x_towerDim.nphi());

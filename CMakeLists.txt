@@ -21,6 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(HEPMC_DIR "$ENV{HEPMC_DIR}")
 set(PYTHIA_DIR "$ENV{PYTHIA_DIR}")
 set(FASTJET_DIR "$ENV{FASTJET_DIR}")
+set(BOOST_ROOT "$ENV{BOOST_ROOT}")
 
 add_subdirectory(rootIO)
 add_subdirectory(Detector)
