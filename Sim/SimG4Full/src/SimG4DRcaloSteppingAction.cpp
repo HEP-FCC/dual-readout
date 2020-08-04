@@ -94,7 +94,7 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
     if ( theTouchable->GetHistoryDepth()==2 ) isFiber = false;
 
     if ( theTouchable->GetHistoryDepth()==4 ) {
-      auto SiPMnum = fSeg->convertLast32to64( fSeg->getLast32bits( theTouchable->GetCopyNumber(1) ) );
+      auto SiPMnum = fSeg->convertLast32to64( theTouchable->GetCopyNumber() );
       fiberId64 = towerNum | SiPMnum;
 
       isFiber = true;
