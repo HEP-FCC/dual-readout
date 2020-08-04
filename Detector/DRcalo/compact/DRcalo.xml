@@ -577,7 +577,7 @@
 
   <!-- this is where we actually define our detector: -->
   <detectors>
-    <detector id="1" name="DRcaloBarrel" type="ddDRcalo" readout="DRcaloSiPMreadout">
+    <detector id="1" name="DRcaloBarrel" type="ddDRcalo" readout="DRcaloSiPMreadout" region="FastSimOpFiberRegion">
       <sensitive type="DRcaloSiPMSD"/>
       <sipmDim height="0.3*mm" material="PolyvinylChloride" vis="GenericVis">
         <sipmGlass material="DR_PyrexGlass" vis="GlassVis"/>
@@ -657,4 +657,8 @@
       <id>system:2,eta:-8,phi:9,xmax:32:6,ymax:6,x:6,y:6,c:1,module:2</id>
     </readout>
   </readouts>
+
+  <regions>
+    <region name="FastSimOpFiberRegion"/>
+  </regions>
 </lccdd>

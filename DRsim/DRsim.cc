@@ -13,6 +13,7 @@
 #include "G4UImanager.hh"
 #include "G4OpticalPhysics.hh"
 #include "G4FastSimulationPhysics.hh"
+#include "G4HadronicProcessStore.hh"
 #include "FTFP_BERT.hh"
 #include "Randomize.hh"
 
@@ -76,6 +77,9 @@ int main(int argc, char** argv) {
   visManager->Initialize();
   #endif
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
+
+  G4HadronicProcessStore::Instance()->SetVerbose(0);
+  UImanager->ApplyCommand("/process/em/verbose 0");
 
   if ( argc != 1 ) {
     // execute an argument macro file if exist

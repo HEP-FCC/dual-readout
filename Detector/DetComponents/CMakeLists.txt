@@ -2,12 +2,7 @@ project(DetComponents)
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" OFF)
-if(WITH_GEANT4_UIVIS)
-  find_package(Geant4 REQUIRED ui_all vis_all)
-else()
-  find_package(Geant4 REQUIRED)
-endif()
+find_package(Geant4 REQUIRED)
 
 include(${Geant4_USE_FILE})
 

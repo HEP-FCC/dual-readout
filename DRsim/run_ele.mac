@@ -1,5 +1,4 @@
 #This macro can not be executed standalone
-/vis/disable
 /run/numberOfThreads 1
 /run/initialize
 /run/verbose 1

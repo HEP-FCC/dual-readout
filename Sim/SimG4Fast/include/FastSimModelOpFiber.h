@@ -1,5 +1,5 @@
-#ifndef FastOpTransportModel_h
-#define FastOpTransportModel_h 1
+#ifndef FastSimModelOpFiber_h
+#define FastSimModelOpFiber_h 1
 
 #include "G4VFastSimulationModel.hh"
 #include "G4OpBoundaryProcess.hh"
@@ -7,10 +7,10 @@
 #include "G4OpBoundaryProcess.hh"
 #include "G4Material.hh"
 
-class FastOpTransportModel : public G4VFastSimulationModel {
+class FastSimModelOpFiber : public G4VFastSimulationModel {
 public:
-  FastOpTransportModel(G4String, G4Region*);
-  ~FastOpTransportModel();
+  FastSimModelOpFiber(G4String, G4Region*);
+  ~FastSimModelOpFiber();
 
   virtual G4bool IsApplicable(const G4ParticleDefinition&);
   virtual G4bool ModelTrigger(const G4FastTrack&);
@@ -25,6 +25,7 @@ private:
   bool checkTotalInternalReflection(const G4Track* track);
   G4double CalculateVelocityForOpticalPhoton(const G4Track* track);
   void setOpBoundaryProc(const G4Track* track);
+  void getCoreMaterial(const G4Track* track);
   void reset();
 
   G4GenericMessenger* fMessenger;

@@ -27,6 +27,7 @@ namespace ddDRcalo {
       fSensDet = sensDet;
       fSegmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( sensDet->readout().segmentation().segmentation() );
     }
+    void setXdet(xml_det_t* x_det) { fX_det = x_det; }
 
     void construct();
     std::pair<int,int> GetColRowFromCopyNo(int copyNo, int numx);
@@ -35,6 +36,7 @@ namespace ddDRcalo {
     void implementFibers(dd4hep::Volume& tower, dd4hep::Trap& trap);
     void implementSipms(dd4hep::Volume& sipmLayerVol);
 
+    xml_det_t* fX_det;
     xml_comp_t* fX_towerDim;
     xml_comp_t* fX_sipmDim;
     dd4hep::Assembly* fExperimentalHall;

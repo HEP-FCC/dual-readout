@@ -7,6 +7,7 @@ source /cvmfs/sft.cern.ch/lcg/releases/LCG_97a_FCC_1/Boost/1.72.0/x86_64-centos7
 source /cvmfs/sft.cern.ch/lcg/releases/LCG_97a_FCC_1/ROOT/v6.20.06/x86_64-centos7-gcc8-opt/ROOT-env.sh
 source /cvmfs/sft.cern.ch/lcg/releases/LCG_97a_FCC_1/Geant4/10.06.p02/x86_64-centos7-gcc8-opt/Geant4-env.sh
 source /cvmfs/sft.cern.ch/lcg/releases/LCG_97a_FCC_1/DD4hep/01-12-01/x86_64-centos7-gcc8-opt/DD4hep-env.sh
+source /cvmfs/sft.cern.ch/lcg/releases/LCG_97a_FCC_1/DD4hep/01-12-01/x86_64-centos7-gcc8-opt/bin/thisdd4hep.sh
 
 export BOOST_ROOT=/cvmfs/sft.cern.ch/lcg/releases/LCG_97a_FCC_1/Boost/1.72.0/x86_64-centos7-gcc8-opt
 export HEPMC_DIR=/cvmfs/sft.cern.ch/lcg/releases/LCG_97a_FCC_1/hepmc3/3.2.2/x86_64-centos7-gcc8-opt

@@ -33,6 +33,7 @@ namespace ddDRcalo {
     paramBarrel.SetSipmHeight(x_sipmDim.height());
 
     auto constructor = DRconstructor();
+    constructor.setXdet(&x_det);
     constructor.setXTowerDim(&x_towerDim);
     constructor.setExpHall(&experimentalHall);
     constructor.setDRparam(&paramBarrel);

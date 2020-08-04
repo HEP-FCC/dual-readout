@@ -1,6 +1,7 @@
 #include "DRconstructor.h"
 
 ddDRcalo::DRconstructor::DRconstructor() {
+  fX_det = nullptr;
   fX_towerDim = nullptr;
   fX_sipmDim = nullptr;
   fExperimentalHall = nullptr;
@@ -49,7 +50,7 @@ void ddDRcalo::DRconstructor::construct() {
     dd4hep::Volume sipmLayerVol( "sipmLayer", sipmLayer, fDescription->material(fX_sipmDim->materialStr()) );
     sipmLayerVol.setVisAttributes(*fDescription, fX_sipmDim->visStr());
 
-    implementSipms(sipmLayerVol);
+    implementSipms(sipmLayerVol); // too much memory consumption, need to reduce it by utilizing segmentation!
 
     for (int nPhi = 0; nPhi < fX_towerDim->nphi(); nPhi++) {
       auto towerId64 = fSegmentation->setVolumeID( fTowerNoLR, nPhi );
@@ -122,11 +123,8 @@ void ddDRcalo::DRconstructor::implementFibers(dd4hep::Volume& towerVol, dd4hep::
       coreVol.setVisAttributes(*fDescription, x_coreC.visStr());
       cladVol.placeVolume( coreVol, fiberId32 );
 
-      // fCerenRegion->AddRootLogicalVolume(cladLogical);
-      // fCerenRegion->AddRootLogicalVolume(coreLogical);
-      // cladLogical->SetRegion(fCerenRegion);
-      // coreLogical->SetRegion(fCerenRegion);
-
+      coreVol.setRegion(*fDescription, fX_det->regionStr());
+      cladVol.setRegion(*fDescription, fX_det->regionStr());
     } else { // s fibre
       dd4hep::IntersectionSolid intersectClad("cladS",fiber,trap,trans);
       dd4hep::Volume cladVol("cladS", intersectClad, fDescription->material(x_coreC.materialStr()));
@@ -138,11 +136,8 @@ void ddDRcalo::DRconstructor::implementFibers(dd4hep::Volume& towerVol, dd4hep::
       coreVol.setVisAttributes(*fDescription, x_coreS.visStr());
       cladVol.placeVolume( coreVol, fiberId32 );
 
-      // fScintRegion->AddRootLogicalVolume(cladLogical);
-      // fScintRegion->AddRootLogicalVolume(coreLogical);
-      // cladLogical->SetRegion(fScintRegion);
-      // coreLogical->SetRegion(fScintRegion);
-
+      coreVol.setRegion(*fDescription, fX_det->regionStr());
+      cladVol.setRegion(*fDescription, fX_det->regionStr());
     }
   }
 }

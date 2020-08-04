@@ -1,11 +1,11 @@
-#include "FastOpTransportModel.hh"
+#include "FastSimModelOpFiber.h"
 
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTypes.hh"
 #include "G4ProcessManager.hh"
 #include "G4OpProcessSubType.hh"
 
-FastOpTransportModel::FastOpTransportModel(G4String name, G4Region* envelope)
+FastSimModelOpFiber::FastSimModelOpFiber(G4String name, G4Region* envelope)
 : G4VFastSimulationModel(name,envelope) {
   fOpBoundaryProc = NULL;
   fCoreMaterial = NULL;
@@ -23,14 +23,16 @@ FastOpTransportModel::FastOpTransportModel(G4String name, G4Region* envelope)
   DefineCommands();
 }
 
-FastOpTransportModel::~FastOpTransportModel() {}
+FastSimModelOpFiber::~FastSimModelOpFiber() {}
 
-G4bool FastOpTransportModel::IsApplicable(const G4ParticleDefinition& type) {
+G4bool FastSimModelOpFiber::IsApplicable(const G4ParticleDefinition& type) {
   return &type == G4OpticalPhoton::OpticalPhotonDefinition();
 }
 
-G4bool FastOpTransportModel::ModelTrigger(const G4FastTrack& fasttrack) {
+G4bool FastSimModelOpFiber::ModelTrigger(const G4FastTrack& fasttrack) {
   const G4Track* track = fasttrack.GetPrimaryTrack();
+
+  getCoreMaterial(track);
 
   auto matPropTable = fCoreMaterial->GetMaterialPropertiesTable();
 
@@ -87,7 +89,7 @@ G4bool FastOpTransportModel::ModelTrigger(const G4FastTrack& fasttrack) {
   return true;
 }
 
-void FastOpTransportModel::DoIt(const G4FastTrack& fasttrack, G4FastStep& faststep) {
+void FastSimModelOpFiber::DoIt(const G4FastTrack& fasttrack, G4FastStep& faststep) {
   auto track = fasttrack.GetPrimaryTrack();
 
   if (fKill) {
@@ -113,7 +115,7 @@ void FastOpTransportModel::DoIt(const G4FastTrack& fasttrack, G4FastStep& fastst
   return;
 }
 
-bool FastOpTransportModel::checkTotalInternalReflection(const G4Track* track) {
+bool FastSimModelOpFiber::checkTotalInternalReflection(const G4Track* track) {
   if (!fProcAssigned) { // locate OpBoundaryProcess only once
     setOpBoundaryProc(track);
   }
@@ -136,7 +138,7 @@ bool FastOpTransportModel::checkTotalInternalReflection(const G4Track* track) {
   return false;
 }
 
-void FastOpTransportModel::setOpBoundaryProc(const G4Track* track) {
+void FastSimModelOpFiber::setOpBoundaryProc(const G4Track* track) {
   G4ProcessManager* pm = track->GetDefinition()->GetProcessManager();
   auto postStepProcessVector = pm->GetPostStepProcessVector();
 
@@ -154,7 +156,7 @@ void FastOpTransportModel::setOpBoundaryProc(const G4Track* track) {
   return;
 }
 
-G4double FastOpTransportModel::CalculateVelocityForOpticalPhoton(const G4Track* track) {
+G4double FastSimModelOpFiber::CalculateVelocityForOpticalPhoton(const G4Track* track) {
   G4double velocity = CLHEP::c_light;
   G4bool update_groupvel = false;
   G4MaterialPropertyVector* groupvel = nullptr;
@@ -180,7 +182,19 @@ G4double FastOpTransportModel::CalculateVelocityForOpticalPhoton(const G4Track* 
   return velocity;
 }
 
-void FastOpTransportModel::reset() {
+void FastSimModelOpFiber::getCoreMaterial(const G4Track* track) {
+  auto physVol = track->GetVolume();
+  auto logVol = physVol->GetLogicalVolume();
+
+  if ( logVol->GetNoDaughters()==0 ) {
+    fCoreMaterial = logVol->GetMaterial();
+  } else {
+    auto corePhys = logVol->GetDaughter(0);
+    fCoreMaterial = corePhys->GetLogicalVolume()->GetMaterial();
+  }
+}
+
+void FastSimModelOpFiber::reset() {
   fTrkLength = 0.;
   fNtransport = 0.;
   fTransportUnit = 0.;
@@ -190,7 +204,7 @@ void FastOpTransportModel::reset() {
   fTrackId = 0;
 }
 
-void FastOpTransportModel::DefineCommands() {
+void FastSimModelOpFiber::DefineCommands() {
   fMessenger = new G4GenericMessenger(this, "/DRsim/fastOp/", "fast Op transport model control");
   G4GenericMessenger::Command& safetyCmd = fMessenger->DeclareProperty("safety",fSafety,"min number of total internal reflection");
   safetyCmd.SetParameterName("safety",true);

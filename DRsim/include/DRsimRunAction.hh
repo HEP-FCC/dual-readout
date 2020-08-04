@@ -4,6 +4,7 @@
 #include "RootInterface.h"
 #include "DRsimInterface.h"
 #include "HepMCG4Reader.hh"
+#include "SimG4FastSimOpFiberRegion.h"
 
 #include "G4UserRunAction.hh"
 #include "globals.hh"
@@ -26,6 +27,7 @@ private:
   G4int fSeed;
   G4String fFilename;
   G4bool fUseHepMC;
+  SimG4FastSimOpFiberRegion* fOpFiberRegion;
 };
 
 #endif

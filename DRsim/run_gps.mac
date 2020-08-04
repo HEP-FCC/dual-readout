@@ -1,7 +1,6 @@
 #This macro can not be executed standalone
 /DRsim/action/useGPS True
 
-/vis/disable
 /run/numberOfThreads 1
 /run/verbose 1
 /run/initialize

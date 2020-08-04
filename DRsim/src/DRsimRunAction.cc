@@ -50,9 +50,15 @@ DRsimRunAction::~DRsimRunAction() {
 }
 
 void DRsimRunAction::BeginOfRunAction(const G4Run*) {
-
+  // Mimic SimG4Svc
+  if (!IsMaster()) {
+    fOpFiberRegion = new SimG4FastSimOpFiberRegion();
+    fOpFiberRegion->create();
+  }
 }
 
 void DRsimRunAction::EndOfRunAction(const G4Run*) {
-
+  if (!IsMaster()) {
+    if (fOpFiberRegion) delete fOpFiberRegion;
+  }
 }
