@@ -29,4 +29,4 @@ add_subdirectory(DRsim)
 add_subdirectory(Sim)
 add_subdirectory(Gen)
 add_subdirectory(Reco)
-#add_subdirectory(analysis) # removed temporarily
+add_subdirectory(analysis)

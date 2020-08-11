@@ -171,6 +171,10 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
   dd4hep::Volume filterVol( "filter", filterBox, fDescription->material(x_filter.materialStr()) );
   filterVol.setVisAttributes(*fDescription, x_filter.visStr());
 
+  dd4hep::Box dummyBox( sipmSize/2., sipmSize/2., x_filter.height()/2. );
+  dd4hep::Volume dummyVol( "dummy", dummyBox, fDescription->material(x_glass.materialStr()) );
+  dummyVol.setVisAttributes(*fDescription, fX_sipmDim->visStr());
+
   for (unsigned int j = 0; j < fGridX.size(); j++) {
     auto colrow = GetColRowFromCopyNo(static_cast<int>(j), fNumx);
     int column = colrow.first;
@@ -180,8 +184,7 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
     int sipmId32 = fSegmentation->getLast32bits(sipmId64);
 
     dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
-    dd4hep::Position pos = dd4hep::Position(fGridX.at(j),fGridY.at(j),-x_filter.height()/2.);
-    if ( !fSegmentation->IsCerenkov(column,row) ) pos = dd4hep::Position(fGridX.at(j),fGridY.at(j),x_filter.height()/2.);
+    dd4hep::Position pos = dd4hep::Position(fGridX.at(j),fGridY.at(j),x_filter.height()/2.);
     dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
 
     auto sipmEnvelopPlaced = sipmLayerVol.placeVolume( sipmEnvelopVol, sipmId32, trans );
@@ -200,6 +203,11 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
 
       dd4hep::PlacedVolume filterPlaced = sipmLayerVol.placeVolume( filterVol, sipmId32, transFilter );
       dd4hep::BorderSurface(*fDescription, *fDetElement, "FilterSurf_Tower"+std::to_string(fTowerNoLR)+"SiPM"+std::to_string(j), *fFilterSurf, filterPlaced, sipmEnvelopPlaced);
+    } else { // c channel
+      dd4hep::Position posDummy = dd4hep::Position(fGridX.at(j),fGridY.at(j),-sipmHeight/2.);
+      dd4hep::Transform3D transDummy = dd4hep::Transform3D(rot,posDummy);
+
+      sipmLayerVol.placeVolume( dummyVol, sipmId32, transDummy );
     }
   }
 }

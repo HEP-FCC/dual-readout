@@ -3,6 +3,9 @@
 #include "DRsimInterface.h"
 #include "functions.h"
 
+#include "GeoSvc.h"
+#include "GridDRcalo.h"
+
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TH1.h"
@@ -20,6 +23,21 @@ int main(int argc, char* argv[]) {
   TString filename = argv[1];
   float low = std::stof(argv[2]);
   float high = std::stof(argv[3]);
+
+  auto geoSvc = new GeoSvc({"./bin/compact/DRcalo.xml"});
+
+  auto m_geoSvc = GeoSvc::GetInstance();
+  std::string m_readoutName = "DRcaloSiPMreadout";
+
+  auto lcdd = m_geoSvc->lcdd();
+  auto allReadouts = lcdd->readouts();
+  if (allReadouts.find(m_readoutName) == allReadouts.end()) {
+    throw std::runtime_error("Readout " + m_readoutName + " not found! Please check tool configuration.");
+  } else {
+    std::cout << "Reading EDM from the collection " << m_readoutName << std::endl;
+  }
+
+  auto segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(m_readoutName).segmentation().segmentation());
 
   gStyle->SetOptFit(1);
 
@@ -101,7 +119,7 @@ int main(int argc, char* argv[]) {
 
     for (auto tower = drEvt.towers.begin(); tower != drEvt.towers.end(); ++tower) {
       for (auto sipm = tower->SiPMs.begin(); sipm != tower->SiPMs.end(); ++sipm) {
-        if ( DRsimInterface::IsCerenkov(sipm->x,sipm->y) ) {
+        if ( segmentation->IsCerenkov(sipm->SiPMnum) ) {
           tNhit_C->Fill(sipm->count);
 
           for (const auto timepair : sipm->timeStruct) {
@@ -134,10 +152,10 @@ int main(int argc, char* argv[]) {
     E_Ss.push_back(E_Scorr);
     E_Cs.push_back(evt.E_C);
 
-    if (Pleak > 3000.) {
-      nLeak++;
-      continue;
-    }
+    // if (Pleak > 3000.) {
+    //   nLeak++;
+    //   continue;
+    // }
 
     tEdep_noLeak->Fill(Edep);
 
@@ -235,4 +253,16 @@ int main(int argc, char* argv[]) {
   tWav_S->Draw("Hist"); c->SaveAs(filename+"_wavS.png");
   tNhit_C->Draw("Hist"); c->SaveAs(filename+"_nhitC.png");
   tNhit_S->Draw("Hist"); c->SaveAs(filename+"_nhitS.png");
+
+  TFile* validFile = new TFile(filename+"_validation.root","RECREATE");
+
+  validFile->WriteTObject(tT_C);
+  validFile->WriteTObject(tT_S);
+  validFile->WriteTObject(tWav_C);
+  validFile->WriteTObject(tWav_S);
+  validFile->WriteTObject(tNhit_C);
+  validFile->WriteTObject(tNhit_S);
+  validFile->WriteTObject(tEdep);
+
+  validFile->Close();
 }
