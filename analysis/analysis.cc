@@ -19,12 +19,12 @@
 #include <iostream>
 #include <string>
 
-int main(int argc, char* argv[]) {
+int main(int , char* argv[]) {
   TString filename = argv[1];
   float low = std::stof(argv[2]);
   float high = std::stof(argv[3]);
 
-  auto geoSvc = new GeoSvc({"./bin/compact/DRcalo.xml"});
+  new GeoSvc({"./bin/compact/DRcalo.xml"});
 
   auto m_geoSvc = GeoSvc::GetInstance();
   std::string m_readoutName = "DRcaloSiPMreadout";

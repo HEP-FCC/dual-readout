@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 
-int main(int argc, char* argv[]) {
+int main(int , char* argv[]) {
   std::string filenum = std::string(argv[1]);
   std::string filename = std::string(argv[2]);
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
   RootInterface<DRsimInterface::DRsimEventData>* drInterface = new RootInterface<DRsimInterface::DRsimEventData>(filename+"_"+filenum+".root");
   drInterface->set("DRsim","DRsimEventData");
 
-  auto geoSvc = new GeoSvc({"./bin/compact/DRcalo.xml"});
+  new GeoSvc({"./bin/compact/DRcalo.xml"});
 
   RecoTower* recoTower = new RecoTower();
   recoTower->readCSV();

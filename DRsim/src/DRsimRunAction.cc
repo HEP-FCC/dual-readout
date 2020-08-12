@@ -3,6 +3,11 @@
 #include "G4AutoLock.hh"
 #include "G4Threading.hh"
 
+#include "G4EmSaturation.hh"
+#include "G4LossTableManager.hh"
+#include "G4Material.hh"
+#include "G4SystemOfUnits.hh"
+
 #include <vector>
 
 using namespace std;
@@ -54,6 +59,12 @@ void DRsimRunAction::BeginOfRunAction(const G4Run*) {
   if (!IsMaster()) {
     fOpFiberRegion = new SimG4FastSimOpFiberRegion();
     fOpFiberRegion->create();
+  }
+
+  if ( G4Threading::IsMasterThread() ) {
+    G4Material::GetMaterial("DR_Polystyrene")->GetIonisation()->SetBirksConstant(0.126*mm/MeV); // makeshift for DD4hep
+    auto* emSaturation = G4LossTableManager::Instance()->EmSaturation();
+    emSaturation->DumpBirksCoefficients();
   }
 }
 
