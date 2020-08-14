@@ -1,6 +1,7 @@
 #include "GridDRcalo.h"
 
 #include <climits>
+#include <cmath>
 
 namespace dd4hep {
 namespace DDSegmentation {
@@ -45,12 +46,17 @@ Vector3D GridDRcalo::position(const CellID& cID) const { // #TODO retrieve posit
 }
 
 /// determine the cell ID based on the position
-CellID GridDRcalo::cellID(const Vector3D& /* localPosition */, const Vector3D& globalPosition, const VolumeID& vID) const { // #TODO retrieve cell ID by position
-  // CellID cID = vID;
-  // double lEta = etaFromXYZ(globalPosition);
-  // _decoder->set(cID, m_etaID, positionToBin(lEta, m_gridSizeEta, m_offsetEta));
-  // return cID;
-  return vID;
+CellID GridDRcalo::cellID(const Vector3D& localPosition, const Vector3D& /*globalPosition*/, const VolumeID& vID) const {
+  int numx = numX(vID);
+  int numy = numY(vID);
+
+  auto localX = localPosition.x();
+  auto localY = localPosition.y();
+
+  int x = std::floor( ( localX + ( numx%2==0 ? 0. : fGridSize/2. ) ) / fGridSize ) + numx/2;
+  int y = std::floor( ( localY + ( numy%2==0 ? 0. : fGridSize/2. ) ) / fGridSize ) + numy/2;
+
+  return setCellID( numEta(vID), numPhi(vID), numx, numy, x, y );
 }
 
 VolumeID GridDRcalo::setVolumeID(int numEta, int numPhi) const {
@@ -66,7 +72,7 @@ VolumeID GridDRcalo::setVolumeID(int numEta, int numPhi) const {
   return vID;
 }
 
-VolumeID GridDRcalo::setVolumeID(int numEta, int numPhi, int numX, int numY, int x, int y) const {
+CellID GridDRcalo::setCellID(int numEta, int numPhi, int numX, int numY, int x, int y) const {
   VolumeID numEtaId = static_cast<VolumeID>(numEta);
   VolumeID numPhiId = static_cast<VolumeID>(numPhi);
   VolumeID numXId = static_cast<VolumeID>(numX);

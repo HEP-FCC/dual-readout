@@ -62,7 +62,7 @@ void DRsimRunAction::BeginOfRunAction(const G4Run*) {
   }
 
   if ( G4Threading::IsMasterThread() ) {
-    G4Material::GetMaterial("DR_Polystyrene")->GetIonisation()->SetBirksConstant(0.126*mm/MeV); // makeshift for DD4hep
+    G4Material::GetMaterial("DR_Polystyrene")->GetIonisation()->SetBirksConstant(0.126*mm/MeV); // makeshift for DD4hep #TODO ask DD4hep authors to implement SetBirksConstant()
     auto* emSaturation = G4LossTableManager::Instance()->EmSaturation();
     emSaturation->DumpBirksCoefficients();
   }

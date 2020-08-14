@@ -1,5 +1,6 @@
 #include "DRparamBarrel.h"
 #include "DRconstructor.h"
+#include "GridDRcaloHandle.h"
 
 #include "DD4hep/DetFactoryHelper.h"
 #include "DD4hep/OpticalSurfaces.h"
@@ -25,6 +26,9 @@ namespace ddDRcalo {
     dd4hep::OpticalSurfaceManager surfMgr = description.surfaceManager();
     dd4hep::OpticalSurface sipmSurfProp = surfMgr.opticalSurface("/world/"+name+"#SiPMSurf");
     dd4hep::OpticalSurface filterSurfProp = surfMgr.opticalSurface("/world/"+name+"#FilterSurf");
+
+    auto segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( sensDet.readout().segmentation().segmentation() );
+    segmentation->setGridSize( x_towerDim.distance() );
 
     auto paramBarrel = DRparamBarrel();
     paramBarrel.SetInnerX(x_towerDim.rmin());

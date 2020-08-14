@@ -40,7 +40,9 @@ namespace dd4hep {
     }
 
     inline VolumeID setVolumeID(int numEta, int numPhi) const { return access()->implementation->setVolumeID(numEta,numPhi); }
-    inline VolumeID setVolumeID(int numEta, int numPhi, int numX, int numY, int x, int y) const { return access()->implementation->setVolumeID(numEta, numPhi, numX, numY, x, y); }
+    inline CellID setCellID(int numEta, int numPhi, int numX, int numY, int x, int y) const { return access()->implementation->setCellID(numEta, numPhi, numX, numY, x, y); }
+
+    inline void setGridSize(double grid) { access()->implementation->setGridSize(grid); }
 
     // Get the identifier number of a mother tower in eta or phi direction
     inline int numEta(const CellID& aCellID) const { return access()->implementation->numEta(aCellID); }

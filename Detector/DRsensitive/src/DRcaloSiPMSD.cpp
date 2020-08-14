@@ -9,6 +9,12 @@
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTypes.hh"
 
+#ifdef HAVE_GEANT4_UNITS
+#define MM_2_CM 1.0
+#else
+#define MM_2_CM 0.1
+#endif
+
 ddDRcalo::DRcaloSiPMSD::DRcaloSiPMSD(const std::string aName, const std::string aReadoutName, const dd4hep::Segmentation& aSeg)
 : G4VSensitiveDetector(aName), fHitCollection(0), fHCID(-1),
 fWavBin(120), fTimeBin(600), fWavlenStart(900.), fWavlenEnd(300.), fTimeStart(10.), fTimeEnd(70.)
@@ -32,9 +38,15 @@ G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
 
   auto theTouchable = step->GetPostStepPoint()->GetTouchable();
 
-  auto towerNum = fSeg->convertFirst32to64( theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 ) );
-  auto SiPMnum = fSeg->convertLast32to64( theTouchable->GetCopyNumber(1) );
-  auto volId = towerNum | SiPMnum;
+  dd4hep::sim::Geant4VolumeManager volMgr = dd4hep::sim::Geant4Mapping::instance().volumeManager();
+  dd4hep::VolumeID volID = volMgr.volumeID(theTouchable);
+
+  G4ThreeVector global = step->GetPostStepPoint()->GetPosition();
+  G4ThreeVector local = theTouchable->GetHistory()->GetTopTransform().TransformPoint( global );
+  dd4hep::Position loc(local.x() * MM_2_CM, local.y() * MM_2_CM, local.z() * MM_2_CM);
+  dd4hep::Position glob(global.x() * MM_2_CM, global.y() * MM_2_CM, global.z() * MM_2_CM);
+
+  auto cID = fSeg->cellID(loc, glob, volID);
 
   G4int nofHits = fHitCollection->entries();
   G4double hitTime = step->GetPostStepPoint()->GetGlobalTime();
@@ -43,7 +55,7 @@ G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
   ddDRcalo::DRcaloSiPMHit* hit = NULL;
 
   for (G4int i = 0; i < nofHits; i++) {
-    if ( (*fHitCollection)[i]->GetSiPMnum()==volId ) {
+    if ( (*fHitCollection)[i]->GetSiPMnum()==cID ) {
       hit = (*fHitCollection)[i];
       break;
     }
@@ -54,7 +66,7 @@ G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
 
     G4ThreeVector pos = step->GetPostStepPoint()->GetTouchableHandle()->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0.,0.,0.));
 
-    hit->SetSiPMnum(volId);
+    hit->SetSiPMnum(cID);
     hit->SetSiPMpos( dd4hep::Position(pos.x(),pos.y(),pos.z()) ); // CLHEP::Hep3Vector to ROOT::Math::XYZVector
 
     fHitCollection->insert(hit);

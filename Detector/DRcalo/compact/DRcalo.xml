@@ -579,7 +579,7 @@
   <detectors>
     <detector id="1" name="DRcaloBarrel" type="ddDRcalo" readout="DRcaloSiPMreadout" region="FastSimOpFiberRegion">
       <sensitive type="DRcaloSiPMSD"/>
-      <sipmDim height="0.31*mm" material="PolyvinylChloride" vis="GenericVis">
+      <sipmDim height="0.3*mm" material="PolyvinylChloride" vis="GenericVis">
         <sipmGlass material="DR_PyrexGlass" vis="GlassVis"/>
         <sipmWafer height="0.01*mm" material="Silicon" vis="WaferVis" sensitive="true"/>
         <filter height="0.01*mm" material="Gelatin" vis="filterVis"/>

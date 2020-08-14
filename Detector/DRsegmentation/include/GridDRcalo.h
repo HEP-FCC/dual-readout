@@ -30,7 +30,9 @@ public:
                         const VolumeID& aVolumeID) const;
 
   VolumeID setVolumeID(int numEta, int numPhi) const;
-  VolumeID setVolumeID(int numEta, int numPhi, int numX, int numY, int x, int y) const;
+  CellID setCellID(int numEta, int numPhi, int numX, int numY, int x, int y) const;
+
+  void setGridSize(double grid) { fGridSize = grid; }
 
   // Get the identifier number of a mother tower in eta or phi direction
   int numEta(const CellID& aCellID) const;
@@ -97,6 +99,8 @@ protected:
   std::string fYId;
   std::string fIsCerenkovId;
   std::string fModule;
+
+  double fGridSize;
 };
 }
 }
