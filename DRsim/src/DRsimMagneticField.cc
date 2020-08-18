@@ -4,11 +4,11 @@
 #include "G4SystemOfUnits.hh"
 #include "globals.hh"
 
-DRsimMagneticField::DRsimMagneticField(G4int Bnum)
+DRsimMagneticField::DRsimMagneticField()
 : G4MagneticField(), fMessenger(0), fBy(0.5*tesla)
 {
   // define commands for this class
-  DefineCommands(Bnum);
+  DefineCommands();
 }
 
 DRsimMagneticField::~DRsimMagneticField() {
@@ -21,7 +21,7 @@ void DRsimMagneticField::GetFieldValue(const G4double [4],double *bField) const 
   bField[2] = 0.;
 }
 
-void DRsimMagneticField::DefineCommands(G4int Bnum) {
+void DRsimMagneticField::DefineCommands() {
   // Define /DRsim/field command directory using generic messenger class
   fMessenger = new G4GenericMessenger(this, "/DRsim/Magneticfield/", "Field control");
 

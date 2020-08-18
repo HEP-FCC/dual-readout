@@ -8,7 +8,7 @@ class G4GenericMessenger;
 
 class DRsimMagneticField : public G4MagneticField {
 public:
-  DRsimMagneticField(G4int);
+  DRsimMagneticField();
   virtual ~DRsimMagneticField();
 
   virtual void GetFieldValue(const G4double point[4],double* bField ) const;
@@ -17,7 +17,7 @@ public:
   G4double GetField() const { return fBy; }
 
 private:
-  void DefineCommands(G4int);
+  void DefineCommands();
 
   G4GenericMessenger* fMessenger;
   G4double fBy;

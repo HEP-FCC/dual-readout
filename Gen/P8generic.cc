@@ -45,7 +45,6 @@ int main(int argc, char* argv[]) {
   // Generator.
   Pythia pythia;
   Event& event      = pythia.event;
-  ParticleData& pdt = pythia.particleData;
 
   // Read in commands from external file.
   pythia.readFile(argv[1]);

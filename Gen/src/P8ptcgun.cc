@@ -5,7 +5,7 @@ P8ptcgun::P8ptcgun(int id, double ee, double thetaIn, double phiIn)
 
 P8ptcgun::~P8ptcgun() {}
 
-void P8ptcgun::fillResonance(Event& event, ParticleData& pdt, Rndm& rndm, bool atRest = false) {
+void P8ptcgun::fillResonance(Event& event, ParticleData& pdt, Rndm& /*rndm*/, bool atRest = false) {
 
   // Reset event record to allow for new event.
   event.reset();
@@ -30,7 +30,7 @@ void P8ptcgun::fillResonance(Event& event, ParticleData& pdt, Rndm& rndm, bool a
   event.append( fId, 1, 0, 0, pp * sThe * cos(phi), pp * sThe * sin(phi), pp * cThe, fE, mm);
 }
 
-void P8ptcgun::fillParton(Event& event, ParticleData& pdt, Rndm& rndm, bool atRest = false, double scale = 20.) {
+void P8ptcgun::fillParton(Event& event, ParticleData& pdt, Rndm& /*rndm*/, bool atRest = false, double scale = 20.) {
 
   // Reset event record to allow for new event.
   event.reset();

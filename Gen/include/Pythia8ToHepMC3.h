@@ -67,7 +67,7 @@ public:
         std::vector<GenParticlePtr> hepevt_particles;
         hepevt_particles.reserve( pyev.size() );
 
-        for(size_t i=0; i<pyev.size(); ++i) {
+        for(int i=0; i<pyev.size(); ++i) {
             hepevt_particles.push_back( std::make_shared<GenParticle>( FourVector( pyev[i].px(), pyev[i].py(),
                                         pyev[i].pz(), pyev[i].e() ),
                                         pyev[i].id(), pyev[i].statusHepMC() )
@@ -78,7 +78,7 @@ public:
         // 3. Fill vertex information
         std::vector<GenVertexPtr> vertex_cache;
 
-        for(size_t  i=1; i<pyev.size(); ++i) {
+        for(int i=1; i<pyev.size(); ++i) {
 
             std::vector<int> mothers = pyev[i].motherList();
 
@@ -113,7 +113,7 @@ public:
         // Add particles and vertices in topological order
         evt->add_tree( beam_particles );
         //Attributes should be set after adding the particles to event
-        for(size_t  i=0; i<pyev.size(); ++i) {
+        for(int i=0; i<pyev.size(); ++i) {
             /* TODO: Set polarization */
             // Colour flow uses index 1 and 2.
             int colType = pyev[i].colType();
@@ -133,7 +133,7 @@ public:
         // 4. Check for particles which come from nowhere, i.e. are without
         // mothers or daughters. These need to be attached to a vertex, or else
         // they will never become part of the event.
-        for (size_t  i = 1; i < pyev.size(); ++i) {
+        for (int i = 1; i < pyev.size(); ++i) {
 
             // Check for particles not added to the event
             // NOTE: We have to check if this step makes any sense in HepMC event standard
