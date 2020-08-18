@@ -48,7 +48,6 @@ namespace ddDRcalo {
     dd4hep::OpticalSurface* fFilterSurf;
     dd4hep::DDSegmentation::GridDRcalo* fSegmentation;
 
-    std::vector<float> fGridX, fGridY;
     int fNumx, fNumy;
     int fTowerNoLR;
   };

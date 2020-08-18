@@ -2,6 +2,8 @@
 
 #include "Math/GenVector/RotationZYX.h"
 
+ddDRcalo::DRparamBarrel* ddDRcalo::DRparamBarrel::fInstance = 0;
+
 ddDRcalo::DRparamBarrel::DRparamBarrel() {
   fIsRHS = 0;
   fPhiZRot = 0.;
@@ -21,9 +23,18 @@ ddDRcalo::DRparamBarrel::DRparamBarrel() {
   fInnerY = 0.;
   fCurrentInnerHalf = 0.;
   fCurrentOuterHalf = 0.;
+  fFilled = false;
+
+  if (fInstance==0) {
+    fInstance = this;
+  }
 }
 
 ddDRcalo::DRparamBarrel::~DRparamBarrel() {}
+
+ddDRcalo::DRparamBarrel* ddDRcalo::DRparamBarrel::GetInstance() {
+  return fInstance;
+}
 
 void ddDRcalo::DRparamBarrel::init() {
   fCurrentInnerR = fInnerX/std::cos(fThetaOfCenter);
@@ -70,6 +81,11 @@ void ddDRcalo::DRparamBarrel::init() {
     0.,
     std::sin(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)+std::cos(fThetaOfCenter)*(fCurrentInnerR+fTowerH+fSipmHeight)*std::tan(fDeltaTheta/2.)
   );
+
+  if (!fFilled) {
+    fDeltaThetaVec.push_back(fDeltaTheta);
+    fThetaOfCenterVec.push_back(fThetaOfCenter);
+  }
 }
 
 dd4hep::RotationZYX ddDRcalo::DRparamBarrel::GetRotationZYX(int numPhi) {

@@ -14,12 +14,10 @@ public:
   /// destructor
   virtual ~GridDRcalo() = default;
 
-  /**  Determine the global position based on the cell ID.
-   *   @warning This segmentation has no knowledge of radius, so radius = 1 is taken into calculations.
-   *   @param[in] aCellId ID of a cell.
-   *   return Position (radius = 1). #TODO modify description
-   */
+  //  Determine the global(local) position based on the cell ID.
   virtual Vector3D position(const CellID& aCellID) const;
+  Vector3D localPosition(const CellID& aCellID) const;
+  Vector3D localPosition(int numx, int numy, int x_, int y_) const;
   /**  Determine the cell ID based on the position.
    *   @param[in] aLocalPosition (not used).
    *   @param[in] aGlobalPosition position in the global coordinates.

@@ -45,6 +45,22 @@ Vector3D GridDRcalo::position(const CellID& cID) const { // #TODO retrieve posit
   return cellPosition;
 }
 
+Vector3D GridDRcalo::localPosition(const CellID& cID) const {
+  int numx = numX(cID);
+  int numy = numY(cID);
+  int x_ = x(cID);
+  int y_ = y(cID);
+
+  return localPosition(numx,numy,x_,y_);
+}
+
+Vector3D GridDRcalo::localPosition(int numx, int numy, int x_, int y_) const {
+  float ptX = -fGridSize*static_cast<float>(numx/2) + static_cast<float>(x_)*fGridSize + ( numx%2==0 ? fGridSize/2. : 0. );
+  float ptY = -fGridSize*static_cast<float>(numy/2) + static_cast<float>(y_)*fGridSize + ( numy%2==0 ? fGridSize/2. : 0. );
+
+  return Vector3D(ptX,ptY,0.);
+}
+
 /// determine the cell ID based on the position
 CellID GridDRcalo::cellID(const Vector3D& localPosition, const Vector3D& /*globalPosition*/, const VolumeID& vID) const {
   int numx = numX(vID);

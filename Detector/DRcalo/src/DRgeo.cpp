@@ -30,17 +30,17 @@ namespace ddDRcalo {
     auto segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( sensDet.readout().segmentation().segmentation() );
     segmentation->setGridSize( x_towerDim.distance() );
 
-    auto paramBarrel = DRparamBarrel();
-    paramBarrel.SetInnerX(x_towerDim.rmin());
-    paramBarrel.SetTowerH(x_towerDim.height());
-    paramBarrel.SetNumZRot(x_towerDim.nphi());
-    paramBarrel.SetSipmHeight(x_sipmDim.height());
+    auto paramBarrel = new DRparamBarrel();
+    paramBarrel->SetInnerX(x_towerDim.rmin());
+    paramBarrel->SetTowerH(x_towerDim.height());
+    paramBarrel->SetNumZRot(x_towerDim.nphi());
+    paramBarrel->SetSipmHeight(x_sipmDim.height());
 
     auto constructor = DRconstructor();
     constructor.setXdet(&x_det);
     constructor.setXTowerDim(&x_towerDim);
     constructor.setExpHall(&experimentalHall);
-    constructor.setDRparam(&paramBarrel);
+    constructor.setDRparam(paramBarrel);
     constructor.setDescription(&description);
     constructor.setXSipmDim(&x_sipmDim);
     constructor.setDetElement(&drDet);
@@ -48,10 +48,11 @@ namespace ddDRcalo {
     constructor.setFilterSurf(&filterSurfProp);
     constructor.setSensDet(&sensDet);
 
-    paramBarrel.SetIsRHS(true);
+    paramBarrel->SetIsRHS(true);
     constructor.construct(); // Barrel right
+    paramBarrel->filled();
 
-    paramBarrel.SetIsRHS(false);
+    paramBarrel->SetIsRHS(false);
     constructor.construct(); // Barrel left
 
     dd4hep::PlacedVolume hallPlace = description.pickMotherVolume(drDet).placeVolume(experimentalHall);

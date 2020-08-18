@@ -31,7 +31,7 @@ void ddDRcalo::DRconstructor::construct() {
     currentTheta += x_deltaTheta.deltatheta();
     fParamBarrel->SetThetaOfCenter(currentToC);
     fParamBarrel->init();
-    fTowerNoLR = fParamBarrel->GetIsRHS() ? towerNo : -towerNo-1;
+    fTowerNoLR = fParamBarrel->signedTowerNo(towerNo);
 
     dd4hep::Trap assemblyEnvelop( (fX_towerDim->height()+fParamBarrel->GetSipmHeight())/2., 0., 0., fParamBarrel->GetH1(), fParamBarrel->GetBl1(), fParamBarrel->GetTl1(), 0.,
                                   fParamBarrel->GetH2sipm(), fParamBarrel->GetBl2sipm(), fParamBarrel->GetTl2sipm(), 0. );
@@ -104,56 +104,44 @@ void ddDRcalo::DRconstructor::implementFibers(dd4hep::Volume& towerVol, dd4hep::
   fNumx = static_cast<int>( std::floor( ( fParamBarrel->GetBl2()*2. - sipmSize )/gridSize ) ) + 1; // in eta direction
   fNumy = static_cast<int>( std::floor( ( fParamBarrel->GetH2()*2. - sipmSize )/gridSize ) ) + 1; // in phi direction
 
-  fGridX.clear();
-  fGridY.clear();
+  for (int row = 0; row < fNumy; row++) {
+    for (int column = 0; column < fNumx; column++) {
+      auto localPosition = fSegmentation->localPosition(fNumx,fNumy,column,row);
 
-  for (int j = 0; j < fNumy; j++) {
-    for (int k = 0; k < fNumx; k++) {
-      float ptX = -gridSize*static_cast<float>(fNumx/2) + static_cast<float>(k)*gridSize + ( fNumx%2==0 ? gridSize/2. : 0. );
-      float ptY = -gridSize*static_cast<float>(fNumy/2) + static_cast<float>(j)*gridSize + ( fNumy%2==0 ? gridSize/2. : 0. );
-      fGridX.push_back(ptX);
-      fGridY.push_back(ptY);
-    }
-  }
+      dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
+      dd4hep::Position pos = dd4hep::Position(localPosition);
+      dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
 
-  for (unsigned int j = 0; j < fGridX.size(); j++) {
-    auto colrow = GetColRowFromCopyNo(static_cast<int>(j), fNumx);
-    int column = colrow.first;
-    int row = colrow.second;
+      auto fiberId64 = fSegmentation->setCellID(fTowerNoLR, 0, fNumx, fNumy, column, row);
+      int fiberId32 = fSegmentation->getLast32bits(fiberId64);
 
-    dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
-    dd4hep::Position pos = dd4hep::Position(fGridX.at(j),fGridY.at(j),0.);
-    dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
+      if ( fSegmentation->IsCerenkov(column,row) ) { //c fibre
+        dd4hep::IntersectionSolid intersectClad("cladC",fiber,trap,trans);
+        dd4hep::Volume cladVol("cladC", intersectClad, fDescription->material(x_cladC.materialStr()));
+        cladVol.setVisAttributes(*fDescription, x_cladC.visStr());
+        towerVol.placeVolume( cladVol, fiberId32, trans );
 
-    auto fiberId64 = fSegmentation->setCellID(fTowerNoLR, 0, fNumx, fNumy, column, row);
-    int fiberId32 = fSegmentation->getLast32bits(fiberId64);
+        dd4hep::IntersectionSolid intersectCore("coreC",fiberC,trap,trans);
+        dd4hep::Volume coreVol("coreC", intersectCore, fDescription->material(x_coreC.materialStr()));
+        coreVol.setVisAttributes(*fDescription, x_coreC.visStr());
+        cladVol.placeVolume( coreVol, fiberId32 );
 
-    if ( fSegmentation->IsCerenkov(column,row) ) { //c fibre
-      dd4hep::IntersectionSolid intersectClad("cladC",fiber,trap,trans);
-      dd4hep::Volume cladVol("cladC", intersectClad, fDescription->material(x_cladC.materialStr()));
-      cladVol.setVisAttributes(*fDescription, x_cladC.visStr());
-      towerVol.placeVolume( cladVol, fiberId32, trans );
+        coreVol.setRegion(*fDescription, fX_det->regionStr());
+        cladVol.setRegion(*fDescription, fX_det->regionStr());
+      } else { // s fibre
+        dd4hep::IntersectionSolid intersectClad("cladS",fiber,trap,trans);
+        dd4hep::Volume cladVol("cladS", intersectClad, fDescription->material(x_coreC.materialStr()));
+        cladVol.setVisAttributes(*fDescription, x_coreC.visStr());
+        towerVol.placeVolume( cladVol, fiberId32, trans );
 
-      dd4hep::IntersectionSolid intersectCore("coreC",fiberC,trap,trans);
-      dd4hep::Volume coreVol("coreC", intersectCore, fDescription->material(x_coreC.materialStr()));
-      coreVol.setVisAttributes(*fDescription, x_coreC.visStr());
-      cladVol.placeVolume( coreVol, fiberId32 );
+        dd4hep::IntersectionSolid intersectCore("coreS",fiberS,trap,trans);
+        dd4hep::Volume coreVol("coreS", intersectCore, fDescription->material(x_coreS.materialStr()));
+        coreVol.setVisAttributes(*fDescription, x_coreS.visStr());
+        cladVol.placeVolume( coreVol, fiberId32 );
 
-      coreVol.setRegion(*fDescription, fX_det->regionStr());
-      cladVol.setRegion(*fDescription, fX_det->regionStr());
-    } else { // s fibre
-      dd4hep::IntersectionSolid intersectClad("cladS",fiber,trap,trans);
-      dd4hep::Volume cladVol("cladS", intersectClad, fDescription->material(x_coreC.materialStr()));
-      cladVol.setVisAttributes(*fDescription, x_coreC.visStr());
-      towerVol.placeVolume( cladVol, fiberId32, trans );
-
-      dd4hep::IntersectionSolid intersectCore("coreS",fiberS,trap,trans);
-      dd4hep::Volume coreVol("coreS", intersectCore, fDescription->material(x_coreS.materialStr()));
-      coreVol.setVisAttributes(*fDescription, x_coreS.visStr());
-      cladVol.placeVolume( coreVol, fiberId32 );
-
-      coreVol.setRegion(*fDescription, fX_det->regionStr());
-      cladVol.setRegion(*fDescription, fX_det->regionStr());
+        coreVol.setRegion(*fDescription, fX_det->regionStr());
+        cladVol.setRegion(*fDescription, fX_det->regionStr());
+      }
     }
   }
 }
@@ -181,38 +169,31 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
   dd4hep::Volume dummyVol( "dummy", dummyBox, fDescription->material(x_glass.materialStr()) );
   dummyVol.setVisAttributes(*fDescription, fX_sipmDim->visStr());
 
-  for (unsigned int j = 0; j < fGridX.size(); j++) {
-    auto colrow = GetColRowFromCopyNo(static_cast<int>(j), fNumx);
-    int column = colrow.first;
-    int row = colrow.second;
+  int sipmNo = 0;
+  for (int row = 0; row < fNumy; row++, sipmNo++) {
+    for (int column = 0; column < fNumx; column++, sipmNo++) {
+      auto localPosition = fSegmentation->localPosition(fNumx,fNumy,column,row);
+      auto sipmId64 = fSegmentation->setCellID(fTowerNoLR, 0, fNumx, fNumy, column, row);
+      int sipmId32 = fSegmentation->getLast32bits(sipmId64);
 
-    auto sipmId64 = fSegmentation->setCellID(fTowerNoLR, 0, fNumx, fNumy, column, row);
-    int sipmId32 = fSegmentation->getLast32bits(sipmId64);
+      dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
+      dd4hep::Position pos = dd4hep::Position(localPosition.x(),localPosition.y(),x_filter.height()/2.);
+      dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
 
-    dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
-    dd4hep::Position pos = dd4hep::Position(fGridX.at(j),fGridY.at(j),x_filter.height()/2.);
-    dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
+      auto sipmEnvelopPlaced = sipmLayerVol.placeVolume( sipmEnvelopVol, sipmId32, trans );
 
-    auto sipmEnvelopPlaced = sipmLayerVol.placeVolume( sipmEnvelopVol, sipmId32, trans );
+      if ( !fSegmentation->IsCerenkov(column,row) ) { //s channel
+        dd4hep::Position posFilter = dd4hep::Position(localPosition.x(),localPosition.y(),-windowHeight/2.);
+        dd4hep::Transform3D transFilter = dd4hep::Transform3D(rot,posFilter);
 
-    if ( !fSegmentation->IsCerenkov(column,row) ) { //s channel
-      dd4hep::Position posFilter = dd4hep::Position(fGridX.at(j),fGridY.at(j),-windowHeight/2.);
-      dd4hep::Transform3D transFilter = dd4hep::Transform3D(rot,posFilter);
+        dd4hep::PlacedVolume filterPlaced = sipmLayerVol.placeVolume( filterVol, sipmId32, transFilter );
+        dd4hep::BorderSurface(*fDescription, *fDetElement, "FilterSurf_Tower"+std::to_string(fTowerNoLR)+"SiPM"+std::to_string(sipmNo), *fFilterSurf, filterPlaced, sipmEnvelopPlaced);
+      } else { // c channel
+        dd4hep::Position posDummy = dd4hep::Position(localPosition.x(),localPosition.y(),-windowHeight/2.);
+        dd4hep::Transform3D transDummy = dd4hep::Transform3D(rot,posDummy);
 
-      dd4hep::PlacedVolume filterPlaced = sipmLayerVol.placeVolume( filterVol, sipmId32, transFilter );
-      dd4hep::BorderSurface(*fDescription, *fDetElement, "FilterSurf_Tower"+std::to_string(fTowerNoLR)+"SiPM"+std::to_string(j), *fFilterSurf, filterPlaced, sipmEnvelopPlaced);
-    } else { // c channel
-      dd4hep::Position posDummy = dd4hep::Position(fGridX.at(j),fGridY.at(j),-windowHeight/2.);
-      dd4hep::Transform3D transDummy = dd4hep::Transform3D(rot,posDummy);
-
-      sipmLayerVol.placeVolume( dummyVol, sipmId32, transDummy );
+        sipmLayerVol.placeVolume( dummyVol, sipmId32, transDummy );
+      }
     }
   }
-}
-
-std::pair<int,int> ddDRcalo::DRconstructor::GetColRowFromCopyNo(int copyNo, int numx) {
-  int column = copyNo % numx;
-  int row = copyNo / numx;
-
-  return std::make_pair(column,row);
 }

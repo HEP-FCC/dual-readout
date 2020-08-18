@@ -48,7 +48,12 @@ namespace ddDRcalo {
     dd4hep::Transform3D GetAssembleTransform3D(int numPhi);
     dd4hep::Transform3D GetSipmTransform3D(int numPhi);
 
+    int signedTowerNo(int unsignedTowerNo) { return fIsRHS ? unsignedTowerNo : -unsignedTowerNo-1; }
+
     void init();
+    void filled() { fFilled = true; }
+
+    static DRparamBarrel* GetInstance();
 
   private:
     bool fIsRHS;
@@ -72,6 +77,12 @@ namespace ddDRcalo {
     double fCurrentInnerHalf;
     double fCurrentOuterHalf;
     double fCurrentOuterHalfSipm;
+
+    static DRparamBarrel* fInstance;
+
+    std::vector<double> fDeltaThetaVec;
+    std::vector<double> fThetaOfCenterVec;
+    bool fFilled;
   };
 }
 

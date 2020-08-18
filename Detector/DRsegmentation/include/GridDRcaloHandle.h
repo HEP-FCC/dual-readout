@@ -33,6 +33,8 @@ namespace dd4hep {
     bool operator==(const GridDRcalo& seg) const { return m_element == seg.m_element; }
     /// determine the position based on the cell ID
     inline Position position(const CellID& id) const { return Position(access()->implementation->position(id)); }
+    inline Position localPosition(const CellID& id) const { return Position(access()->implementation->localPosition(id)); }
+    inline Position localPosition(int numx, int numy, int x_, int y_) const { return Position(access()->implementation->localPosition(numx,numy,x_,y_)); }
 
     /// determine the cell ID based on the position
     inline dd4hep::CellID cellID(const Position& local, const Position& global, const VolumeID& volID) const {
