@@ -6,7 +6,6 @@ ddDRcalo::DRcaloSiPMHit::DRcaloSiPMHit(G4int wavBin, G4int timeBin)
 : G4VHit(),
   fSiPMnum(0),
   fPhotons(0),
-  fSiPMpos(dd4hep::Position(0.,0.,0.)),
   fWavBin(wavBin),
   fTimeBin(timeBin)
 {}
@@ -17,7 +16,6 @@ ddDRcalo::DRcaloSiPMHit::DRcaloSiPMHit(const ddDRcalo::DRcaloSiPMHit &right)
 : G4VHit() {
   fSiPMnum = right.fSiPMnum;
   fPhotons = right.fPhotons;
-  fSiPMpos = right.fSiPMpos;
   fWavlenSpectrum = right.fWavlenSpectrum;
   fTimeStruct = right.fTimeStruct;
 }
@@ -25,7 +23,6 @@ ddDRcalo::DRcaloSiPMHit::DRcaloSiPMHit(const ddDRcalo::DRcaloSiPMHit &right)
 const ddDRcalo::DRcaloSiPMHit& ddDRcalo::DRcaloSiPMHit::operator=(const ddDRcalo::DRcaloSiPMHit &right) {
   fSiPMnum = right.fSiPMnum;
   fPhotons = right.fPhotons;
-  fSiPMpos = right.fSiPMpos;
   fWavlenSpectrum = right.fWavlenSpectrum;
   fTimeStruct = right.fTimeStruct;
   return *this;

@@ -17,7 +17,7 @@ namespace ddDRcalo {
 
     void setXTowerDim(xml_comp_t* x_towerDim) { fX_towerDim = x_towerDim; }
     void setExpHall(dd4hep::Assembly* experimentalHall) { fExperimentalHall = experimentalHall; }
-    void setDRparam(DRparamBarrel* paramBarrel) { fParamBarrel = paramBarrel; }
+    void setDRparam(dd4hep::DDSegmentation::DRparamBarrel* paramBarrel) { fParamBarrel = paramBarrel; }
     void setDescription(dd4hep::Detector* description) { fDescription = description; }
     void setXSipmDim(xml_comp_t* x_sipmDim) { fX_sipmDim = x_sipmDim; }
     void setDetElement(dd4hep::DetElement* drDet) { fDetElement = drDet; }
@@ -41,7 +41,7 @@ namespace ddDRcalo {
     xml_comp_t* fX_sipmDim;
     dd4hep::Assembly* fExperimentalHall;
     dd4hep::Detector* fDescription;
-    DRparamBarrel* fParamBarrel;
+    dd4hep::DDSegmentation::DRparamBarrel* fParamBarrel;
     dd4hep::DetElement* fDetElement;
     dd4hep::SensitiveDetector* fSensDet;
     dd4hep::OpticalSurface* fSipmSurf;

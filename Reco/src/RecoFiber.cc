@@ -68,7 +68,8 @@ int RecoFiber::cutXtalk(const DRsimInterface::DRsimSiPMData& sipm) {
 }
 
 void RecoFiber::addFjInputs(const RecoInterface::RecoFiberData& recoFiber) {
-  TVector3 vec(std::get<0>(recoFiber.pos),std::get<1>(recoFiber.pos),std::get<2>(recoFiber.pos));
+  auto global = fSeg->position(recoFiber.fiberNum);
+  TVector3 vec(global.x(),global.y(),global.z());
   TVector3 p = recoFiber.E*vec.Unit();
 
   if (fSeg->IsCerenkov(recoFiber.fiberNum)) {

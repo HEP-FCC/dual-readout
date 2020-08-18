@@ -18,7 +18,6 @@ RecoInterface::RecoTowerData::RecoTowerData(const DRsimInterface::DRsimTowerData
 RecoInterface::RecoFiberData::RecoFiberData(const DRsimInterface::DRsimSiPMData& sipmIn) {
   fiberNum = sipmIn.SiPMnum;
   n = sipmIn.count;
-  pos = sipmIn.pos;
 
   E = 0.;
   Ecorr = 0.;

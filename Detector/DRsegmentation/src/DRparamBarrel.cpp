@@ -2,9 +2,12 @@
 
 #include "Math/GenVector/RotationZYX.h"
 
-ddDRcalo::DRparamBarrel* ddDRcalo::DRparamBarrel::fInstance = 0;
+#include <stdexcept>
 
-ddDRcalo::DRparamBarrel::DRparamBarrel() {
+namespace dd4hep {
+namespace DDSegmentation {
+
+DRparamBarrel::DRparamBarrel() {
   fIsRHS = 0;
   fPhiZRot = 0.;
   fInnerX = 0.;
@@ -24,19 +27,12 @@ ddDRcalo::DRparamBarrel::DRparamBarrel() {
   fCurrentInnerHalf = 0.;
   fCurrentOuterHalf = 0.;
   fFilled = false;
-
-  if (fInstance==0) {
-    fInstance = this;
-  }
+  fFinalized = false;
 }
 
-ddDRcalo::DRparamBarrel::~DRparamBarrel() {}
+DRparamBarrel::~DRparamBarrel() {}
 
-ddDRcalo::DRparamBarrel* ddDRcalo::DRparamBarrel::GetInstance() {
-  return fInstance;
-}
-
-void ddDRcalo::DRparamBarrel::init() {
+void DRparamBarrel::init() {
   fCurrentInnerR = fInnerX/std::cos(fThetaOfCenter);
   double trnsLength = fTowerH/2.+fCurrentInnerR;
   fCurrentCenter =  TVector3(std::cos(fThetaOfCenter)*trnsLength,0.,std::sin(fThetaOfCenter)*trnsLength);
@@ -88,7 +84,7 @@ void ddDRcalo::DRparamBarrel::init() {
   }
 }
 
-dd4hep::RotationZYX ddDRcalo::DRparamBarrel::GetRotationZYX(int numPhi) {
+dd4hep::RotationZYX DRparamBarrel::GetRotationZYX(int numPhi) {
   double numPhi_ = (double)numPhi;
   double xRot = fIsRHS ? -fThetaOfCenter : fThetaOfCenter;
   double zRot = fIsRHS ? -M_PI/2. : M_PI/2.;
@@ -99,7 +95,7 @@ dd4hep::RotationZYX ddDRcalo::DRparamBarrel::GetRotationZYX(int numPhi) {
   return rot;
 }
 
-dd4hep::Position ddDRcalo::DRparamBarrel::GetTowerPos(int numPhi) {
+dd4hep::Position DRparamBarrel::GetTowerPos(int numPhi) {
   double numPhi_ = (double)numPhi;
   double x = std::cos(numPhi_*fPhiZRot)*fCurrentCenter.X();
   double y = std::sin(numPhi_*fPhiZRot)*fCurrentCenter.X();
@@ -109,7 +105,7 @@ dd4hep::Position ddDRcalo::DRparamBarrel::GetTowerPos(int numPhi) {
   return pos;
 }
 
-dd4hep::Position ddDRcalo::DRparamBarrel::GetAssemblePos(int numPhi) {
+dd4hep::Position DRparamBarrel::GetAssemblePos(int numPhi) {
   double numPhi_ = (double)numPhi;
   double x = std::cos(numPhi_*fPhiZRot)*fCurrentCenter.X()*(fCurrentCenter.Mag()+fSipmHeight/2.)/fCurrentCenter.Mag();
   double y = std::sin(numPhi_*fPhiZRot)*fCurrentCenter.X()*(fCurrentCenter.Mag()+fSipmHeight/2.)/fCurrentCenter.Mag();
@@ -120,7 +116,7 @@ dd4hep::Position ddDRcalo::DRparamBarrel::GetAssemblePos(int numPhi) {
   return pos;
 }
 
-dd4hep::Position ddDRcalo::DRparamBarrel::GetSipmLayerPos(int numPhi) {
+dd4hep::Position DRparamBarrel::GetSipmLayerPos(int numPhi) {
   double numPhi_ = (double)numPhi;
   double x = std::cos(numPhi_*fPhiZRot)*fCurrentCenter.X()*(fCurrentCenter.Mag()+fTowerH/2.+fSipmHeight/2.)/fCurrentCenter.Mag();
   double y = std::sin(numPhi_*fPhiZRot)*fCurrentCenter.X()*(fCurrentCenter.Mag()+fTowerH/2.+fSipmHeight/2.)/fCurrentCenter.Mag();
@@ -131,23 +127,38 @@ dd4hep::Position ddDRcalo::DRparamBarrel::GetSipmLayerPos(int numPhi) {
   return pos;
 }
 
-dd4hep::Transform3D ddDRcalo::DRparamBarrel::GetTransform3D(int numPhi) {
+dd4hep::Transform3D DRparamBarrel::GetTransform3D(int numPhi) {
   auto rot = GetRotationZYX(numPhi);
   auto pos = GetTowerPos(numPhi);
 
   return dd4hep::Transform3D(rot,pos);
 }
 
-dd4hep::Transform3D ddDRcalo::DRparamBarrel::GetAssembleTransform3D(int numPhi) {
+dd4hep::Transform3D DRparamBarrel::GetAssembleTransform3D(int numPhi) {
   auto rot = GetRotationZYX(numPhi);
   auto pos = GetAssemblePos(numPhi);
 
   return dd4hep::Transform3D(rot,pos);
 }
 
-dd4hep::Transform3D ddDRcalo::DRparamBarrel::GetSipmTransform3D(int numPhi) {
+dd4hep::Transform3D DRparamBarrel::GetSipmTransform3D(int numPhi) {
   auto rot = GetRotationZYX(numPhi);
   auto pos = GetSipmLayerPos(numPhi);
 
   return dd4hep::Transform3D(rot,pos);
+}
+
+void DRparamBarrel::SetDeltaThetaByTowerNo(int signedTowerNo) {
+  if (!fFilled) throw std::runtime_error("Attempt to set by tower num while barrel parameter is not filled!");
+
+  fDeltaTheta = fDeltaThetaVec.at( unsignedTowerNo(signedTowerNo) );
+}
+
+void DRparamBarrel::SetThetaOfCenterByTowerNo(int signedTowerNo) {
+  if (!fFilled) throw std::runtime_error("Attempt to set by tower num while barrel parameter is not filled!");
+
+  fThetaOfCenter = fThetaOfCenterVec.at( unsignedTowerNo(signedTowerNo) );
+}
+
+}
 }

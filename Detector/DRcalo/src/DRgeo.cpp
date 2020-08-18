@@ -30,7 +30,7 @@ namespace ddDRcalo {
     auto segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( sensDet.readout().segmentation().segmentation() );
     segmentation->setGridSize( x_towerDim.distance() );
 
-    auto paramBarrel = new DRparamBarrel();
+    auto paramBarrel = segmentation->paramBarrel();
     paramBarrel->SetInnerX(x_towerDim.rmin());
     paramBarrel->SetTowerH(x_towerDim.height());
     paramBarrel->SetNumZRot(x_towerDim.nphi());
@@ -59,6 +59,8 @@ namespace ddDRcalo {
     hallPlace.addPhysVolID("system",x_det.id());
     // connect placed volume and physical volume
     drDet.setPlacement( hallPlace );
+
+    paramBarrel->finalized();
 
     return drDet;
   }

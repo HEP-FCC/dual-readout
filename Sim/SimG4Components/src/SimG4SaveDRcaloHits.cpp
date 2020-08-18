@@ -57,11 +57,6 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) {
           DRsimInterface::DRsimSiPMData sipmData;
           sipmData.count = hit->GetPhotonCount();
           sipmData.SiPMnum = static_cast<long long int>(hit->GetSiPMnum());
-          sipmData.pos = std::make_tuple(
-            static_cast<float>(hit->GetSiPMpos().x()),
-            static_cast<float>(hit->GetSiPMpos().y()),
-            static_cast<float>(hit->GetSiPMpos().z())
-          );
           sipmData.timeStruct = hit->GetTimeStruct();
           sipmData.wavlenSpectrum = hit->GetWavlenSpectrum();
 

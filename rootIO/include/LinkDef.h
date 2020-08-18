@@ -11,7 +11,6 @@
 #pragma link C++ class std::vector<fastjetInterface::fastjetData>+;
 #pragma link C++ class std::vector<fastjetInterface::fastjetDataBase>+;
 
-#pragma link C++ class DRsimInterface::threeVector+;
 #pragma link C++ struct DRsimInterface::DRsimSiPMData+;
 #pragma link C++ struct DRsimInterface::DRsimTowerData+;
 #pragma link C++ struct DRsimInterface::DRsimEdepFiberData+;

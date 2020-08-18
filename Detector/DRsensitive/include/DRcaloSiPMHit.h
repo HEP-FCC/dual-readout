@@ -34,9 +34,6 @@ namespace ddDRcalo {
     void SetSiPMnum(dd4hep::DDSegmentation::CellID n) { fSiPMnum = n; }
     dd4hep::DDSegmentation::CellID GetSiPMnum() const { return fSiPMnum; }
 
-    void SetSiPMpos(dd4hep::Position pos) { fSiPMpos = pos; }
-    dd4hep::Position GetSiPMpos() const { return fSiPMpos; }
-
     void CountWavlenSpectrum(DRsimInterface::hitRange range);
     DRsimInterface::DRsimWavlenSpectrum GetWavlenSpectrum() const { return fWavlenSpectrum; }
 
@@ -46,7 +43,6 @@ namespace ddDRcalo {
   private:
     dd4hep::DDSegmentation::CellID fSiPMnum;
     unsigned long fPhotons;
-    dd4hep::Position fSiPMpos;
     DRsimInterface::DRsimWavlenSpectrum fWavlenSpectrum;
     DRsimInterface::DRsimTimeStruct fTimeStruct;
     G4int fWavBin;

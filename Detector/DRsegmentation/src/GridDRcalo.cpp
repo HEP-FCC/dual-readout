@@ -2,6 +2,7 @@
 
 #include <climits>
 #include <cmath>
+#include <stdexcept>
 
 namespace dd4hep {
 namespace DDSegmentation {
@@ -21,6 +22,8 @@ GridDRcalo::GridDRcalo(const std::string& cellEncoding) : Segmentation(cellEncod
   registerIdentifier("identifier_y", "Cell ID identifier for y", fYId, "y");
   registerIdentifier("identifier_IsCerenkov", "Cell ID identifier for IsCerenkov", fIsCerenkovId, "c");
   registerIdentifier("identifier_module", "Cell ID identifier for module", fModule, "module");
+
+  fParamBarrel = new DRparamBarrel();
 }
 
 GridDRcalo::GridDRcalo(const BitFieldCoder* decoder) : Segmentation(decoder) {
@@ -37,12 +40,36 @@ GridDRcalo::GridDRcalo(const BitFieldCoder* decoder) : Segmentation(decoder) {
   registerIdentifier("identifier_y", "Cell ID identifier for y", fYId, "y");
   registerIdentifier("identifier_IsCerenkov", "Cell ID identifier for IsCerenkov", fIsCerenkovId, "c");
   registerIdentifier("identifier_module", "Cell ID identifier for module", fModule, "module");
+
+  fParamBarrel = new DRparamBarrel();
 }
 
-/// determine the local based on the cell ID
-Vector3D GridDRcalo::position(const CellID& cID) const { // #TODO retrieve position by cell ID
-  Vector3D cellPosition{0,0,0};
-  return cellPosition;
+GridDRcalo::~GridDRcalo() {
+  if (fParamBarrel) delete fParamBarrel;
+}
+
+Vector3D GridDRcalo::position(const CellID& cID) const {
+  // This should not be called while building detector geometry
+  if (!fParamBarrel->IsFinalized()) throw std::runtime_error("GridDRcalo::position should not be called while building detector geometry!");
+
+  int noEta = numEta(cID);
+  int noPhi = numPhi(cID);
+
+  fParamBarrel->SetDeltaThetaByTowerNo(noEta);
+  fParamBarrel->SetThetaOfCenterByTowerNo(noEta);
+  fParamBarrel->SetIsRHSByTowerNo(noEta);
+  fParamBarrel->init();
+
+  auto transformA = fParamBarrel->GetSipmTransform3D(noPhi);
+  dd4hep::Position localPos = dd4hep::Position( localPosition(cID) );
+  dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
+  dd4hep::Transform3D transformB = dd4hep::Transform3D(rot,localPos);
+  auto total = transformA*transformB;
+
+  dd4hep::Position translation = dd4hep::Position(0.,0.,0.);
+  total.GetTranslation(translation);
+
+  return Vector3D(translation.x(),translation.y(),translation.z());
 }
 
 Vector3D GridDRcalo::localPosition(const CellID& cID) const {

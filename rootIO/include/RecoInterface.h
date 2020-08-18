@@ -19,7 +19,6 @@ public:
     int n;
     float t;
     float depth;
-    DRsimInterface::threeVector pos;
   };
 
   struct RecoTowerData {

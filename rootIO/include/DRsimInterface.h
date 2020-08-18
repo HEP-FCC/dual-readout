@@ -12,21 +12,8 @@ public:
   ~DRsimInterface();
 
   typedef std::pair<float,float> hitRange;
-  typedef std::pair<int,int> hitXY;
   typedef std::map<hitRange, int> DRsimTimeStruct;
   typedef std::map<hitRange, int> DRsimWavlenSpectrum;
-  typedef std::tuple<float,float,float> threeVector;
-
-  struct DRsimTowerProperty {
-    DRsimTowerProperty() {};
-    virtual ~DRsimTowerProperty() {};
-
-    std::pair<int,float> towerTheta;
-    DRsimInterface::hitXY towerXY;
-    float innerR;
-    float towerH;
-    float dTheta;
-  };
 
   struct DRsimSiPMData {
     DRsimSiPMData() {};
@@ -34,7 +21,6 @@ public:
 
     int count;
     long long int SiPMnum;
-    threeVector pos;
     DRsimTimeStruct timeStruct;
     DRsimWavlenSpectrum wavlenSpectrum;
   };
@@ -122,8 +108,6 @@ public:
     std::vector<DRsimLeakageData> leaks;
     std::vector<DRsimGenData> GenPtcs;
   };
-
-  static bool IsCerenkov(int col, int row);
 };
 
 #endif

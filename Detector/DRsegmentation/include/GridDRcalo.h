@@ -1,6 +1,8 @@
 #ifndef GridDRcalo_h
 #define GridDRcalo_h 1
 
+#include "DRparamBarrel.h"
+
 #include "DDSegmentation/Segmentation.h"
 
 namespace dd4hep {
@@ -12,7 +14,7 @@ public:
   /// Default constructor used by derived classes passing an existing decoder
   GridDRcalo(const BitFieldCoder* decoder);
   /// destructor
-  virtual ~GridDRcalo() = default;
+  virtual ~GridDRcalo() override;
 
   //  Determine the global(local) position based on the cell ID.
   virtual Vector3D position(const CellID& aCellID) const;
@@ -88,6 +90,8 @@ public:
   inline void setFieldNameIsCerenkov(const std::string& fieldName) { fIsCerenkovId = fieldName; }
   inline void setFieldNameModule(const std::string& fieldName) { fModule = fieldName; }
 
+  DRparamBarrel* paramBarrel() { return fParamBarrel; }
+
 protected:
   std::string fNumEtaId;
   std::string fNumPhiId;
@@ -99,6 +103,9 @@ protected:
   std::string fModule;
 
   double fGridSize;
+
+private:
+  DRparamBarrel* fParamBarrel;
 };
 }
 }

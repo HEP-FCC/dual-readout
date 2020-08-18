@@ -63,11 +63,7 @@ G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
 
   if (hit==NULL) {
     hit = new DRcaloSiPMHit(fWavBin,fTimeBin);
-
-    G4ThreeVector pos = step->GetPostStepPoint()->GetTouchableHandle()->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0.,0.,0.));
-
     hit->SetSiPMnum(cID);
-    hit->SetSiPMpos( dd4hep::Position(pos.x(),pos.y(),pos.z()) ); // CLHEP::Hep3Vector to ROOT::Math::XYZVector
 
     fHitCollection->insert(hit);
   }
@@ -98,7 +94,7 @@ DRsimInterface::hitRange ddDRcalo::DRcaloSiPMSD::findWavRange(G4double en) {
 DRsimInterface::hitRange ddDRcalo::DRcaloSiPMSD::findTimeRange(G4double stepTime) {
   int i = 0;
   for ( ; i < fTimeBin+1; i++) {
-    if ( stepTime < ( (fTimeStart + (float)i*fTimeStep)*ns ) ) break;
+    if ( stepTime < ( (fTimeStart + (float)i*fTimeStep)*CLHEP::ns ) ) break;
   }
 
   if (i==0) return std::make_pair(0.,fTimeStart);

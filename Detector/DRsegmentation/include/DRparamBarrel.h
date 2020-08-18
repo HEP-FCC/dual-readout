@@ -7,7 +7,8 @@
 #include <vector>
 #include <cmath>
 
-namespace ddDRcalo {
+namespace dd4hep {
+namespace DDSegmentation {
   class DRparamBarrel {
   public:
     DRparamBarrel();
@@ -49,11 +50,16 @@ namespace ddDRcalo {
     dd4hep::Transform3D GetSipmTransform3D(int numPhi);
 
     int signedTowerNo(int unsignedTowerNo) { return fIsRHS ? unsignedTowerNo : -unsignedTowerNo-1; }
+    int unsignedTowerNo(int signedTowerNo) { return signedTowerNo >= 0 ? signedTowerNo : -signedTowerNo-1; }
+
+    void SetDeltaThetaByTowerNo(int signedTowerNo);
+    void SetThetaOfCenterByTowerNo(int signedTowerNo);
+    void SetIsRHSByTowerNo(int signedTowerNo) { fIsRHS = ( signedTowerNo >=0 ? true : false ); }
 
     void init();
     void filled() { fFilled = true; }
-
-    static DRparamBarrel* GetInstance();
+    void finalized() { fFinalized = true; }
+    bool IsFinalized() { return fFinalized; }
 
   private:
     bool fIsRHS;
@@ -78,12 +84,12 @@ namespace ddDRcalo {
     double fCurrentOuterHalf;
     double fCurrentOuterHalfSipm;
 
-    static DRparamBarrel* fInstance;
-
     std::vector<double> fDeltaThetaVec;
     std::vector<double> fThetaOfCenterVec;
     bool fFilled;
+    bool fFinalized;
   };
+}
 }
 
 #endif
