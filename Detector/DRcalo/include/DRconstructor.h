@@ -30,11 +30,13 @@ namespace ddDRcalo {
     void setXdet(xml_det_t* x_det) { fX_det = x_det; }
 
     void construct();
-    std::pair<int,int> GetColRowFromCopyNo(int copyNo, int numx);
 
   private:
-    void implementFibers(dd4hep::Volume& tower, dd4hep::Trap& trap);
+    void implementFibers(dd4hep::Volume& towerVol, dd4hep::Trap& trap);
+    void implementFiber(dd4hep::Volume& towerVol, dd4hep::Position& pos, int col, int row,
+                        dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS);
     void implementSipms(dd4hep::Volume& sipmLayerVol);
+    double calculateDistAtZ(TGeoTrap* rootTrap, dd4hep::Position& pos, double z);
 
     xml_det_t* fX_det;
     xml_comp_t* fX_towerDim;

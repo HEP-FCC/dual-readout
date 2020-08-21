@@ -16,7 +16,6 @@ public:
   virtual G4bool ModelTrigger(const G4FastTrack&);
   virtual void DoIt(const G4FastTrack&, G4FastStep&);
 
-  void SetFiberLength(G4double length) { fFiberLength = length; }
   void SetCoreMaterial(G4Material* mat) { fCoreMaterial = mat; }
 
 private:
@@ -33,7 +32,6 @@ private:
   G4Material* fCoreMaterial;
   G4bool fProcAssigned;
 
-  G4double fFiberLength;
   G4int fSafety;
   G4double fTrkLength;
   G4double fNtransport;

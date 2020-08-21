@@ -4,13 +4,13 @@
 #include "G4ParticleTypes.hh"
 #include "G4ProcessManager.hh"
 #include "G4OpProcessSubType.hh"
+#include "G4Tubs.hh"
 
 FastSimModelOpFiber::FastSimModelOpFiber(G4String name, G4Region* envelope)
 : G4VFastSimulationModel(name,envelope) {
   fOpBoundaryProc = NULL;
   fCoreMaterial = NULL;
   fProcAssigned = false;
-  fFiberLength = 0.;
   fSafety = 2;
   fTrkLength = 0.;
   fNtransport = 0.;
@@ -44,6 +44,8 @@ G4bool FastSimModelOpFiber::ModelTrigger(const G4FastTrack& fasttrack) {
   auto fiberPos = theTouchable->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0.,0.,0.));
   fFiberAxis = theTouchable->GetHistory()->GetTopTransform().Inverse().TransformAxis(G4ThreeVector(0.,0.,1.));
   fTrkLength = track->GetTrackLength();
+  G4Tubs* tubs = static_cast<G4Tubs*>(theTouchable->GetSolid());
+  G4double fiberLen = 2.*tubs->GetZHalfLength();
 
   if ( fTrkLength==0. ) { // kill stopped particle
     fKill = true;
@@ -60,7 +62,7 @@ G4bool FastSimModelOpFiber::ModelTrigger(const G4FastTrack& fasttrack) {
     return true;
   }
 
-  auto fiberEnd = fiberPos + fFiberAxis*fFiberLength/2.;
+  auto fiberEnd = fiberPos + fFiberAxis*fiberLen/2.;
   auto toEnd = fiberEnd - track->GetPosition();
   double toEndAxis = toEnd.dot(fFiberAxis);
   double maxTransport = std::floor(toEndAxis/fTransportUnit);
