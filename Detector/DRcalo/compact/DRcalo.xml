@@ -565,19 +565,20 @@
   </materials>
 
   <display>
-    <vis name="TowerVis" alpha="1." r="0.7" g="0.4" b="0.1" showDaughters="true" visible="true"/>
-    <vis name="CerenVis" alpha="0.5" r="0.3" g="0.6" b="0.9" showDaughters="true" visible="false"/>
-    <vis name="ScintVis" alpha="0.5" r="1.0" g="0.8" b="0.1" showDaughters="true" visible="false"/>
-    <vis name="CladVis" alpha="0.5" r="0.0" g="0.5" b="0.5" showDaughters="true" visible="false"/>
-    <vis name="GenericVis" alpha="0.8" r="0.5" g="0.5" b="0.5" showDaughters="true" visible="true"/>
-    <vis name="GlassVis" alpha="0.5" r="0.0" g="0.1" b="0.9" showDaughters="true" visible="true"/>
-    <vis name="WaferVis" alpha="1." r="0.0" g="0.9" b="0.2" showDaughters="true" visible="true"/>
-    <vis name="filterVis" alpha="0.5" r="0.9" g="0.8" b="0.1" showDaughters="true" visible="true"/>
+    <vis name="Invisible" showDaughters="false" visible="false"/> <!-- set showDaughters="true" to visualize -->
+    <vis name="TowerVis" alpha="1." r="0.7" g="0.4" b="0.1" showDaughters="false" visible="true"/>
+    <vis name="CerenVis" alpha="0.5" r="0.3" g="0.6" b="0.9" showDaughters="false" visible="false"/>
+    <vis name="ScintVis" alpha="0.5" r="1.0" g="0.8" b="0.1" showDaughters="false" visible="false"/>
+    <vis name="CladVis" alpha="0.5" r="0.0" g="0.5" b="0.5" showDaughters="false" visible="false"/>
+    <vis name="GenericVis" alpha="0.8" r="0.5" g="0.5" b="0.5" showDaughters="false" visible="false"/>
+    <vis name="GlassVis" alpha="0.5" r="0.0" g="0.1" b="0.9" showDaughters="false" visible="false"/>
+    <vis name="WaferVis" alpha="1." r="0.0" g="0.9" b="0.2" showDaughters="false" visible="false"/>
+    <vis name="filterVis" alpha="0.5" r="0.9" g="0.8" b="0.1" showDaughters="false" visible="false"/>
   </display>
 
   <!-- this is where we actually define our detector: -->
   <detectors>
-    <detector id="1" name="DRcaloBarrel" type="ddDRcalo" readout="DRcaloSiPMreadout" region="FastSimOpFiberRegion">
+    <detector id="1" name="DRcaloBarrel" type="ddDRcalo" readout="DRcaloSiPMreadout" region="FastSimOpFiberRegion" vis="Invisible">
       <sensitive type="DRcaloSiPMSD"/>
       <sipmDim height="0.3*mm" material="PolyvinylChloride" vis="GenericVis">
         <sipmGlass material="DR_PyrexGlass" vis="GlassVis"/>

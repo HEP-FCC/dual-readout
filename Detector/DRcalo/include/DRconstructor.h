@@ -50,6 +50,7 @@ namespace ddDRcalo {
     dd4hep::OpticalSurface* fFilterSurf;
     dd4hep::DDSegmentation::GridDRcalo* fSegmentation;
 
+    bool fVis;
     int fNumx, fNumy;
     int fTowerNoLR;
   };
