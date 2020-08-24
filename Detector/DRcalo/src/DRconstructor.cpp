@@ -196,15 +196,12 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
   dd4hep::Box filterBox( sipmSize/2., sipmSize/2., x_filter.height()/2. );
   dd4hep::Volume filterVol( "filter", filterBox, fDescription->material(x_filter.materialStr()) );
   if (fVis) filterVol.setVisAttributes(*fDescription, x_filter.visStr());
+  dd4hep::SkinSurface(*fDescription, *fDetElement, "FilterSurf_Tower"+std::to_string(fTowerNoLR), *fFilterSurf, filterVol);
 
   // dummy Box placed at C channel (instead of Kodak filter at S channel)
   dd4hep::Box dummyBox( sipmSize/2., sipmSize/2., x_filter.height()/2. );
   dd4hep::Volume dummyVol( "dummy", dummyBox, fDescription->material(x_glass.materialStr()) );
   if (fVis) dummyVol.setVisAttributes(*fDescription, fX_sipmDim->visStr());
-
-  // Assembly for the set of filters (to reduce the # of BorderSurface)
-  dd4hep::Assembly filterAssembly("filterAssembly");
-  dd4hep::Assembly sipmEnvelopAssembly("sipmEnvelopAssembly");
 
   int sipmNo = 0;
   for (int row = 0; row < fNumy; row++, sipmNo++) {
@@ -217,13 +214,13 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
       dd4hep::Position pos = dd4hep::Position(localPosition.x(),localPosition.y(),x_filter.height()/2.);
       dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
 
-      sipmEnvelopAssembly.placeVolume( sipmEnvelopVol, trans );
+      sipmLayerVol.placeVolume( sipmEnvelopVol, trans );
 
       if ( !fSegmentation->IsCerenkov(column,row) ) { //s channel
         dd4hep::Position posFilter = dd4hep::Position(localPosition.x(),localPosition.y(),-windowHeight/2.);
         dd4hep::Transform3D transFilter = dd4hep::Transform3D(rot,posFilter);
 
-        filterAssembly.placeVolume( filterVol, transFilter );
+        sipmLayerVol.placeVolume( filterVol, transFilter );
       } else { // c channel
         dd4hep::Position posDummy = dd4hep::Position(localPosition.x(),localPosition.y(),-windowHeight/2.);
         dd4hep::Transform3D transDummy = dd4hep::Transform3D(rot,posDummy);
@@ -232,10 +229,6 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
       }
     }
   }
-
-  dd4hep::PlacedVolume sipmAssemblyPlaced = sipmLayerVol.placeVolume(sipmEnvelopAssembly);
-  dd4hep::PlacedVolume filterAssemblyPlaced = sipmLayerVol.placeVolume(filterAssembly);
-  dd4hep::BorderSurface(*fDescription, *fDetElement, "FilterSurf_Tower"+std::to_string(fTowerNoLR), *fFilterSurf, filterAssemblyPlaced, sipmAssemblyPlaced);
 }
 
 double ddDRcalo::DRconstructor::calculateDistAtZ(TGeoTrap* rootTrap, dd4hep::Position& pos, double z) {
