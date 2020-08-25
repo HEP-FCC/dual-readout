@@ -13,7 +13,7 @@
 #include <stdexcept>
 
 SimG4DRcaloSteppingAction::SimG4DRcaloSteppingAction()
-: G4UserSteppingAction()
+: G4UserSteppingAction(), fPrevTower(0), fPrevFiber(0)
 {
   m_geoSvc = GeoSvc::GetInstance();
   m_readoutName = "DRcaloSiPMreadout";
@@ -51,6 +51,7 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
   G4StepPoint* poststeppoint = step->GetPostStepPoint();
   G4TouchableHandle theTouchable = presteppoint->GetTouchableHandle();
 
+  // leakage particles
   if (poststeppoint->GetStepStatus() == fWorldBoundary) {
     DRsimInterface::DRsimLeakageData leak = DRsimInterface::DRsimLeakageData();
 
@@ -69,67 +70,93 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
     return;
   }
 
-  if ( theTouchable->GetHistoryDepth()<2 ) return;
+  if ( theTouchable->GetHistoryDepth()<2 ) return; // skip particles in the world or assembly volume
 
+  // MC truth energy deposits
   float edep = step->GetTotalEnergyDeposit();
   float edepEle = (std::abs(pdgID)==11) ? edep : 0.;
   float edepGamma = (std::abs(pdgID)==22) ? edep : 0.;
   float edepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? edep : 0.;
 
+  int towerNum32 = theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 );
+  auto towerNum64 = fSeg->convertFirst32to64( towerNum32 );
+
+  accumulate(fEventData->Edeps,fPrevTower,towerNum64,edep,edepEle,edepGamma,edepCharged);
+
   bool isFiber = false;
   long long int fiberId64 = 0;
 
-  auto towerNum = fSeg->convertFirst32to64( theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 ) );
-
-  int iTheta = fSeg->numEta(towerNum);
-  int iPhi = fSeg->numPhi(towerNum);
-
-  if ( theTouchable->GetHistoryDepth()==2 ) isFiber = false;
-
+  // check the type
   if ( theTouchable->GetHistoryDepth()==4 ) {
     auto SiPMnum = fSeg->convertLast32to64( theTouchable->GetCopyNumber() );
-    fiberId64 = towerNum | SiPMnum;
+    fiberId64 = towerNum64 | SiPMnum;
 
     isFiber = true;
   }
 
-  bool isFound = false;
-  bool isFiberAndFound = false;
-  for (auto& iEdep : fEventData->Edeps) {
-    if ( ( iEdep.iTheta == iTheta ) && ( iEdep.iPhi == iPhi ) ) {
-      iEdep.accumulate(edep,edepEle,edepGamma,edepCharged);
-      isFound = true;
+  if (!isFiber) return; // done if the type is not fiber
 
-      if (isFiber) {
-        for (auto& iFiber : iEdep.fibers) {
-          if ( iFiber.fiberNum==fiberId64 ) {
-            iFiber.accumulate(edep,edepEle,edepGamma,edepCharged);
-            isFiberAndFound = true;
-
-            break;
-          }
-        }
-
-        if (!isFiberAndFound) {
-          DRsimInterface::DRsimEdepFiberData theFiber = DRsimInterface::DRsimEdepFiberData(fiberId64,edep,edepEle,edepGamma,edepCharged);
-          iEdep.fibers.push_back(theFiber);
-        }
-      }
-
-      break;
-    }
-  }
-
-  if (!isFound) {
-    DRsimInterface::DRsimEdepData theEdep = DRsimInterface::DRsimEdepData(iTheta,iPhi,edep,edepEle,edepGamma,edepCharged);
-
-    if (isFiber) {
-      DRsimInterface::DRsimEdepFiberData theFiber = DRsimInterface::DRsimEdepFiberData(fiberId64,edep,edepEle,edepGamma,edepCharged);
-      theEdep.fibers.push_back(theFiber);
-    }
-
-    fEventData->Edeps.push_back(theEdep);
-  }
+  accumulate(fEventData->Edeps.at(fPrevTower).fibers,fPrevFiber,fiberId64,edep,edepEle,edepGamma,edepCharged);
 
   return;
+}
+
+template <typename T>
+void SimG4DRcaloSteppingAction::accumulate(std::vector<T> &input, unsigned int &prev, long long int id64,
+                                           float edep, float edepEle, float edepGamma, float edepCharged) {
+  // search for the element
+  typename std::vector<T>::iterator thePtr = input.begin();
+  bool found = false;
+
+  if ( input.size() > prev ) { // check previous element
+    T element = input.at(prev);
+    if ( checkId(element, id64) ) {
+      std::advance(thePtr,prev);
+      found = true;
+    }
+  }
+
+  if (!found) { // fall back to loop
+    for (unsigned int iElement = 0; iElement < input.size(); iElement++) {
+      T element = input.at(iElement);
+      if ( checkId(element, id64) ) {
+        found = true;
+        prev = iElement;
+        std::advance(thePtr,prev);
+
+        break;
+      }
+    }
+  }
+
+  if (!found) { // create
+    T theEdep = create(id64,input);
+    prev = input.size();
+    input.push_back(theEdep);
+    thePtr = input.begin();
+    std::advance(thePtr,prev);
+  }
+
+  thePtr->accumulate(edep,edepEle,edepGamma,edepCharged);
+}
+
+bool SimG4DRcaloSteppingAction::checkId(DRsimInterface::DRsimEdepData edep, long long int id64) {
+  int iTheta = fSeg->numEta(id64);
+  int iPhi = fSeg->numPhi(id64);
+  return ( edep.iTheta==iTheta && edep.iPhi==iPhi );
+}
+
+bool SimG4DRcaloSteppingAction::checkId(DRsimInterface::DRsimEdepFiberData edep, long long int id64) {
+  return edep.fiberNum==id64;
+}
+
+DRsimInterface::DRsimEdepData SimG4DRcaloSteppingAction::create(long long int id64, std::vector<DRsimInterface::DRsimEdepData>&) {
+  int iTheta = fSeg->numEta(id64);
+  int iPhi = fSeg->numPhi(id64);
+
+  return DRsimInterface::DRsimEdepData(iTheta,iPhi);
+}
+
+DRsimInterface::DRsimEdepFiberData SimG4DRcaloSteppingAction::create(long long int id64, std::vector<DRsimInterface::DRsimEdepFiberData>&) {
+  return DRsimInterface::DRsimEdepFiberData(id64);
 }

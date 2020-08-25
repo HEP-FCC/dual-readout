@@ -38,6 +38,7 @@ public:
 
   struct DRsimEdepFiberData {
     DRsimEdepFiberData();
+    DRsimEdepFiberData(long long int fiberId64);
     DRsimEdepFiberData(long long int fiberId64, float edep, float edepEle, float edepGamma, float edepCharged);
     virtual ~DRsimEdepFiberData() {};
 
@@ -52,6 +53,7 @@ public:
 
   struct DRsimEdepData {
     DRsimEdepData();
+    DRsimEdepData(int theta, int phi);
     DRsimEdepData(int theta, int phi, float edep, float edepEle, float edepGamma, float edepCharged);
     virtual ~DRsimEdepData() {};
 

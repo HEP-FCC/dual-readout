@@ -12,6 +12,15 @@ DRsimInterface::DRsimEdepData::DRsimEdepData() {
   iPhi = -999;
 }
 
+DRsimInterface::DRsimEdepData::DRsimEdepData(int theta, int phi) {
+  iTheta = theta;
+  iPhi = phi;
+  Edep = 0.;
+  EdepEle = 0.;
+  EdepGamma = 0.;
+  EdepCharged = 0.;
+}
+
 DRsimInterface::DRsimEdepData::DRsimEdepData(int theta, int phi, float edep, float edepEle, float edepGamma, float edepCharged) {
   iTheta = theta;
   iPhi = phi;
@@ -30,6 +39,14 @@ void DRsimInterface::DRsimEdepData::accumulate(float edep, float edepEle, float 
 
 DRsimInterface::DRsimEdepFiberData::DRsimEdepFiberData() {
   fiberNum = -1;
+  Edep = 0.;
+  EdepEle = 0.;
+  EdepGamma = 0.;
+  EdepCharged = 0.;
+}
+
+DRsimInterface::DRsimEdepFiberData::DRsimEdepFiberData(long long int fiberId64) {
+  fiberNum = fiberId64;
   Edep = 0.;
   EdepEle = 0.;
   EdepGamma = 0.;
