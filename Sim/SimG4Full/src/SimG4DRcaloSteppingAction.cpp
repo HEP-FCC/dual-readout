@@ -43,100 +43,92 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
   G4Track* track = step->GetTrack();
   G4ParticleDefinition* particle = track->GetDefinition();
 
-  if ( particle == G4OpticalPhoton::OpticalPhotonDefinition() ) {
-    if ( track->GetMaterial()->GetName()=="FluorinatedPolymer" || track->GetNextMaterial()->GetName()=="FluorinatedPolymer" ) {
-      auto creatorProcess = track->GetCreatorProcess();
-      if ( creatorProcess->GetProcessType()==fElectromagnetic && creatorProcess->GetProcessSubType()==G4EmProcessSubType::fScintillation ) {
-        track->SetTrackStatus(G4TrackStatus::fStopAndKill); // AdHoc treatment for unphysical Xtalk
-        return;
-      }
-    }
-  } else {
-    G4int pdgID = particle->GetPDGEncoding();
-    G4double pdgCharge = particle->GetPDGCharge();
-    G4StepPoint* presteppoint = step->GetPreStepPoint();
-    G4StepPoint* poststeppoint = step->GetPostStepPoint();
-    G4TouchableHandle theTouchable = presteppoint->GetTouchableHandle();
+  if ( particle == G4OpticalPhoton::OpticalPhotonDefinition() ) return;
 
-    if (poststeppoint->GetStepStatus() == fWorldBoundary) {
-      DRsimInterface::DRsimLeakageData leak = DRsimInterface::DRsimLeakageData();
+  G4int pdgID = particle->GetPDGEncoding();
+  G4double pdgCharge = particle->GetPDGCharge();
+  G4StepPoint* presteppoint = step->GetPreStepPoint();
+  G4StepPoint* poststeppoint = step->GetPostStepPoint();
+  G4TouchableHandle theTouchable = presteppoint->GetTouchableHandle();
 
-      leak.E = track->GetTotalEnergy();
-      leak.px = track->GetMomentum().x();
-      leak.py = track->GetMomentum().y();
-      leak.pz = track->GetMomentum().z();
-      leak.vx = presteppoint->GetPosition().x();
-      leak.vy = presteppoint->GetPosition().y();
-      leak.vz = presteppoint->GetPosition().z();
-      leak.vt = presteppoint->GetGlobalTime();
-      leak.pdgId = track->GetDefinition()->GetPDGEncoding();
+  if (poststeppoint->GetStepStatus() == fWorldBoundary) {
+    DRsimInterface::DRsimLeakageData leak = DRsimInterface::DRsimLeakageData();
 
-      fEventData->leaks.push_back(leak);
+    leak.E = track->GetTotalEnergy();
+    leak.px = track->GetMomentum().x();
+    leak.py = track->GetMomentum().y();
+    leak.pz = track->GetMomentum().z();
+    leak.vx = presteppoint->GetPosition().x();
+    leak.vy = presteppoint->GetPosition().y();
+    leak.vz = presteppoint->GetPosition().z();
+    leak.vt = presteppoint->GetGlobalTime();
+    leak.pdgId = track->GetDefinition()->GetPDGEncoding();
 
-      return;
-    }
+    fEventData->leaks.push_back(leak);
 
-    if ( theTouchable->GetHistoryDepth()<2 ) return;
+    return;
+  }
 
-    float edep = step->GetTotalEnergyDeposit();
-    float edepEle = (std::abs(pdgID)==11) ? edep : 0.;
-    float edepGamma = (std::abs(pdgID)==22) ? edep : 0.;
-    float edepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? edep : 0.;
+  if ( theTouchable->GetHistoryDepth()<2 ) return;
 
-    bool isFiber = false;
-    long long int fiberId64 = 0;
+  float edep = step->GetTotalEnergyDeposit();
+  float edepEle = (std::abs(pdgID)==11) ? edep : 0.;
+  float edepGamma = (std::abs(pdgID)==22) ? edep : 0.;
+  float edepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? edep : 0.;
 
-    auto towerNum = fSeg->convertFirst32to64( theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 ) );
+  bool isFiber = false;
+  long long int fiberId64 = 0;
 
-    int iTheta = fSeg->numEta(towerNum);
-    int iPhi = fSeg->numPhi(towerNum);
+  auto towerNum = fSeg->convertFirst32to64( theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 ) );
 
-    if ( theTouchable->GetHistoryDepth()==2 ) isFiber = false;
+  int iTheta = fSeg->numEta(towerNum);
+  int iPhi = fSeg->numPhi(towerNum);
 
-    if ( theTouchable->GetHistoryDepth()==4 ) {
-      auto SiPMnum = fSeg->convertLast32to64( theTouchable->GetCopyNumber() );
-      fiberId64 = towerNum | SiPMnum;
+  if ( theTouchable->GetHistoryDepth()==2 ) isFiber = false;
 
-      isFiber = true;
-    }
+  if ( theTouchable->GetHistoryDepth()==4 ) {
+    auto SiPMnum = fSeg->convertLast32to64( theTouchable->GetCopyNumber() );
+    fiberId64 = towerNum | SiPMnum;
 
-    bool isFound = false;
-    bool isFiberAndFound = false;
-    for (auto& iEdep : fEventData->Edeps) {
-      if ( ( iEdep.iTheta == iTheta ) && ( iEdep.iPhi == iPhi ) ) {
-        iEdep.accumulate(edep,edepEle,edepGamma,edepCharged);
-        isFound = true;
+    isFiber = true;
+  }
 
-        if (isFiber) {
-          for (auto& iFiber : iEdep.fibers) {
-            if ( iFiber.fiberNum==fiberId64 ) {
-              iFiber.accumulate(edep,edepEle,edepGamma,edepCharged);
-              isFiberAndFound = true;
+  bool isFound = false;
+  bool isFiberAndFound = false;
+  for (auto& iEdep : fEventData->Edeps) {
+    if ( ( iEdep.iTheta == iTheta ) && ( iEdep.iPhi == iPhi ) ) {
+      iEdep.accumulate(edep,edepEle,edepGamma,edepCharged);
+      isFound = true;
 
-              break;
-            }
-          }
+      if (isFiber) {
+        for (auto& iFiber : iEdep.fibers) {
+          if ( iFiber.fiberNum==fiberId64 ) {
+            iFiber.accumulate(edep,edepEle,edepGamma,edepCharged);
+            isFiberAndFound = true;
 
-          if (!isFiberAndFound) {
-            DRsimInterface::DRsimEdepFiberData theFiber = DRsimInterface::DRsimEdepFiberData(fiberId64,edep,edepEle,edepGamma,edepCharged);
-            iEdep.fibers.push_back(theFiber);
+            break;
           }
         }
 
-        break;
-      }
-    }
-
-    if (!isFound) {
-      DRsimInterface::DRsimEdepData theEdep = DRsimInterface::DRsimEdepData(iTheta,iPhi,edep,edepEle,edepGamma,edepCharged);
-
-      if (isFiber) {
-        DRsimInterface::DRsimEdepFiberData theFiber = DRsimInterface::DRsimEdepFiberData(fiberId64,edep,edepEle,edepGamma,edepCharged);
-        theEdep.fibers.push_back(theFiber);
+        if (!isFiberAndFound) {
+          DRsimInterface::DRsimEdepFiberData theFiber = DRsimInterface::DRsimEdepFiberData(fiberId64,edep,edepEle,edepGamma,edepCharged);
+          iEdep.fibers.push_back(theFiber);
+        }
       }
 
-      fEventData->Edeps.push_back(theEdep);
+      break;
     }
+  }
+
+  if (!isFound) {
+    DRsimInterface::DRsimEdepData theEdep = DRsimInterface::DRsimEdepData(iTheta,iPhi,edep,edepEle,edepGamma,edepCharged);
+
+    if (isFiber) {
+      DRsimInterface::DRsimEdepFiberData theFiber = DRsimInterface::DRsimEdepFiberData(fiberId64,edep,edepEle,edepGamma,edepCharged);
+      theEdep.fibers.push_back(theFiber);
+    }
+
+    fEventData->Edeps.push_back(theEdep);
   }
 
   return;
