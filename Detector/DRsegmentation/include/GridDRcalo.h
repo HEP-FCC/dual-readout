@@ -2,6 +2,7 @@
 #define GridDRcalo_h 1
 
 #include "DRparamBarrel.h"
+#include "DRparamEndcap.h"
 
 #include "DDSegmentation/Segmentation.h"
 
@@ -20,12 +21,7 @@ public:
   virtual Vector3D position(const CellID& aCellID) const;
   Vector3D localPosition(const CellID& aCellID) const;
   Vector3D localPosition(int numx, int numy, int x_, int y_) const;
-  /**  Determine the cell ID based on the position.
-   *   @param[in] aLocalPosition (not used).
-   *   @param[in] aGlobalPosition position in the global coordinates.
-   *   @param[in] aVolumeId ID of a volume.
-   *   return Cell ID. #TODO modify description
-   */
+
   virtual CellID cellID(const Vector3D& aLocalPosition, const Vector3D& aGlobalPosition,
                         const VolumeID& aVolumeID) const;
 
@@ -91,6 +87,7 @@ public:
   inline void setFieldNameModule(const std::string& fieldName) { fModule = fieldName; }
 
   DRparamBarrel* paramBarrel() { return fParamBarrel; }
+  DRparamEndcap* paramEndcap() { return fParamEndcap; }
 
 protected:
   std::string fNumEtaId;
@@ -106,6 +103,7 @@ protected:
 
 private:
   DRparamBarrel* fParamBarrel;
+  DRparamEndcap* fParamEndcap;
 };
 }
 }

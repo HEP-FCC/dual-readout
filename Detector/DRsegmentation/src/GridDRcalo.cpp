@@ -24,6 +24,7 @@ GridDRcalo::GridDRcalo(const std::string& cellEncoding) : Segmentation(cellEncod
   registerIdentifier("identifier_module", "Cell ID identifier for module", fModule, "module");
 
   fParamBarrel = new DRparamBarrel();
+  fParamEndcap = new DRparamEndcap();
 }
 
 GridDRcalo::GridDRcalo(const BitFieldCoder* decoder) : Segmentation(decoder) {
@@ -42,25 +43,32 @@ GridDRcalo::GridDRcalo(const BitFieldCoder* decoder) : Segmentation(decoder) {
   registerIdentifier("identifier_module", "Cell ID identifier for module", fModule, "module");
 
   fParamBarrel = new DRparamBarrel();
+  fParamEndcap = new DRparamEndcap();
 }
 
 GridDRcalo::~GridDRcalo() {
   if (fParamBarrel) delete fParamBarrel;
+  if (fParamEndcap) delete fParamEndcap;
 }
 
 Vector3D GridDRcalo::position(const CellID& cID) const {
-  // This should not be called while building detector geometry
-  if (!fParamBarrel->IsFinalized()) throw std::runtime_error("GridDRcalo::position should not be called while building detector geometry!");
-
   int noEta = numEta(cID);
   int noPhi = numPhi(cID);
 
-  fParamBarrel->SetDeltaThetaByTowerNo(noEta);
-  fParamBarrel->SetThetaOfCenterByTowerNo(noEta);
-  fParamBarrel->SetIsRHSByTowerNo(noEta);
-  fParamBarrel->init();
+  DRparamBase* paramBase = nullptr;
 
-  auto transformA = fParamBarrel->GetSipmTransform3D(noPhi);
+  if ( fParamEndcap->unsignedTowerNo(noEta) >= fParamBarrel->GetTotTowerNum() ) paramBase = fParamEndcap;
+  else paramBase = fParamBarrel;
+
+  // This should not be called while building detector geometry
+  if (!paramBase->IsFinalized()) throw std::runtime_error("GridDRcalo::position should not be called while building detector geometry!");
+
+  paramBase->SetDeltaThetaByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
+  paramBase->SetThetaOfCenterByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
+  paramBase->SetIsRHSByTowerNo(noEta);
+  paramBase->init();
+
+  auto transformA = paramBase->GetSipmTransform3D(noPhi);
   dd4hep::Position localPos = dd4hep::Position( localPosition(cID) );
   dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
   dd4hep::Transform3D transformB = dd4hep::Transform3D(rot,localPos);

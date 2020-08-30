@@ -1,4 +1,5 @@
 #include "DRparamBarrel.h"
+#include "DRparamEndcap.h"
 #include "DRconstructor.h"
 #include "GridDRcaloHandle.h"
 
@@ -20,7 +21,10 @@ namespace ddDRcalo {
     // Get the world volume
     dd4hep::Assembly experimentalHall("hall");
     // Get the dimensions defined in the xml-tree
-    xml_comp_t x_towerDim ( x_det.child( _U(trap) ) );
+    xml_comp_t x_barrel ( x_det.child( _Unicode(barrel) ) );
+    xml_comp_t x_endcap ( x_det.child( _Unicode(endcap) ) );
+    xml_comp_t x_structure ( x_det.child( _Unicode(structure) ) );
+    xml_comp_t x_dim ( x_structure.child( _Unicode(dim) ) );
     xml_comp_t x_sipmDim ( x_det.child( _Unicode(sipmDim) ) );
 
     dd4hep::OpticalSurfaceManager surfMgr = description.surfaceManager();
@@ -28,32 +32,39 @@ namespace ddDRcalo {
     dd4hep::OpticalSurface filterSurfProp = surfMgr.opticalSurface("/world/"+name+"#FilterSurf");
 
     auto segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( sensDet.readout().segmentation().segmentation() );
-    segmentation->setGridSize( x_towerDim.distance() );
+    segmentation->setGridSize( x_dim.distance() );
 
     auto paramBarrel = segmentation->paramBarrel();
-    paramBarrel->SetInnerX(x_towerDim.rmin());
-    paramBarrel->SetTowerH(x_towerDim.height());
-    paramBarrel->SetNumZRot(x_towerDim.nphi());
+    paramBarrel->SetInnerX(x_barrel.rmin());
+    paramBarrel->SetTowerH(x_barrel.height());
+    paramBarrel->SetNumZRot(x_barrel.nphi());
     paramBarrel->SetSipmHeight(x_sipmDim.height());
 
-    auto constructor = DRconstructor();
-    constructor.setXdet(&x_det);
-    constructor.setXTowerDim(&x_towerDim);
+    auto paramEndcap = segmentation->paramEndcap();
+    paramEndcap->SetInnerX(x_endcap.rmin());
+    paramEndcap->SetTowerH(x_endcap.height());
+    paramEndcap->SetNumZRot(x_endcap.nphi());
+    paramEndcap->SetSipmHeight(x_sipmDim.height());
+
+    auto constructor = DRconstructor(x_det);
     constructor.setExpHall(&experimentalHall);
-    constructor.setDRparam(paramBarrel);
+    constructor.setDRparamBarrel(paramBarrel);
+    constructor.setDRparamEndcap(paramEndcap);
     constructor.setDescription(&description);
-    constructor.setXSipmDim(&x_sipmDim);
     constructor.setDetElement(&drDet);
     constructor.setSipmSurf(&sipmSurfProp);
     constructor.setFilterSurf(&filterSurfProp);
     constructor.setSensDet(&sensDet);
 
     paramBarrel->SetIsRHS(true);
-    constructor.construct(); // Barrel right
+    paramEndcap->SetIsRHS(true);
+    constructor.construct(); // right
     paramBarrel->filled();
+    paramEndcap->filled();
 
     paramBarrel->SetIsRHS(false);
-    constructor.construct(); // Barrel left
+    paramEndcap->SetIsRHS(false);
+    constructor.construct(); // left
 
     dd4hep::PlacedVolume hallPlace = description.pickMotherVolume(drDet).placeVolume(experimentalHall);
     hallPlace.addPhysVolID("system",x_det.id());
@@ -61,6 +72,7 @@ namespace ddDRcalo {
     drDet.setPlacement( hallPlace );
 
     paramBarrel->finalized();
+    paramEndcap->finalized();
 
     return drDet;
   }

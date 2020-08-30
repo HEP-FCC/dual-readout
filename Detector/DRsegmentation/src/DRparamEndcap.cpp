@@ -1,4 +1,4 @@
-#include "DRparamBarrel.h"
+#include "DRparamEndcap.h"
 
 #include "Math/GenVector/RotationZYX.h"
 
@@ -7,7 +7,7 @@
 namespace dd4hep {
 namespace DDSegmentation {
 
-DRparamBarrel::DRparamBarrel() {
+DRparamEndcap::DRparamEndcap() {
   fIsRHS = 0;
   fPhiZRot = 0.;
   fInnerX = 0.;
@@ -29,10 +29,10 @@ DRparamBarrel::DRparamBarrel() {
   fFinalized = false;
 }
 
-DRparamBarrel::~DRparamBarrel() {}
+DRparamEndcap::~DRparamEndcap() {}
 
-void DRparamBarrel::init() {
-  fCurrentInnerR = fInnerX/std::cos(fThetaOfCenter);
+void DRparamEndcap::init() {
+  fCurrentInnerR = fInnerX;
   double trnsLength = fTowerH/2.+fCurrentInnerR;
   fCurrentCenter =  TVector3(std::cos(fThetaOfCenter)*trnsLength,0.,std::sin(fThetaOfCenter)*trnsLength);
 
@@ -82,16 +82,16 @@ void DRparamBarrel::init() {
   }
 }
 
-void DRparamBarrel::SetDeltaThetaByTowerNo(int signedTowerNo, int) {
-  if (!fFilled) throw std::runtime_error("Attempt to set by tower num while barrel parameter is not filled!");
+void DRparamEndcap::SetDeltaThetaByTowerNo(int signedTowerNo, int BEtrans) {
+  if (!fFilled) throw std::runtime_error("Attempt to set by tower num while endcap parameter is not filled!");
 
-  fDeltaTheta = fDeltaThetaVec.at( unsignedTowerNo(signedTowerNo) );
+  fDeltaTheta = fDeltaThetaVec.at( unsignedTowerNo(signedTowerNo) - unsignedTowerNo(BEtrans) );
 }
 
-void DRparamBarrel::SetThetaOfCenterByTowerNo(int signedTowerNo, int) {
-  if (!fFilled) throw std::runtime_error("Attempt to set by tower num while barrel parameter is not filled!");
+void DRparamEndcap::SetThetaOfCenterByTowerNo(int signedTowerNo, int BEtrans) {
+  if (!fFilled) throw std::runtime_error("Attempt to set by tower num while endcap parameter is not filled!");
 
-  fThetaOfCenter = fThetaOfCenterVec.at( unsignedTowerNo(signedTowerNo) );
+  fThetaOfCenter = fThetaOfCenterVec.at( unsignedTowerNo(signedTowerNo) - unsignedTowerNo(BEtrans) );
 }
 
 }
