@@ -59,8 +59,6 @@ namespace ddDRcalo {
     paramBarrel->SetIsRHS(true);
     paramEndcap->SetIsRHS(true);
     constructor.construct(); // right
-    paramBarrel->filled();
-    paramEndcap->filled();
 
     paramBarrel->SetIsRHS(false);
     paramEndcap->SetIsRHS(false);

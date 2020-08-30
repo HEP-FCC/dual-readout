@@ -101,6 +101,7 @@ void ddDRcalo::DRconstructor::implementTowers(xml_comp_t& x_theta, dd4hep::DDSeg
     }
   }
 
+  param->filled();
   param->SetTotTowerNum( towerNo - x_theta.start() );
 }
 
