@@ -49,7 +49,7 @@ target_link_libraries(
   SimG4Fast
 )
 
-file(GLOB DRsim_MACROS ${PROJECT_SOURCE_DIR}/*.mac)
+file(GLOB DRsim_MACROS ${PROJECT_SOURCE_DIR}/*.mac compacts.txt)
 file(COPY ${DRsim_MACROS} DESTINATION ${PROJECT_BINARY_DIR})
 
 #----------------------------------------------------------------------------

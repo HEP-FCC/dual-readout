@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 
 #include "GeoSvc.h"
 
@@ -47,8 +48,18 @@ int main(int argc, char** argv) {
   G4RunManager* runManager = new G4RunManager;
   #endif
 
+  std::ifstream compacts("compacts.txt");
+  if (!compacts) throw std::runtime_error("Cannot find compacts.txt!");
+  std::string xmlFile = "";
+  std::vector<std::string> xmlList = {};
+
+  while (std::getline(compacts,xmlFile)) {
+    if (xmlFile.size()>0) xmlList.push_back(xmlFile);
+  }
+
+
   // Mandatory user initialization classes
-  auto geoSvc = new GeoSvc({"./bin/compact/DRcalo.xml"});
+  auto geoSvc = new GeoSvc(xmlList);
 
   runManager->SetUserInitialization(geoSvc->getGeant4Geo());
 
