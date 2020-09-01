@@ -32,7 +32,7 @@ DRparamEndcap::DRparamEndcap() {
 DRparamEndcap::~DRparamEndcap() {}
 
 void DRparamEndcap::init() {
-  fCurrentInnerR = fInnerX;
+  fCurrentInnerR = fInnerX/std::sin(fThetaOfCenter);
   double trnsLength = fTowerH/2.+fCurrentInnerR;
   fCurrentCenter =  TVector3(std::cos(fThetaOfCenter)*trnsLength,0.,std::sin(fThetaOfCenter)*trnsLength);
 

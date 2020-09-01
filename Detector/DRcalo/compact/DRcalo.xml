@@ -651,7 +651,7 @@
         <deltatheta deltatheta="0.01303"/>
         <deltatheta deltatheta="0.01280"/>
       </barrel>
-      <endcap height="2.*m" rmin="3.12583*m" nphi="283" theta="0.95717" start="52" material="Copper" vis="TowerVis">
+      <endcap height="2.*m" rmin="2.556*m" nphi="283" theta="0.95717" start="52" material="Copper" vis="TowerVis">
         <deltatheta deltatheta="0.01280"/>
         <deltatheta deltatheta="0.01280"/>
         <deltatheta deltatheta="0.01280"/>
