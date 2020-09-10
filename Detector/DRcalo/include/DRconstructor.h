@@ -37,8 +37,8 @@ namespace ddDRcalo {
     void implementSipms(dd4hep::Volume& sipmLayerVol);
     double calculateDistAtZ(TGeoTrap* rootTrap, dd4hep::Position& pos, double* norm, double z);
     float calculateFiberLen(TGeoTrap* rootTrap, dd4hep::Position& pos, double* norm, double z1, double diff, double towerHeight);
-    void checkContained(TGeoTrap* rootTrap, dd4hep::Position& pos, double z);
-    void getNormals(TGeoTrap* rootTrap, double z, double* norm1, double* norm2, double* norm3, double* norm4);
+    bool checkContained(TGeoTrap* rootTrap, dd4hep::Position& pos, double z, bool throwExcept=false);
+    void getNormals(TGeoTrap* rootTrap, int numxBl2, double z, double* norm1, double* norm2, double* norm3, double* norm4);
 
     xml_det_t fX_det;
     xml_comp_t fX_barrel;
@@ -62,6 +62,7 @@ namespace ddDRcalo {
     bool fVis;
     int fNumx, fNumy;
     int fTowerNoLR;
+    std::vector< std::pair<int,int> > fFiberCoords;
   };
 }
 
