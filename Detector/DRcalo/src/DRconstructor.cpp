@@ -96,8 +96,6 @@ void ddDRcalo::DRconstructor::implementTowers(xml_comp_t& x_theta, dd4hep::DDSeg
       sipmWaferPhys.addPhysVolID("eta", fTowerNoLR);
       sipmWaferPhys.addPhysVolID("phi", nPhi);
       sipmWaferPhys.addPhysVolID("module", 0);
-      sipmWaferPhys.addPhysVolID("xmax",fNumx);
-      sipmWaferPhys.addPhysVolID("ymax",fNumy);
     }
   }
 
@@ -181,7 +179,7 @@ void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::P
   dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
   dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
 
-  auto fiberId64 = fSegmentation->setCellID(fTowerNoLR, 0, fNumx, fNumy, col, row);
+  auto fiberId64 = fSegmentation->setCellID(fTowerNoLR, 0, col, row);
   int fiberId32 = fSegmentation->getLast32bits(fiberId64);
 
   if ( fSegmentation->IsCerenkov(col,row) ) { //c fiber
@@ -239,7 +237,7 @@ void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
     int row = fFiberCoords.at(iFiber).second;
 
     auto localPosition = fSegmentation->localPosition(fNumx,fNumy,column,row);
-    auto sipmId64 = fSegmentation->setCellID(fTowerNoLR, 0, fNumx, fNumy, column, row);
+    auto sipmId64 = fSegmentation->setCellID(fTowerNoLR, 0, column, row);
     int sipmId32 = fSegmentation->getLast32bits(sipmId64);
 
     dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug

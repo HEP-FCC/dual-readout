@@ -26,9 +26,10 @@ public:
                         const VolumeID& aVolumeID) const;
 
   VolumeID setVolumeID(int numEta, int numPhi) const;
-  CellID setCellID(int numEta, int numPhi, int numX, int numY, int x, int y) const;
+  CellID setCellID(int numEta, int numPhi, int x, int y) const;
 
   void setGridSize(double grid) { fGridSize = grid; }
+  void setSipmSize(double sipm) { fSipmSize = sipm; }
 
   // Get the identifier number of a mother tower in eta or phi direction
   int numEta(const CellID& aCellID) const;
@@ -57,8 +58,8 @@ public:
   int numEta(const int& aId32) const { return numEta( convertFirst32to64(aId32) ); }
   int numPhi(const int& aId32) const { return numPhi( convertFirst32to64(aId32) ); }
 
-  int numX(const int& aId32) const { return numX( convertLast32to64(aId32) ); }
-  int numY(const int& aId32) const { return numY( convertLast32to64(aId32) ); }
+  int numX(const int& aId32) const { return numX( convertFirst32to64(aId32) ); }
+  int numY(const int& aId32) const { return numY( convertFirst32to64(aId32) ); }
 
   int x(const int& aId32) const { return x( convertLast32to64(aId32) ); }
   int y(const int& aId32) const { return y( convertLast32to64(aId32) ); }
@@ -70,8 +71,6 @@ public:
 
   inline const std::string& fieldNameNumEta() const { return fNumEtaId; }
   inline const std::string& fieldNameNumPhi() const { return fNumPhiId; }
-  inline const std::string& fieldNameNumX() const { return fNumXId; }
-  inline const std::string& fieldNameNumY() const { return fNumYId; }
   inline const std::string& fieldNameX() const { return fXId; }
   inline const std::string& fieldNameY() const { return fYId; }
   inline const std::string& fieldNameIsCerenkov() const { return fIsCerenkovId; }
@@ -79,8 +78,6 @@ public:
 
   inline void setFieldNameNumEta(const std::string& fieldName) { fNumEtaId = fieldName; }
   inline void setFieldNameNumPhi(const std::string& fieldName) { fNumPhiId = fieldName; }
-  inline void setFieldNameNumX(const std::string& fieldName) { fNumXId = fieldName; }
-  inline void setFieldNameNumY(const std::string& fieldName) { fNumYId = fieldName; }
   inline void setFieldNameX(const std::string& fieldName) { fXId = fieldName; }
   inline void setFieldNameY(const std::string& fieldName) { fYId = fieldName; }
   inline void setFieldNameIsCerenkov(const std::string& fieldName) { fIsCerenkovId = fieldName; }
@@ -92,16 +89,17 @@ public:
 protected:
   std::string fNumEtaId;
   std::string fNumPhiId;
-  std::string fNumXId;
-  std::string fNumYId;
   std::string fXId;
   std::string fYId;
   std::string fIsCerenkovId;
   std::string fModule;
 
   double fGridSize;
+  double fSipmSize;
 
 private:
+  DRparamBase* setParamBase(int noEta) const;
+
   DRparamBarrel* fParamBarrel;
   DRparamEndcap* fParamEndcap;
 };

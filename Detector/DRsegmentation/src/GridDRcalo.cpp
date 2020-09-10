@@ -16,8 +16,6 @@ GridDRcalo::GridDRcalo(const std::string& cellEncoding) : Segmentation(cellEncod
   // register all necessary parameters
   registerIdentifier("identifier_eta", "Cell ID identifier for numEta", fNumEtaId, "eta");
   registerIdentifier("identifier_phi", "Cell ID identifier for numPhi", fNumPhiId, "phi");
-  registerIdentifier("identifier_numx", "Cell ID identifier for numX", fNumXId, "xmax");
-  registerIdentifier("identifier_numy", "Cell ID identifier for numY", fNumYId, "ymax");
   registerIdentifier("identifier_x", "Cell ID identifier for x", fXId, "x");
   registerIdentifier("identifier_y", "Cell ID identifier for y", fYId, "y");
   registerIdentifier("identifier_IsCerenkov", "Cell ID identifier for IsCerenkov", fIsCerenkovId, "c");
@@ -35,8 +33,6 @@ GridDRcalo::GridDRcalo(const BitFieldCoder* decoder) : Segmentation(decoder) {
   // register all necessary parameters
   registerIdentifier("identifier_eta", "Cell ID identifier for numEta", fNumEtaId, "eta");
   registerIdentifier("identifier_phi", "Cell ID identifier for numPhi", fNumPhiId, "phi");
-  registerIdentifier("identifier_numx", "Cell ID identifier for numX", fNumXId, "xmax");
-  registerIdentifier("identifier_numy", "Cell ID identifier for numY", fNumYId, "ymax");
   registerIdentifier("identifier_x", "Cell ID identifier for x", fXId, "x");
   registerIdentifier("identifier_y", "Cell ID identifier for y", fYId, "y");
   registerIdentifier("identifier_IsCerenkov", "Cell ID identifier for IsCerenkov", fIsCerenkovId, "c");
@@ -55,18 +51,7 @@ Vector3D GridDRcalo::position(const CellID& cID) const {
   int noEta = numEta(cID);
   int noPhi = numPhi(cID);
 
-  DRparamBase* paramBase = nullptr;
-
-  if ( fParamEndcap->unsignedTowerNo(noEta) >= fParamBarrel->GetTotTowerNum() ) paramBase = fParamEndcap;
-  else paramBase = fParamBarrel;
-
-  // This should not be called while building detector geometry
-  if (!paramBase->IsFinalized()) throw std::runtime_error("GridDRcalo::position should not be called while building detector geometry!");
-
-  paramBase->SetDeltaThetaByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
-  paramBase->SetThetaOfCenterByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
-  paramBase->SetIsRHSByTowerNo(noEta);
-  paramBase->init();
+  DRparamBase* paramBase = setParamBase(noEta);
 
   auto transformA = paramBase->GetSipmTransform3D(noPhi);
   dd4hep::Position localPos = dd4hep::Position( localPosition(cID) );
@@ -107,7 +92,7 @@ CellID GridDRcalo::cellID(const Vector3D& localPosition, const Vector3D& /*globa
   int x = std::floor( ( localX + ( numx%2==0 ? 0. : fGridSize/2. ) ) / fGridSize ) + numx/2;
   int y = std::floor( ( localY + ( numy%2==0 ? 0. : fGridSize/2. ) ) / fGridSize ) + numy/2;
 
-  return setCellID( numEta(vID), numPhi(vID), numx, numy, x, y );
+  return setCellID( numEta(vID), numPhi(vID), x, y );
 }
 
 VolumeID GridDRcalo::setVolumeID(int numEta, int numPhi) const {
@@ -123,18 +108,14 @@ VolumeID GridDRcalo::setVolumeID(int numEta, int numPhi) const {
   return vID;
 }
 
-CellID GridDRcalo::setCellID(int numEta, int numPhi, int numX, int numY, int x, int y) const {
+CellID GridDRcalo::setCellID(int numEta, int numPhi, int x, int y) const {
   VolumeID numEtaId = static_cast<VolumeID>(numEta);
   VolumeID numPhiId = static_cast<VolumeID>(numPhi);
-  VolumeID numXId = static_cast<VolumeID>(numX);
-  VolumeID numYId = static_cast<VolumeID>(numY);
   VolumeID xId = static_cast<VolumeID>(x);
   VolumeID yId = static_cast<VolumeID>(y);
   VolumeID vID = 0;
   _decoder->set(vID, fNumEtaId, numEtaId);
   _decoder->set(vID, fNumPhiId, numPhiId);
-  _decoder->set(vID, fNumXId, numXId);
-  _decoder->set(vID, fNumYId, numYId);
   _decoder->set(vID, fXId, xId);
   _decoder->set(vID, fYId, yId);
 
@@ -160,13 +141,23 @@ int GridDRcalo::numPhi(const CellID& aCellID) const {
 
 // Get the total number of SiPMs of the mother tower in x or y direction (local coordinate)
 int GridDRcalo::numX(const CellID& aCellID) const {
-  VolumeID numX = static_cast<VolumeID>(_decoder->get(aCellID, fNumXId));
-  return static_cast<int>(numX);
+  int noEta = numEta(aCellID);
+
+  DRparamBase* paramBase = setParamBase(noEta);
+
+  int noX = static_cast<int>( std::floor( ( paramBase->GetTl2()*2. - fSipmSize )/fGridSize ) ) + 1; // in phi direction
+
+  return noX;
 }
 
 int GridDRcalo::numY(const CellID& aCellID) const {
-  VolumeID numY = static_cast<VolumeID>(_decoder->get(aCellID, fNumYId));
-  return static_cast<int>(numY);
+  int noEta = numEta(aCellID);
+
+  DRparamBase* paramBase = setParamBase(noEta);
+
+  int noY = static_cast<int>( std::floor( ( paramBase->GetH2()*2. - fSipmSize )/fGridSize ) ) + 1; // in eta direction
+
+  return noY;
 }
 
 // Get the identifier number of a SiPM in x or y direction (local coordinate)
@@ -213,6 +204,23 @@ CellID GridDRcalo::convertLast32to64(const int aId32) const {
   aId64 <<= sizeof(int)*CHAR_BIT;
 
   return aId64;
+}
+
+DRparamBase* GridDRcalo::setParamBase(int noEta) const {
+  DRparamBase* paramBase = nullptr;
+
+  if ( fParamEndcap->unsignedTowerNo(noEta) >= fParamBarrel->GetTotTowerNum() ) paramBase = fParamEndcap;
+  else paramBase = fParamBarrel;
+
+  // This should not be called while building detector geometry
+  if (!paramBase->IsFinalized()) throw std::runtime_error("GridDRcalo::position should not be called while building detector geometry!");
+
+  paramBase->SetDeltaThetaByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
+  paramBase->SetThetaOfCenterByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
+  paramBase->SetIsRHSByTowerNo(noEta);
+  paramBase->init();
+
+  return paramBase;
 }
 
 REGISTER_SEGMENTATION(GridDRcalo)

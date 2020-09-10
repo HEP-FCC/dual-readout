@@ -42,7 +42,7 @@ namespace dd4hep {
     }
 
     inline VolumeID setVolumeID(int numEta, int numPhi) const { return access()->implementation->setVolumeID(numEta,numPhi); }
-    inline CellID setCellID(int numEta, int numPhi, int numX, int numY, int x, int y) const { return access()->implementation->setCellID(numEta, numPhi, numX, numY, x, y); }
+    inline CellID setCellID(int numEta, int numPhi, int x, int y) const { return access()->implementation->setCellID(numEta, numPhi, x, y); }
 
     inline void setGridSize(double grid) { access()->implementation->setGridSize(grid); }
 
