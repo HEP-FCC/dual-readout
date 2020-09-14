@@ -5,7 +5,7 @@ find_package(FastJet)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${FASTJET_DIR}/include
+  ${FASTJET_INCLUDE_DIR}
 )
 file(GLOB sources
   ${PROJECT_SOURCE_DIR}/src/*.cc
