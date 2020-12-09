@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 cmake_policy(SET CMP0074 NEW)
 project(dual-readout)
 
-
-# HSF cmaketools for fastjet etc.
-
+set(CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH}
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 IF(NOT TARGET DD4hep::DDCore)
   find_package ( DD4hep REQUIRED )
@@ -21,9 +21,6 @@ dd4hep_configure_output()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-find_package(CMakeTools)
-UseCMakeTools()
 
 set(HEPMC_DIR "$ENV{HEPMC_DIR}")
 set(PYTHIA_DIR "$ENV{PYTHIA_DIR}")
