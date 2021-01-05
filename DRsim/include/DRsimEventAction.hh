@@ -25,7 +25,7 @@ private:
   void fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc);
   void queue();
 
-  SimG4SaveDRcaloHits* fSaveHits;
+  const SimG4SaveDRcaloHits* mSaveHits;
 
   DRsimInterface::DRsimEventData* fEventData;
 };

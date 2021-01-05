@@ -19,19 +19,14 @@ DRsimEventAction::DRsimEventAction()
   // set printing per each event
   G4RunManager::GetRunManager()->SetPrintProgress(1);
 
-  fSaveHits = new SimG4SaveDRcaloHits();
-  fEventData = new DRsimInterface::DRsimEventData();
+  auto runAction = dynamic_cast<const DRsimRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction());
+  mSaveHits = runAction->GetSaveHits();
 }
 
-DRsimEventAction::~DRsimEventAction() {
-  if (fSaveHits) delete fSaveHits;
-  if (fEventData) delete fEventData;
-}
+DRsimEventAction::~DRsimEventAction() {}
 
 void DRsimEventAction::BeginOfEventAction(const G4Event*) {
 	clear();
-
-  fSaveHits->setEventData(fEventData);
 }
 
 void DRsimEventAction::clear() {
@@ -39,7 +34,7 @@ void DRsimEventAction::clear() {
 }
 
 void DRsimEventAction::EndOfEventAction(const G4Event* event) {
-  fSaveHits->saveOutput(event);
+  mSaveHits->saveOutput(event);
 
   for (int iVtx = 0; iVtx < event->GetNumberOfPrimaryVertex(); iVtx++) {
     G4PrimaryVertex* vtx = event->GetPrimaryVertex(iVtx);
@@ -72,13 +67,13 @@ void DRsimEventAction::fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc) {
 }
 
 void DRsimEventAction::queue() {
-  while ( DRsimRunAction::sNumEvt != DRsimPrimaryGeneratorAction::sIdxEvt ) {
-    G4AutoLock lock(&DRsimEventActionMutex);
-    if ( DRsimRunAction::sNumEvt == DRsimPrimaryGeneratorAction::sIdxEvt ) break;
-    G4CONDITIONWAIT(&DRsimEventActionCV, &lock);
-  }
-  G4AutoLock lock(&DRsimEventActionMutex);
-  DRsimRunAction::sRootIO->fill(fEventData);
-  DRsimRunAction::sNumEvt++;
-  G4CONDITIONBROADCAST(&DRsimEventActionCV);
+  // while ( DRsimRunAction::sNumEvt != DRsimPrimaryGeneratorAction::sIdxEvt ) {
+  //   G4AutoLock lock(&DRsimEventActionMutex);
+  //   if ( DRsimRunAction::sNumEvt == DRsimPrimaryGeneratorAction::sIdxEvt ) break;
+  //   G4CONDITIONWAIT(&DRsimEventActionCV, &lock);
+  // }
+  // G4AutoLock lock(&DRsimEventActionMutex);
+  // DRsimRunAction::sRootIO->fill(fEventData);
+  // DRsimRunAction::sNumEvt++;
+  // G4CONDITIONBROADCAST(&DRsimEventActionCV);
 }

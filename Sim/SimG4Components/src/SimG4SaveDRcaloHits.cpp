@@ -9,20 +9,29 @@
 // DD4hep
 #include "DDG4/Geant4Hits.h"
 
+// Data model
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/SimCalorimeterHitCollection.h"
+#include "edm4hep/DRSimCalorimeterHitCollection.h"
+
 #include <stdexcept>
 
-SimG4SaveDRcaloHits::SimG4SaveDRcaloHits() {
+SimG4SaveDRcaloHits::SimG4SaveDRcaloHits(const std::string filename) {
   m_geoSvc = GeoSvc::GetInstance();
   m_readoutNames = {"DRcaloSiPMreadout"};
+  mFilename = filename;
 
   initialize();
 
   if (m_geoSvc==0) throw std::runtime_error("Attempt to save hits while GeoSvc is not initialized!");
 }
 
-SimG4SaveDRcaloHits::~SimG4SaveDRcaloHits() {}
+SimG4SaveDRcaloHits::~SimG4SaveDRcaloHits() {
+  finalize();
+}
 
 void SimG4SaveDRcaloHits::initialize() {
+  // DD4hep readouts
   auto lcdd = m_geoSvc->lcdd();
   auto allReadouts = lcdd->readouts();
   for (auto& readoutName : m_readoutNames) {
@@ -32,10 +41,21 @@ void SimG4SaveDRcaloHits::initialize() {
       std::cout << "Hits will be saved to EDM from the collection " << readoutName << std::endl;
     }
   }
+
+  // EDM4hep/PODIO event store
+  pStore = std::make_unique<podio::EventStore>();
+  pWriter = std::make_unique<podio::ROOTWriter>(mFilename,pStore.get());
+
+  auto& simCaloHits = pStore->create<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
+  pWriter->registerForWrite("SimCalorimeterHits");
+
+  auto& DRsimCaloHits = pStore->create<edm4hep::DRSimCalorimeterHitCollection>("DRSimCalorimeterHits");
+  pWriter->registerForWrite("DRSimCalorimeterHits");
+
   return;
 }
 
-void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) {
+void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
   G4HCofThisEvent* collections = aEvent->GetHCofThisEvent();
   G4VHitsCollection* collect;
   ddDRcalo::DRcaloSiPMHit* hit;
@@ -85,4 +105,8 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) {
   }
 
   return;
+}
+
+void SimG4SaveDRcaloHits::finalize() {
+  pWriter->finish();
 }

@@ -9,6 +9,8 @@ else()
   find_package(Geant4 REQUIRED)
 endif()
 
+find_package(podio REQUIRED HINTS $ENV{PODIO})
+
 include(${Geant4_USE_FILE})
 
 include_directories(
@@ -20,7 +22,13 @@ file(GLOB sources
 )
 
 add_library(SimG4Components SHARED ${sources})
-target_include_directories(SimG4Components PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${DD4hep_DIR}/include)
+target_include_directories(
+  SimG4Components
+  PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${DD4hep_DIR}/include
+)
+
 target_link_libraries(
   SimG4Components
   ${Geant4_LIBRARIES}
@@ -29,6 +37,10 @@ target_link_libraries(
   ddDRsensitive
   ddDRsegmentation
   DetComponents
+  podio::podio
+  podio::podioRootIO
+  edm4dr
+  rootIO
 )
 
 install(TARGETS SimG4Components LIBRARY DESTINATION lib)

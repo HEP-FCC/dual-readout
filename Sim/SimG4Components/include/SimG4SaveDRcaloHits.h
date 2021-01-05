@@ -3,6 +3,8 @@
 
 #include "GeoSvc.h"
 
+#include "podio/ROOTWriter.h"
+#include "podio/EventStore.h"
 #include "DRsimInterface.h"
 
 /** @class SimG4SaveCalHits SimG4Components/src/SimG4SaveCalHits.h SimG4SaveCalHits.h
@@ -19,23 +21,29 @@
 
 class SimG4SaveDRcaloHits {
 public:
-  explicit SimG4SaveDRcaloHits();
+  explicit SimG4SaveDRcaloHits(const std::string filename);
   virtual ~SimG4SaveDRcaloHits();
 
   void initialize();
+  void finalize();
 
-  void saveOutput(const G4Event* aEvent);
+  const podio::EventStore* GetEventStore() { return pStore.get(); }
+  const podio::ROOTWriter* GetWriter() { return pWriter.get(); }
 
-  void setEventData(DRsimInterface::DRsimEventData* evtData) { fEventData = evtData; }
+  void saveOutput(const G4Event* aEvent) const;
 
 private:
   /// Pointer to the geometry service
   GeoSvc* m_geoSvc;
 
-  DRsimInterface::DRsimEventData* fEventData;
-
   /// Name of the readouts (hits collections) to save
   std::vector<std::string> m_readoutNames;
+  std::string mFilename;
+
+  DRsimInterface::DRsimEventData* fEventData;
+
+  std::unique_ptr<podio::EventStore> pStore;
+  std::unique_ptr<podio::ROOTWriter> pWriter;
 };
 
 #endif

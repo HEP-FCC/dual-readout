@@ -2,7 +2,6 @@ project(rootIO)
 
 find_package(ROOT REQUIRED)
 find_package(podio REQUIRED HINTS $ENV{PODIO})
-find_package(EDM4HEP REQUIRED)
 find_package(FastJet)
 
 include_directories(
@@ -35,4 +34,4 @@ install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/librootIO_rdict.pcm ${CMAKE_CURRENT_BINARY_DIR}/librootIO.rootmap DESTINATION lib
 )
 
-#add_subdirectory(edm4DRsim)
+add_subdirectory(edm4dr)
