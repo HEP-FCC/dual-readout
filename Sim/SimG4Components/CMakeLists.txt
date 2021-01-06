@@ -31,16 +31,15 @@ target_include_directories(
 
 target_link_libraries(
   SimG4Components
+  PUBLIC
   ${Geant4_LIBRARIES}
   DD4hep::DDCore
   DD4hep::DDG4
   ddDRsensitive
   ddDRsegmentation
   DetComponents
-  podio::podio
   podio::podioRootIO
   edm4dr
-  rootIO
 )
 
 install(TARGETS SimG4Components LIBRARY DESTINATION lib)

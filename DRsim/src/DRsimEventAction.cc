@@ -47,6 +47,9 @@ void DRsimEventAction::EndOfEventAction(const G4Event* event) {
 
   fEventData->event_number = DRsimPrimaryGeneratorAction::sIdxEvt;
 
+  mSaveHits->writeEvent();
+  mSaveHits->clearCollections();
+
   queue();
   clear();
 }

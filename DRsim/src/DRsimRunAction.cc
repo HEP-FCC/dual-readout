@@ -47,7 +47,7 @@ void DRsimRunAction::BeginOfRunAction(const G4Run*) {
     fOpFiberRegion = new SimG4FastSimOpFiberRegion();
     fOpFiberRegion->create();
 
-    pSaveHits = std::make_unique<SimG4SaveDRcaloHits>(fFilename);
+    pSaveHits = std::make_unique<SimG4SaveDRcaloHits>( fFilename + "_t" + std::to_string(G4Threading::G4GetThreadId()) + ".root" );
   }
 
   if ( G4Threading::IsMasterThread() ) {

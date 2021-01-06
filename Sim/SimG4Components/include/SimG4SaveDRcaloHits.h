@@ -3,21 +3,15 @@
 
 #include "GeoSvc.h"
 
+#include "DRcaloSiPMHit.h"
+
 #include "podio/ROOTWriter.h"
 #include "podio/EventStore.h"
-#include "DRsimInterface.h"
 
-/** @class SimG4SaveCalHits SimG4Components/src/SimG4SaveCalHits.h SimG4SaveCalHits.h
- *
- *  Save calorimeter hits tool.
- *  All collections passed in the job options will be saved (\b'readoutNames').
- *  Readout name is defined in DD4hep XML file as the attribute 'readout' of 'detector' tag.
- *  If (\b'readoutNames') contain no elements or names that do not correspond to any hit collection,
- *  tool will fail at initialization.
- *  [For more information please see](@ref md_sim_doc_geant4fullsim).
- *
- *  @author Anna Zaborowska
- */
+// Data model
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/SimCalorimeterHitCollection.h"
+#include "edm4hep/DRSimCalorimeterHitCollection.h"
 
 class SimG4SaveDRcaloHits {
 public:
@@ -31,8 +25,13 @@ public:
   const podio::ROOTWriter* GetWriter() { return pWriter.get(); }
 
   void saveOutput(const G4Event* aEvent) const;
+  void writeEvent() const { pWriter->writeEvent(); }
+  void clearCollections() const { pStore->clearCollections(); }
 
 private:
+  void addStruct( const std::map< std::pair<float,float>, int >& structData, std::function<void(int)> addTo ) const;
+  void checkMetadata(const ddDRcalo::DRcaloSiPMHit* hit) const;
+
   /// Pointer to the geometry service
   GeoSvc* m_geoSvc;
 
@@ -40,10 +39,11 @@ private:
   std::vector<std::string> m_readoutNames;
   std::string mFilename;
 
-  DRsimInterface::DRsimEventData* fEventData;
-
   std::unique_ptr<podio::EventStore> pStore;
   std::unique_ptr<podio::ROOTWriter> pWriter;
+
+  edm4hep::SimCalorimeterHitCollection* mSimCaloHits;
+  edm4hep::DRSimCalorimeterHitCollection* mDRsimCaloHits;
 };
 
 #endif
