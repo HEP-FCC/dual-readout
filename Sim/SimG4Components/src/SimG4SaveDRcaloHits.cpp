@@ -8,22 +8,23 @@
 // DD4hep
 #include "DDG4/Geant4Hits.h"
 
+#include "G4SystemOfUnits.hh"
+#include "DD4hep/DD4hepUnits.h"
+
 #include <stdexcept>
 #include <functional>
 
-SimG4SaveDRcaloHits::SimG4SaveDRcaloHits(const std::string filename) {
+SimG4SaveDRcaloHits::SimG4SaveDRcaloHits(podio::EventStore* store, podio::ROOTWriter* writer)
+: pStore(store), pWriter(writer) {
   m_geoSvc = GeoSvc::GetInstance();
   m_readoutNames = {"DRcaloSiPMreadout"};
-  mFilename = filename;
 
   initialize();
 
   if (m_geoSvc==0) throw std::runtime_error("Attempt to save hits while GeoSvc is not initialized!");
 }
 
-SimG4SaveDRcaloHits::~SimG4SaveDRcaloHits() {
-  finalize();
-}
+SimG4SaveDRcaloHits::~SimG4SaveDRcaloHits() {}
 
 void SimG4SaveDRcaloHits::initialize() {
   // DD4hep readouts
@@ -36,10 +37,6 @@ void SimG4SaveDRcaloHits::initialize() {
       std::cout << "Hits will be saved to EDM from the collection " << readoutName << std::endl;
     }
   }
-
-  // EDM4hep/PODIO event store
-  pStore = std::make_unique<podio::EventStore>();
-  pWriter = std::make_unique<podio::ROOTWriter>(mFilename,pStore.get());
 
   *mSimCaloHits = pStore->create<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
   pWriter->registerForWrite("SimCalorimeterHits");
@@ -73,7 +70,7 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
           caloHit.setCellID( static_cast<unsigned long long>(hit->GetSiPMnum()) );
 
           auto globalPos = segmentation->position( hit->GetSiPMnum() );
-          caloHit.setPosition( {globalPos.x(),globalPos.y(),globalPos.z()} );
+          caloHit.setPosition( { globalPos.x() * CLHEP::millimeter/dd4hep::millimeter , globalPos.y() * CLHEP::millimeter/dd4hep::millimeter , globalPos.z() * CLHEP::millimeter/dd4hep::millimeter } );
 
           auto DRcaloHit = mDRsimCaloHits->create();
           DRcaloHit.setCount( hit->GetPhotonCount() );
@@ -90,10 +87,6 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
   }
 
   return;
-}
-
-void SimG4SaveDRcaloHits::finalize() {
-  pWriter->finish();
 }
 
 void SimG4SaveDRcaloHits::checkMetadata(const ddDRcalo::DRcaloSiPMHit* hit) const {

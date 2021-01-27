@@ -18,6 +18,10 @@ public:
   virtual void BeginOfEventAction(const G4Event*);
   virtual void EndOfEventAction(const G4Event*);
 
+  void SetSaveHits(SimG4SaveDRcaloHits* saveHits) { pSaveHits = saveHits; }
+  void SetEventStore(podio::EventStore* theStore) { pStore = theStore; }
+  void SetWriter(podio::ROOTWriter* theWriter) { pWriter = theWriter; }
+
   DRsimInterface::DRsimEventData* getEventData() { return fEventData; }
 
 private:
@@ -25,7 +29,12 @@ private:
   void fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc);
   void queue();
 
-  const SimG4SaveDRcaloHits* mSaveHits;
+  void writeEvent() const { pWriter->writeEvent(); }
+  void clearCollections() const { pStore->clearCollections(); }
+
+  SimG4SaveDRcaloHits* pSaveHits;
+  podio::EventStore* pStore;
+  podio::ROOTWriter* pWriter;
 
   DRsimInterface::DRsimEventData* fEventData;
 };

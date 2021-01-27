@@ -1,5 +1,4 @@
 #include "DRsimEventAction.hh"
-#include "DRsimRunAction.hh"
 #include "DRsimPrimaryGeneratorAction.hh"
 
 #include "G4PrimaryVertex.hh"
@@ -14,18 +13,22 @@ namespace {
 }
 
 DRsimEventAction::DRsimEventAction()
-: G4UserEventAction()
+: G4UserEventAction(), pSaveHits(nullptr), pStore(nullptr), pWriter(nullptr)
 {
   // set printing per each event
   G4RunManager::GetRunManager()->SetPrintProgress(1);
-
-  auto runAction = dynamic_cast<const DRsimRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction());
-  mSaveHits = runAction->GetSaveHits();
 }
 
 DRsimEventAction::~DRsimEventAction() {}
 
 void DRsimEventAction::BeginOfEventAction(const G4Event*) {
+  if (pSaveHits==nullptr)
+    G4Exception("DRsimEventAction::BeginOfEventAction()","",FatalException,
+                "Should initialize SimG4SaveDRcaloHits before starting the Run");
+  if ( pStore==nullptr || pWriter==nullptr )
+    G4Exception("DRsimEventAction::BeginOfEventAction()","",FatalException,
+                "Should initialize PODIO Writer & Eventstore before starting the Run");
+
 	clear();
 }
 
@@ -34,7 +37,7 @@ void DRsimEventAction::clear() {
 }
 
 void DRsimEventAction::EndOfEventAction(const G4Event* event) {
-  mSaveHits->saveOutput(event);
+  pSaveHits->saveOutput(event);
 
   for (int iVtx = 0; iVtx < event->GetNumberOfPrimaryVertex(); iVtx++) {
     G4PrimaryVertex* vtx = event->GetPrimaryVertex(iVtx);
@@ -47,8 +50,8 @@ void DRsimEventAction::EndOfEventAction(const G4Event* event) {
 
   fEventData->event_number = DRsimPrimaryGeneratorAction::sIdxEvt;
 
-  mSaveHits->writeEvent();
-  mSaveHits->clearCollections();
+  writeEvent();
+  clearCollections();
 
   queue();
   clear();

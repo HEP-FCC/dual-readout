@@ -17,7 +17,7 @@ HepMCG4Reader* DRsimRunAction::sHepMCreader = 0;
 int DRsimRunAction::sNumEvt = 0;
 
 DRsimRunAction::DRsimRunAction(G4int seed, G4String filename, G4bool useHepMC)
-: pSaveHits(nullptr), G4UserRunAction()
+: G4UserRunAction()
 {
   fSeed = seed;
   fFilename = filename;
@@ -47,7 +47,13 @@ void DRsimRunAction::BeginOfRunAction(const G4Run*) {
     fOpFiberRegion = new SimG4FastSimOpFiberRegion();
     fOpFiberRegion->create();
 
-    pSaveHits = std::make_unique<SimG4SaveDRcaloHits>( fFilename + "_t" + std::to_string(G4Threading::G4GetThreadId()) + ".root" );
+    pStore = std::make_unique<podio::EventStore>();
+    pWriter = std::make_unique<podio::ROOTWriter>( fFilename + "_t" + std::to_string(G4Threading::G4GetThreadId()) + ".root", pStore.get() );
+
+    pSaveHits = std::make_unique<SimG4SaveDRcaloHits>(pStore.get(),pWriter.get());
+    pEventAction->SetWriter(pWriter.get());
+    pEventAction->SetEventStore(pStore.get());
+    pEventAction->SetSaveHits(pSaveHits.get());
   }
 
   if ( G4Threading::IsMasterThread() ) {
@@ -59,7 +65,7 @@ void DRsimRunAction::BeginOfRunAction(const G4Run*) {
 
 void DRsimRunAction::EndOfRunAction(const G4Run*) {
   if ( !IsMaster() || !G4Threading::IsMultithreadedApplication() ) {
-    pSaveHits.reset();
+    pWriter->finish();
 
     if (fOpFiberRegion) delete fOpFiberRegion;
   }

@@ -9,11 +9,8 @@
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTypes.hh"
 
-#ifdef HAVE_GEANT4_UNITS
-#define MM_2_CM 1.0
-#else
-#define MM_2_CM 0.1
-#endif
+#include "G4SystemOfUnits.hh"
+#include "DD4hep/DD4hepUnits.h"
 
 ddDRcalo::DRcaloSiPMSD::DRcaloSiPMSD(const std::string aName, const std::string aReadoutName, const dd4hep::Segmentation& aSeg)
 : G4VSensitiveDetector(aName), fHitCollection(0), fHCID(-1),
@@ -43,8 +40,8 @@ G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
 
   G4ThreeVector global = step->GetPostStepPoint()->GetPosition();
   G4ThreeVector local = theTouchable->GetHistory()->GetTopTransform().TransformPoint( global );
-  dd4hep::Position loc(local.x() * MM_2_CM, local.y() * MM_2_CM, local.z() * MM_2_CM);
-  dd4hep::Position glob(global.x() * MM_2_CM, global.y() * MM_2_CM, global.z() * MM_2_CM);
+  dd4hep::Position loc(local.x() * dd4hep::millimeter/CLHEP::millimeter, local.y() * dd4hep::millimeter/CLHEP::millimeter, local.z() * dd4hep::millimeter/CLHEP::millimeter);
+  dd4hep::Position glob(global.x() * dd4hep::millimeter/CLHEP::millimeter, global.y() * dd4hep::millimeter/CLHEP::millimeter, global.z() * dd4hep::millimeter/CLHEP::millimeter);
 
   auto cID = fSeg->cellID(loc, glob, volID);
 
