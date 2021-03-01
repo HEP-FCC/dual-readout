@@ -1,8 +1,6 @@
 project(rootIO)
 
 find_package(ROOT REQUIRED)
-find_package(podio REQUIRED HINTS $ENV{PODIO})
-find_package(EDM4HEP REQUIRED)
 find_package(FastJet)
 
 include_directories(
