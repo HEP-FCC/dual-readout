@@ -1,12 +1,13 @@
 #ifndef DRsimRunAction_h
 #define DRsimRunAction_h 1
 
-#include "DRsimInterface.h"
 #include "DRsimEventAction.hh"
 #include "HepMCG4Reader.hh"
 
 #include "SimG4FastSimOpFiberRegion.h"
 #include "SimG4SaveDRcaloHits.h"
+#include "SimG4SaveMCParticles.h"
+#include "SimG4DRcaloSteppingAction.hh"
 
 #include "G4UserRunAction.hh"
 #include "globals.hh"
@@ -25,8 +26,10 @@ public:
   const podio::ROOTWriter* GetWriter() { return pWriter.get(); }
 
   const SimG4SaveDRcaloHits* GetSaveHits() const { return pSaveHits.get(); }
+  const SimG4SaveMCParticles* GetSaveMCParticles() const { return pSaveMCParticles.get(); }
 
   void SetEventAction(DRsimEventAction* eventAction) { pEventAction = eventAction; }
+  void SetSteppingAction(SimG4DRcaloSteppingAction* steppingAction) { pSteppingAction = steppingAction; }
 
   static HepMCG4Reader* sHepMCreader;
   static int sNumEvt;
@@ -39,7 +42,9 @@ private:
   std::unique_ptr<podio::EventStore> pStore;
   std::unique_ptr<podio::ROOTWriter> pWriter;
   std::unique_ptr<SimG4SaveDRcaloHits> pSaveHits;
+  std::unique_ptr<SimG4SaveMCParticles> pSaveMCParticles;
   DRsimEventAction* pEventAction;
+  SimG4DRcaloSteppingAction* pSteppingAction;
 };
 
 #endif

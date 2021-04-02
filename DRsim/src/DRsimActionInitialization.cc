@@ -38,13 +38,12 @@ void DRsimActionInitialization::Build() const {
   DRsimEventAction* eventAction = new DRsimEventAction();
   SetUserAction(eventAction);
 
+  SimG4DRcaloSteppingAction* steppingAction = new SimG4DRcaloSteppingAction();
+  SetUserAction(steppingAction);
+
   // cheat to avoid constness
   runAction->SetEventAction(eventAction);
-
-  SimG4DRcaloSteppingAction* steppingAction = new SimG4DRcaloSteppingAction();
-  steppingAction->setEventData( eventAction->getEventData() );
-
-  SetUserAction(steppingAction);
+  runAction->SetSteppingAction(steppingAction);
 }
 
 void DRsimActionInitialization::DefineCommands() {

@@ -48,12 +48,21 @@ void DRsimRunAction::BeginOfRunAction(const G4Run*) {
     fOpFiberRegion->create();
 
     pStore = std::make_unique<podio::EventStore>();
-    pWriter = std::make_unique<podio::ROOTWriter>( fFilename + "_t" + std::to_string(G4Threading::G4GetThreadId()) + ".root", pStore.get() );
+    pWriter = std::make_unique<podio::ROOTWriter>( fFilename + "_" + std::to_string(fSeed) + "_t" + std::to_string(G4Threading::G4GetThreadId()) + ".root", pStore.get() );
 
     pSaveHits = std::make_unique<SimG4SaveDRcaloHits>(pStore.get(),pWriter.get());
+    pSaveMCParticles = std::make_unique<SimG4SaveMCParticles>(pStore.get(),pWriter.get());
     pEventAction->SetWriter(pWriter.get());
     pEventAction->SetEventStore(pStore.get());
     pEventAction->SetSaveHits(pSaveHits.get());
+    pEventAction->SetSaveMCParticles(pSaveMCParticles.get());
+    pEventAction->SetRunNumber(fSeed);
+
+    pEventAction->initialize();
+
+    pSteppingAction->SetWriter(pWriter.get());
+    pSteppingAction->SetEventStore(pStore.get());
+    pSteppingAction->initializeEDM();
   }
 
   if ( G4Threading::IsMasterThread() ) {

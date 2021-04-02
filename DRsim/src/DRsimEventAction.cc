@@ -13,7 +13,7 @@ namespace {
 }
 
 DRsimEventAction::DRsimEventAction()
-: G4UserEventAction(), pSaveHits(nullptr), pStore(nullptr), pWriter(nullptr)
+: G4UserEventAction(), pSaveHits(nullptr), pSaveMCParticles(nullptr), pStore(nullptr), pWriter(nullptr), mEvtHeaders(nullptr)
 {
   // set printing per each event
   G4RunManager::GetRunManager()->SetPrintProgress(1);
@@ -21,65 +21,37 @@ DRsimEventAction::DRsimEventAction()
 
 DRsimEventAction::~DRsimEventAction() {}
 
+void DRsimEventAction::initialize() {
+  *mEvtHeaders = pStore->create<edm4hep::EventHeaderCollection>("EventHeader");
+  pWriter->registerForWrite("EventHeader");
+
+  return;
+}
+
 void DRsimEventAction::BeginOfEventAction(const G4Event*) {
   if (pSaveHits==nullptr)
     G4Exception("DRsimEventAction::BeginOfEventAction()","",FatalException,
                 "Should initialize SimG4SaveDRcaloHits before starting the Run");
+  if (pSaveMCParticles==nullptr)
+    G4Exception("DRsimEventAction::BeginOfEventAction()","",FatalException,
+                "Should initialize SimG4SaveMCParticles before starting the Run");
   if ( pStore==nullptr || pWriter==nullptr )
     G4Exception("DRsimEventAction::BeginOfEventAction()","",FatalException,
                 "Should initialize PODIO Writer & Eventstore before starting the Run");
 
 	clear();
-}
 
-void DRsimEventAction::clear() {
-  fEventData->clear();
+  return;
 }
 
 void DRsimEventAction::EndOfEventAction(const G4Event* event) {
   pSaveHits->saveOutput(event);
+  pSaveMCParticles->saveOutput(event);
 
-  for (int iVtx = 0; iVtx < event->GetNumberOfPrimaryVertex(); iVtx++) {
-    G4PrimaryVertex* vtx = event->GetPrimaryVertex(iVtx);
-
-    for (int iPtc = 0; iPtc < vtx->GetNumberOfParticle(); iPtc++) {
-      G4PrimaryParticle* ptc = vtx->GetPrimary(iPtc);
-      fillPtcs(vtx,ptc);
-    }
-  }
-
-  fEventData->event_number = DRsimPrimaryGeneratorAction::sIdxEvt;
+  auto evtHeader = mEvtHeaders->create();
+  evtHeader.setEventNumber(DRsimPrimaryGeneratorAction::sIdxEvt);
+  evtHeader.setRunNumber(mRunNumber);
 
   writeEvent();
   clearCollections();
-
-  queue();
-  clear();
-}
-
-void DRsimEventAction::fillPtcs(G4PrimaryVertex* vtx, G4PrimaryParticle* ptc) {
-  DRsimInterface::DRsimGenData GenData;
-  GenData.E = ptc->GetTotalEnergy();
-  GenData.px = ptc->GetPx();
-  GenData.py = ptc->GetPy();
-  GenData.pz = ptc->GetPz();
-  GenData.pdgId = ptc->GetPDGcode();
-  GenData.vx = vtx->GetX0();
-  GenData.vy = vtx->GetY0();
-  GenData.vz = vtx->GetZ0();
-  GenData.vt = vtx->GetT0();
-
-  fEventData->GenPtcs.push_back(GenData);
-}
-
-void DRsimEventAction::queue() {
-  // while ( DRsimRunAction::sNumEvt != DRsimPrimaryGeneratorAction::sIdxEvt ) {
-  //   G4AutoLock lock(&DRsimEventActionMutex);
-  //   if ( DRsimRunAction::sNumEvt == DRsimPrimaryGeneratorAction::sIdxEvt ) break;
-  //   G4CONDITIONWAIT(&DRsimEventActionCV, &lock);
-  // }
-  // G4AutoLock lock(&DRsimEventActionMutex);
-  // DRsimRunAction::sRootIO->fill(fEventData);
-  // DRsimRunAction::sNumEvt++;
-  // G4CONDITIONBROADCAST(&DRsimEventActionCV);
 }
