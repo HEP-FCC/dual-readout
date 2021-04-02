@@ -39,8 +39,6 @@ void DRsimEventAction::BeginOfEventAction(const G4Event*) {
     G4Exception("DRsimEventAction::BeginOfEventAction()","",FatalException,
                 "Should initialize PODIO Writer & Eventstore before starting the Run");
 
-	clear();
-
   return;
 }
 

@@ -70,7 +70,9 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
           caloHit.setCellID( static_cast<unsigned long long>(hit->GetSiPMnum()) );
 
           auto globalPos = segmentation->position( hit->GetSiPMnum() );
-          caloHit.setPosition( { globalPos.x() * CLHEP::millimeter/dd4hep::millimeter , globalPos.y() * CLHEP::millimeter/dd4hep::millimeter , globalPos.z() * CLHEP::millimeter/dd4hep::millimeter } );
+          caloHit.setPosition( { static_cast<float>( globalPos.x() * CLHEP::millimeter/dd4hep::millimeter ),
+                                 static_cast<float>( globalPos.y() * CLHEP::millimeter/dd4hep::millimeter ),
+                                 static_cast<float>( globalPos.z() * CLHEP::millimeter/dd4hep::millimeter ) } );
 
           auto DRcaloHit = mDRsimCaloHits->create();
           DRcaloHit.setCount( hit->GetPhotonCount() );

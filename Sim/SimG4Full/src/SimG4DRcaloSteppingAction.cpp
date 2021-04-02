@@ -55,8 +55,6 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
 
   if ( particle == G4OpticalPhoton::OpticalPhotonDefinition() ) return;
 
-  G4int pdgID = particle->GetPDGEncoding();
-  G4double pdgCharge = particle->GetPDGCharge();
   G4StepPoint* presteppoint = step->GetPreStepPoint();
   G4StepPoint* poststeppoint = step->GetPostStepPoint();
   G4TouchableHandle theTouchable = presteppoint->GetTouchableHandle();
@@ -89,7 +87,7 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, long long int id6
   if ( mEdeps->size() > prev ) { // check previous element
     auto element = mEdeps->at(prev);
     if ( checkId(element, id64) ) {
-      thePtr = &(mEdeps[prev]);
+      thePtr = &element;
       found = true;
     }
   }
@@ -100,7 +98,7 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, long long int id6
       if ( checkId(element, id64) ) {
         found = true;
         prev = iElement;
-        thePtr = &(mEdeps[prev]);
+        thePtr = &element;
 
         break;
       }
@@ -113,9 +111,11 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, long long int id6
     simEdep.setEnergy(0.); // added later
 
     auto pos = fSeg->position(id64);
-    simEdep.setPosition( { pos.x()*dd4hep::centimeter/dd4hep::millimeter, pos.y()*dd4hep::centimeter/dd4hep::millimeter, pos.z()*dd4hep::centimeter/dd4hep::millimeter } )
+    simEdep.setPosition( { static_cast<float>(pos.x()*dd4hep::centimeter/dd4hep::millimeter),
+                           static_cast<float>(pos.y()*dd4hep::centimeter/dd4hep::millimeter),
+                           static_cast<float>(pos.z()*dd4hep::centimeter/dd4hep::millimeter) } );
     prev = mEdeps->size();
-    thePtr = &(mEdeps[prev]);
+    thePtr = &simEdep;
   }
 
   auto edepPrev = thePtr->getEnergy();
@@ -123,10 +123,10 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, long long int id6
 }
 
 bool SimG4DRcaloSteppingAction::checkId(edm4hep::SimCalorimeterHit edep, long long int id64) {
-  return ( edep.getCellID()==id64 );
+  return ( edep.getCellID()==static_cast<unsigned long long>(id64) );
 }
 
-void SimG4DRcaloSteppingAction::saveLeakage(G4Track* track, G4StepPoint* pre) {
+void SimG4DRcaloSteppingAction::saveLeakage(G4Track* track, G4StepPoint* presteppoint) {
   auto leakage = mLeakages->create();
   leakage.setPDG( track->GetDefinition()->GetPDGEncoding() );
   leakage.setGeneratorStatus(1); // leakages naturally belong to final states

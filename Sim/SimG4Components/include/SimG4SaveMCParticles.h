@@ -16,7 +16,7 @@ public:
 
   void initialize();
 
-  void saveOutput(const G4PrimaryVertex* vtx, const G4PrimaryParticle* ptc) const;
+  void saveOutput(const G4Event* aEvent) const;
 
 private:
   podio::EventStore* pStore;

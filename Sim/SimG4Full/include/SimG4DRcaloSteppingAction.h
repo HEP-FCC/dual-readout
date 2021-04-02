@@ -23,13 +23,10 @@ public:
   void initialize();
   void initializeEDM();
 
-  void setEventData(DRsimInterface::DRsimEventData* evtData) { fEventData = evtData; }
-
   void SetEventStore(podio::EventStore* theStore) { pStore = theStore; }
   void SetWriter(podio::ROOTWriter* theWriter) { pWriter = theWriter; }
 
 private:
-  template <typename T>
   void accumulate(unsigned int &prev, long long int id64, float edep);
   bool checkId(edm4hep::SimCalorimeterHit edep, long long int id64);
 
@@ -38,7 +35,6 @@ private:
   /// Pointer to the geometry service
   GeoSvc* m_geoSvc;
 
-  DRsimInterface::DRsimEventData* fEventData;
   dd4hep::DDSegmentation::GridDRcalo* fSeg;
 
   /// Name of the readout to save

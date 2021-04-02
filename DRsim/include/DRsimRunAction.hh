@@ -7,7 +7,7 @@
 #include "SimG4FastSimOpFiberRegion.h"
 #include "SimG4SaveDRcaloHits.h"
 #include "SimG4SaveMCParticles.h"
-#include "SimG4DRcaloSteppingAction.hh"
+#include "SimG4DRcaloSteppingAction.h"
 
 #include "G4UserRunAction.hh"
 #include "globals.hh"
