@@ -43,8 +43,8 @@ void SimG4DRcaloSteppingAction::initializeEDM() {
   *mLeakages = pStore->create<edm4hep::MCParticleCollection>("Leakages");
   pWriter->registerForWrite("Leakages");
 
-  *mEdeps = pStore->create<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterEdeps");
-  pWriter->registerForWrite("SimCalorimeterEdeps");
+  *mEdeps = pStore->create<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
+  pWriter->registerForWrite("SimCalorimeterHits");
 
   return;
 }

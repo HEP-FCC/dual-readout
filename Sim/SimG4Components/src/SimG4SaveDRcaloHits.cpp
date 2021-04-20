@@ -38,8 +38,8 @@ void SimG4SaveDRcaloHits::initialize() {
     }
   }
 
-  *mSimCaloHits = pStore->create<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
-  pWriter->registerForWrite("SimCalorimeterHits");
+  *mRawCaloHits = pStore->create<edm4hep::RawCalorimeterHitCollection>("RawCalorimeterHits");
+  pWriter->registerForWrite("RawCalorimeterHits");
 
   *mDRsimCaloHits = pStore->create<edm4hep::DRSimCalorimeterHitCollection>("DRSimCalorimeterHits");
   pWriter->registerForWrite("DRSimCalorimeterHits");
@@ -51,8 +51,6 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
   G4HCofThisEvent* collections = aEvent->GetHCofThisEvent();
   G4VHitsCollection* collect;
   ddDRcalo::DRcaloSiPMHit* hit;
-
-  std::map<int, DRsimInterface::DRsimTowerData> towerMap;
 
   if (collections != nullptr) {
     for (int iter_coll = 0; iter_coll < collections->GetNumberOfCollections(); iter_coll++) {
@@ -66,23 +64,22 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
         for (size_t iter_hit = 0; iter_hit < n_hit; iter_hit++) {
           hit = dynamic_cast<ddDRcalo::DRcaloSiPMHit*>(collect->GetHit(iter_hit));
 
-          auto caloHit = mSimCaloHits->create();
+          auto caloHit = mRawCaloHits->create();
           caloHit.setCellID( static_cast<unsigned long long>(hit->GetSiPMnum()) );
+          caloHit.setAmplitude( hit->GetPhotonCount() );
 
-          auto globalPos = segmentation->position( hit->GetSiPMnum() );
-          caloHit.setPosition( { static_cast<float>( globalPos.x() * CLHEP::millimeter/dd4hep::millimeter ),
-                                 static_cast<float>( globalPos.y() * CLHEP::millimeter/dd4hep::millimeter ),
-                                 static_cast<float>( globalPos.z() * CLHEP::millimeter/dd4hep::millimeter ) } );
+          // auto globalPos = segmentation->position( hit->GetSiPMnum() );
+          // caloHit.setPosition( { static_cast<float>( globalPos.x() * CLHEP::millimeter/dd4hep::millimeter ),
+          //                        static_cast<float>( globalPos.y() * CLHEP::millimeter/dd4hep::millimeter ),
+          //                        static_cast<float>( globalPos.z() * CLHEP::millimeter/dd4hep::millimeter ) } );
 
           auto DRcaloHit = mDRsimCaloHits->create();
-          DRcaloHit.setCount( hit->GetPhotonCount() );
-
           checkMetadata(hit);
 
           addStruct( hit->GetTimeStruct(), std::bind( &edm4hep::DRSimCalorimeterHit::addToTimeStruct, &DRcaloHit, std::placeholders::_1 ) );
           addStruct( hit->GetWavlenSpectrum(), std::bind( &edm4hep::DRSimCalorimeterHit::addToWavlenSpectrum, &DRcaloHit, std::placeholders::_1 ) );
 
-          DRcaloHit.setEdm4hepSimCalorimeterHit( caloHit );
+          DRcaloHit.setEdm4hepRawCalorimeterHit( caloHit );
         }
       }
     }

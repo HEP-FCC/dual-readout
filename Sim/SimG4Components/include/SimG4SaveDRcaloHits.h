@@ -10,7 +10,7 @@
 
 // Data model
 #include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/SimCalorimeterHitCollection.h"
+#include "edm4hep/RawCalorimeterHitCollection.h"
 #include "edm4hep/DRSimCalorimeterHitCollection.h"
 
 class SimG4SaveDRcaloHits {
@@ -35,7 +35,7 @@ private:
   podio::EventStore* pStore;
   podio::ROOTWriter* pWriter;
 
-  edm4hep::SimCalorimeterHitCollection* mSimCaloHits;
+  edm4hep::RawCalorimeterHitCollection* mRawCaloHits;
   edm4hep::DRSimCalorimeterHitCollection* mDRsimCaloHits;
 };
 
