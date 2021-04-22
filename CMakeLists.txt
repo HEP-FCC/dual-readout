@@ -9,7 +9,10 @@ set(CMAKE_MODULE_PATH
 # Use GNU-style hierarchy for installing build products
 include(GNUInstallDirs)
 
+find_package(ROOT REQUIRED)
 find_package(HepMC3)
+find_package(podio REQUIRED HINTS $ENV{PODIO})
+find_package(FastJet)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default

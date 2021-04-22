@@ -4,6 +4,12 @@ find_package(EDM4HEP REQUIRED)
 
 PODIO_GENERATE_DATAMODEL(edm4hep ../edm4dr.yaml headers sources IO_BACKEND_HANDLERS ${PODIO_IO_HANDLERS})
 
+# use customized library linking instead of PODIO_ADD_DATAMODEL_CORE_LIB(edm4dr "${headers}" "${sources}")
+
+# Filter out anything I/O backend related to build the core library
+LIST(FILTER headers EXCLUDE REGEX .*SIOBlock.h)
+LIST(FILTER sources EXCLUDE REGEX .*SIOBlock.cc)
+
 add_library(edm4dr SHARED ${sources} ${headers})
 target_link_libraries(edm4dr
   PUBLIC
@@ -17,30 +23,21 @@ target_include_directories(edm4dr
 )
 set_target_properties(edm4dr PROPERTIES PUBLIC_HEADER "${headers}")
 
-add_library(edm4drDict SHARED)
+
+PODIO_ADD_ROOT_IO_DICT(edm4drDict edm4dr "${headers}" src/selection.xml)
+
 add_library(edm4dr::edm4drDict ALIAS edm4drDict )
-target_link_libraries(edm4drDict
-  PUBLIC
-  edm4dr
-  podio::podio
-  ROOT::Core
-)
-target_include_directories(edm4drDict
-  PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-  ${ROOT_INCLUDE_DIRS}
-)
 
-PODIO_GENERATE_DICTIONARY(edm4drDict ${headers} SELECTION src/selection.xml
-  OPTIONS --library ${CMAKE_SHARED_LIBRARY_PREFIX}edm4drDict${CMAKE_SHARED_LIBRARY_SUFFIX} )
-set_target_properties(edm4drDict-dictgen PROPERTIES EXCLUDE_FROM_ALL TRUE)
-add_dependencies(edm4drDict edm4dr)
+list(APPEND EDM4DR_INSTALL_LIBS edm4dr edm4drDict)
 
-list(APPEND edm4dr_INSTALL_LIBS edm4dr edm4drDict)
+PODIO_ADD_SIO_IO_BLOCKS(edm4dr "${headers}" "${sources}")
+IF(TARGET edm4drSioBlocks)
+  message(STATUS "Building and installing the SioBlocks since podio supports it")
+  list(APPEND EDM4DR_INSTALL_LIBS edm4drSioBlocks)
+ENDIF()
 
-install(TARGETS ${edm4dr_INSTALL_LIBS}
-  EXPORT edm4drTargets
+install(TARGETS ${EDM4DR_INSTALL_LIBS}
+  EXPORT EDM4DRTargets
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/edm4hep"
