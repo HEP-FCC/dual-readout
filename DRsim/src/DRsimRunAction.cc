@@ -44,8 +44,10 @@ DRsimRunAction::~DRsimRunAction() {
 void DRsimRunAction::BeginOfRunAction(const G4Run*) {
   // Mimic SimG4Svc
   if ( !IsMaster() || !G4Threading::IsMultithreadedApplication() ) {
-    fOpFiberRegion = new SimG4FastSimOpFiberRegion();
-    fOpFiberRegion->create();
+    G4AutoLock lock(&DRsimRunActionMutex);
+
+    pOpFiberRegion = std::make_unique<SimG4FastSimOpFiberRegion>();
+    pOpFiberRegion->create();
 
     pStore = std::make_unique<podio::EventStore>();
     pWriter = std::make_unique<podio::ROOTWriter>( fFilename + "_" + std::to_string(fSeed) + "_t" + std::to_string(G4Threading::G4GetThreadId()) + ".root", pStore.get() );
@@ -74,8 +76,11 @@ void DRsimRunAction::BeginOfRunAction(const G4Run*) {
 
 void DRsimRunAction::EndOfRunAction(const G4Run*) {
   if ( !IsMaster() || !G4Threading::IsMultithreadedApplication() ) {
+    G4AutoLock lock(&DRsimRunActionMutex);
     pWriter->finish();
 
-    if (fOpFiberRegion) delete fOpFiberRegion;
+    // delete manually while locked, otherwise segfault during multithreading
+    pWriter.reset();
+    pStore.reset();
   }
 }

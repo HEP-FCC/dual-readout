@@ -38,7 +38,7 @@ private:
   G4int fSeed;
   G4String fFilename;
   G4bool fUseHepMC;
-  SimG4FastSimOpFiberRegion* fOpFiberRegion;
+  std::unique_ptr<SimG4FastSimOpFiberRegion> pOpFiberRegion;
   std::unique_ptr<podio::EventStore> pStore;
   std::unique_ptr<podio::ROOTWriter> pWriter;
   std::unique_ptr<SimG4SaveDRcaloHits> pSaveHits;
