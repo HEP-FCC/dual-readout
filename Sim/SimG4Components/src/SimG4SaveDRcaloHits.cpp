@@ -38,10 +38,12 @@ void SimG4SaveDRcaloHits::initialize() {
     }
   }
 
-  *mRawCaloHits = pStore->create<edm4hep::RawCalorimeterHitCollection>("RawCalorimeterHits");
+  auto& rawCaloHits = pStore->create<edm4hep::RawCalorimeterHitCollection>("RawCalorimeterHits");
+  mRawCaloHits = &rawCaloHits;
   pWriter->registerForWrite("RawCalorimeterHits");
 
-  *mDRsimCaloHits = pStore->create<edm4hep::DRSimCalorimeterHitCollection>("DRSimCalorimeterHits");
+  auto& DRsimCaloHits = pStore->create<edm4hep::DRSimCalorimeterHitCollection>("DRSimCalorimeterHits");
+  mDRsimCaloHits = &DRsimCaloHits;
   pWriter->registerForWrite("DRSimCalorimeterHits");
 
   return;
@@ -59,7 +61,7 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
       if (std::find(m_readoutNames.begin(), m_readoutNames.end(), collect->GetName()) != m_readoutNames.end()) {
         size_t n_hit = collect->GetSize();
 
-        dd4hep::DDSegmentation::GridDRcalo* segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(collect->GetName()).segmentation().segmentation());
+        // dd4hep::DDSegmentation::GridDRcalo* segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(collect->GetName()).segmentation().segmentation());
 
         for (size_t iter_hit = 0; iter_hit < n_hit; iter_hit++) {
           hit = dynamic_cast<ddDRcalo::DRcaloSiPMHit*>(collect->GetHit(iter_hit));

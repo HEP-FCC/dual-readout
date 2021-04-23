@@ -40,10 +40,12 @@ void SimG4DRcaloSteppingAction::initialize() {
 }
 
 void SimG4DRcaloSteppingAction::initializeEDM() {
-  *mLeakages = pStore->create<edm4hep::MCParticleCollection>("Leakages");
+  auto& leakages = pStore->create<edm4hep::MCParticleCollection>("Leakages");
+  mLeakages = &leakages;
   pWriter->registerForWrite("Leakages");
 
-  *mEdeps = pStore->create<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
+  auto& edeps = pStore->create<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
+  mEdeps = &edeps;
   pWriter->registerForWrite("SimCalorimeterHits");
 
   return;
@@ -69,7 +71,7 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
   if ( theTouchable->GetHistoryDepth()<2 ) return; // skip particles in the world or assembly volume
 
   // MC truth energy deposits
-  float edep = step->GetTotalEnergyDeposit();
+  float edep = step->GetTotalEnergyDeposit()*CLHEP::MeV/CLHEP::GeV;
 
   int towerNum32 = theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 );
   auto towerNum64 = fSeg->convertFirst32to64( towerNum32 );
@@ -111,9 +113,9 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, long long int id6
     simEdep.setEnergy(0.); // added later
 
     auto pos = fSeg->position(id64);
-    simEdep.setPosition( { static_cast<float>(pos.x()*dd4hep::centimeter/dd4hep::millimeter),
-                           static_cast<float>(pos.y()*dd4hep::centimeter/dd4hep::millimeter),
-                           static_cast<float>(pos.z()*dd4hep::centimeter/dd4hep::millimeter) } );
+    simEdep.setPosition( { static_cast<float>(pos.x()*CLHEP::millimeter/dd4hep::millimeter),
+                           static_cast<float>(pos.y()*CLHEP::millimeter/dd4hep::millimeter),
+                           static_cast<float>(pos.z()*CLHEP::millimeter/dd4hep::millimeter) } );
     prev = mEdeps->size();
     thePtr = &simEdep;
   }

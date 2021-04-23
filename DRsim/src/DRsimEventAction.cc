@@ -22,7 +22,8 @@ DRsimEventAction::DRsimEventAction()
 DRsimEventAction::~DRsimEventAction() {}
 
 void DRsimEventAction::initialize() {
-  *mEvtHeaders = pStore->create<edm4hep::EventHeaderCollection>("EventHeader");
+  auto& evtHeaders = pStore->create<edm4hep::EventHeaderCollection>("EventHeader");
+  mEvtHeaders = &evtHeaders;
   pWriter->registerForWrite("EventHeader");
 
   return;

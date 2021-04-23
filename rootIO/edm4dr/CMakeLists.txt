@@ -50,5 +50,5 @@ install(FILES
 if (${ROOT_VERSION} GREATER 6)
   install(FILES
       "${CMAKE_CURRENT_BINARY_DIR}/libedm4drDict_rdict.pcm"
-      DESTINATION lib COMPONENT dev)
+      DESTINATION lib64 COMPONENT dev)
 endif()
