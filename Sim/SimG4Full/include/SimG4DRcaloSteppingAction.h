@@ -1,12 +1,17 @@
 #ifndef SimG4DRcaloSteppingAction_h
 #define SimG4DRcaloSteppingAction_h 1
 
-#include "DRsimInterface.h"
-
 #include "GeoSvc.h"
 #include "GridDRcalo.h"
 
 #include "G4UserSteppingAction.hh"
+
+#include "podio/ROOTWriter.h"
+#include "podio/EventStore.h"
+
+// Data model
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/SimCalorimeterHitCollection.h"
 
 class SimG4DRcaloSteppingAction : public G4UserSteppingAction {
 public:
@@ -16,22 +21,20 @@ public:
   virtual void UserSteppingAction(const G4Step*);
 
   void initialize();
+  void initializeEDM();
 
-  void setEventData(DRsimInterface::DRsimEventData* evtData) { fEventData = evtData; }
+  void SetEventStore(podio::EventStore* theStore) { pStore = theStore; }
+  void SetWriter(podio::ROOTWriter* theWriter) { pWriter = theWriter; }
 
 private:
-  template <typename T>
-  void accumulate(std::vector<T> &input, unsigned int &prev, long long int fiberId64,
-                  float edep, float edepEle, float edepGamma, float edepCharged);
-  bool checkId(DRsimInterface::DRsimEdepData edep, long long int id64);
-  bool checkId(DRsimInterface::DRsimEdepFiberData edep, long long int id64);
-  DRsimInterface::DRsimEdepData create(long long int id64, std::vector<DRsimInterface::DRsimEdepData> &dummy);
-  DRsimInterface::DRsimEdepFiberData create(long long int id64, std::vector<DRsimInterface::DRsimEdepFiberData> &dummy);
-  
+  void accumulate(unsigned int &prev, long long int id64, float edep);
+  bool checkId(edm4hep::SimCalorimeterHit edep, long long int id64);
+
+  void saveLeakage(G4Track* track, G4StepPoint* pre);
+
   /// Pointer to the geometry service
   GeoSvc* m_geoSvc;
 
-  DRsimInterface::DRsimEventData* fEventData;
   dd4hep::DDSegmentation::GridDRcalo* fSeg;
 
   /// Name of the readout to save
@@ -39,6 +42,12 @@ private:
 
   unsigned int fPrevTower;
   unsigned int fPrevFiber;
+
+  podio::EventStore* pStore;
+  podio::ROOTWriter* pWriter;
+
+  edm4hep::MCParticleCollection* mLeakages;
+  edm4hep::SimCalorimeterHitCollection* mEdeps;
 };
 
 #endif

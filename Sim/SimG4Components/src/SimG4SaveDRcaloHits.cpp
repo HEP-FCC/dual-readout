@@ -1,6 +1,5 @@
 #include "SimG4SaveDRcaloHits.h"
 
-#include "DRcaloSiPMHit.h"
 #include "GridDRcalo.h"
 
 // Geant4
@@ -9,9 +8,14 @@
 // DD4hep
 #include "DDG4/Geant4Hits.h"
 
-#include <stdexcept>
+#include "G4SystemOfUnits.hh"
+#include "DD4hep/DD4hepUnits.h"
 
-SimG4SaveDRcaloHits::SimG4SaveDRcaloHits() {
+#include <stdexcept>
+#include <functional>
+
+SimG4SaveDRcaloHits::SimG4SaveDRcaloHits(podio::EventStore* store, podio::ROOTWriter* writer)
+: pStore(store), pWriter(writer) {
   m_geoSvc = GeoSvc::GetInstance();
   m_readoutNames = {"DRcaloSiPMreadout"};
 
@@ -23,6 +27,7 @@ SimG4SaveDRcaloHits::SimG4SaveDRcaloHits() {
 SimG4SaveDRcaloHits::~SimG4SaveDRcaloHits() {}
 
 void SimG4SaveDRcaloHits::initialize() {
+  // DD4hep readouts
   auto lcdd = m_geoSvc->lcdd();
   auto allReadouts = lcdd->readouts();
   for (auto& readoutName : m_readoutNames) {
@@ -32,15 +37,22 @@ void SimG4SaveDRcaloHits::initialize() {
       std::cout << "Hits will be saved to EDM from the collection " << readoutName << std::endl;
     }
   }
+
+  auto& rawCaloHits = pStore->create<edm4hep::RawCalorimeterHitCollection>("RawCalorimeterHits");
+  mRawCaloHits = &rawCaloHits;
+  pWriter->registerForWrite("RawCalorimeterHits");
+
+  auto& DRsimCaloHits = pStore->create<edm4hep::DRSimCalorimeterHitCollection>("DRSimCalorimeterHits");
+  mDRsimCaloHits = &DRsimCaloHits;
+  pWriter->registerForWrite("DRSimCalorimeterHits");
+
   return;
 }
 
-void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) {
+void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
   G4HCofThisEvent* collections = aEvent->GetHCofThisEvent();
   G4VHitsCollection* collect;
   ddDRcalo::DRcaloSiPMHit* hit;
-
-  std::map<int, DRsimInterface::DRsimTowerData> towerMap;
 
   if (collections != nullptr) {
     for (int iter_coll = 0; iter_coll < collections->GetNumberOfCollections(); iter_coll++) {
@@ -49,40 +61,52 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) {
       if (std::find(m_readoutNames.begin(), m_readoutNames.end(), collect->GetName()) != m_readoutNames.end()) {
         size_t n_hit = collect->GetSize();
 
-        dd4hep::DDSegmentation::GridDRcalo* segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(collect->GetName()).segmentation().segmentation());
+        // dd4hep::DDSegmentation::GridDRcalo* segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(collect->GetName()).segmentation().segmentation());
 
         for (size_t iter_hit = 0; iter_hit < n_hit; iter_hit++) {
           hit = dynamic_cast<ddDRcalo::DRcaloSiPMHit*>(collect->GetHit(iter_hit));
 
-          DRsimInterface::DRsimSiPMData sipmData;
-          sipmData.count = hit->GetPhotonCount();
-          sipmData.SiPMnum = static_cast<long long int>(hit->GetSiPMnum());
-          sipmData.timeStruct = hit->GetTimeStruct();
-          sipmData.wavlenSpectrum = hit->GetWavlenSpectrum();
+          auto caloHit = mRawCaloHits->create();
+          caloHit.setCellID( static_cast<unsigned long long>(hit->GetSiPMnum()) );
+          caloHit.setAmplitude( hit->GetPhotonCount() );
 
-          int first32 = segmentation->getFirst32bits(hit->GetSiPMnum());
-          auto towerIter = towerMap.find(first32);
+          // auto globalPos = segmentation->position( hit->GetSiPMnum() );
+          // caloHit.setPosition( { static_cast<float>( globalPos.x() * CLHEP::millimeter/dd4hep::millimeter ),
+          //                        static_cast<float>( globalPos.y() * CLHEP::millimeter/dd4hep::millimeter ),
+          //                        static_cast<float>( globalPos.z() * CLHEP::millimeter/dd4hep::millimeter ) } );
 
-          if ( towerIter==towerMap.end() ) {
-            DRsimInterface::DRsimTowerData towerData;
-            towerData.iTheta = segmentation->numEta(hit->GetSiPMnum());
-            towerData.iPhi = segmentation->numPhi(hit->GetSiPMnum());
-            towerData.numx = segmentation->numX(hit->GetSiPMnum());
-            towerData.numy = segmentation->numY(hit->GetSiPMnum());
-            towerData.SiPMs.push_back(sipmData);
+          auto DRcaloHit = mDRsimCaloHits->create();
+          checkMetadata(hit);
 
-            towerMap.insert(std::make_pair(first32,towerData));
-          } else {
-            towerIter->second.SiPMs.push_back(sipmData);
-          }
+          addStruct( hit->GetTimeStruct(), std::bind( &edm4hep::DRSimCalorimeterHit::addToTimeStruct, &DRcaloHit, std::placeholders::_1 ) );
+          addStruct( hit->GetWavlenSpectrum(), std::bind( &edm4hep::DRSimCalorimeterHit::addToWavlenSpectrum, &DRcaloHit, std::placeholders::_1 ) );
+
+          DRcaloHit.setEdm4hepRawCalorimeterHit( caloHit );
         }
       }
     }
   }
 
-  for (const auto& theMap : towerMap) {
-    fEventData->towers.push_back(theMap.second);
-  }
-
   return;
+}
+
+void SimG4SaveDRcaloHits::checkMetadata(const ddDRcalo::DRcaloSiPMHit* hit) const {
+  auto& colMD = pStore->getCollectionMetaData( mDRsimCaloHits->getID() );
+  if ( !colMD.getStringVal("Producer").empty() ) return;
+
+  auto& timeStruct = hit->GetTimeStruct();
+  std::vector<float> timeBins;
+  std::for_each( timeStruct.begin(), timeStruct.end(), [&](const std::pair< std::pair<float,float>, int >& element) { timeBins.push_back(element.first.first); } );
+
+  auto& wavlenSpectrum = hit->GetWavlenSpectrum();
+  std::vector<float> waveBins;
+  std::for_each( wavlenSpectrum.begin(), wavlenSpectrum.end(), [&](const std::pair< std::pair<float,float>, int >& element) { waveBins.push_back(element.first.first); } );
+
+  colMD.setValues( "timeBins", timeBins );
+  colMD.setValues( "waveBins", waveBins );
+  colMD.setValue( "Producer", "SimG4SaveDRcaloHits" );
+}
+
+void SimG4SaveDRcaloHits::addStruct( const std::map< std::pair<float,float>, int >& structData, std::function<void(int)> addTo ) const {
+  std::for_each( structData.begin(), structData.end(), [&](const std::pair< std::pair<float,float>, int >& element) { addTo(element.second); } );
 }

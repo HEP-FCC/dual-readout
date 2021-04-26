@@ -6,9 +6,9 @@
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTypes.hh"
 #include "G4VProcess.hh"
-#include "G4OpProcessSubType.hh"
-#include "G4OpBoundaryProcess.hh"
-#include "G4EmProcessSubType.hh"
+
+#include "G4SystemOfUnits.hh"
+#include "DD4hep/DD4hepUnits.h"
 
 #include <stdexcept>
 
@@ -39,33 +39,31 @@ void SimG4DRcaloSteppingAction::initialize() {
   return;
 }
 
+void SimG4DRcaloSteppingAction::initializeEDM() {
+  auto& leakages = pStore->create<edm4hep::MCParticleCollection>("Leakages");
+  mLeakages = &leakages;
+  pWriter->registerForWrite("Leakages");
+
+  auto& edeps = pStore->create<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
+  mEdeps = &edeps;
+  pWriter->registerForWrite("SimCalorimeterHits");
+
+  return;
+}
+
 void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
   G4Track* track = step->GetTrack();
   G4ParticleDefinition* particle = track->GetDefinition();
 
   if ( particle == G4OpticalPhoton::OpticalPhotonDefinition() ) return;
 
-  G4int pdgID = particle->GetPDGEncoding();
-  G4double pdgCharge = particle->GetPDGCharge();
   G4StepPoint* presteppoint = step->GetPreStepPoint();
   G4StepPoint* poststeppoint = step->GetPostStepPoint();
   G4TouchableHandle theTouchable = presteppoint->GetTouchableHandle();
 
   // leakage particles
   if (poststeppoint->GetStepStatus() == fWorldBoundary) {
-    DRsimInterface::DRsimLeakageData leak = DRsimInterface::DRsimLeakageData();
-
-    leak.E = track->GetTotalEnergy();
-    leak.px = track->GetMomentum().x();
-    leak.py = track->GetMomentum().y();
-    leak.pz = track->GetMomentum().z();
-    leak.vx = presteppoint->GetPosition().x();
-    leak.vy = presteppoint->GetPosition().y();
-    leak.vz = presteppoint->GetPosition().z();
-    leak.vt = presteppoint->GetGlobalTime();
-    leak.pdgId = track->GetDefinition()->GetPDGEncoding();
-
-    fEventData->leaks.push_back(leak);
+    saveLeakage(track,presteppoint);
 
     return;
   }
@@ -73,56 +71,36 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
   if ( theTouchable->GetHistoryDepth()<2 ) return; // skip particles in the world or assembly volume
 
   // MC truth energy deposits
-  float edep = step->GetTotalEnergyDeposit();
-  float edepEle = (std::abs(pdgID)==11) ? edep : 0.;
-  float edepGamma = (std::abs(pdgID)==22) ? edep : 0.;
-  float edepCharged = ( std::round(std::abs(pdgCharge)) != 0. ) ? edep : 0.;
+  float edep = step->GetTotalEnergyDeposit()*CLHEP::MeV/CLHEP::GeV;
 
   int towerNum32 = theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 );
   auto towerNum64 = fSeg->convertFirst32to64( towerNum32 );
 
-  accumulate(fEventData->Edeps,fPrevTower,towerNum64,edep,edepEle,edepGamma,edepCharged);
-
-  bool isFiber = false;
-  long long int fiberId64 = 0;
-
-  // check the type
-  if ( theTouchable->GetHistoryDepth()==4 ) {
-    auto SiPMnum = fSeg->convertLast32to64( theTouchable->GetCopyNumber() );
-    fiberId64 = towerNum64 | SiPMnum;
-
-    isFiber = true;
-  }
-
-  if (!isFiber) return; // done if the type is not fiber
-
-  accumulate(fEventData->Edeps.at(fPrevTower).fibers,fPrevFiber,fiberId64,edep,edepEle,edepGamma,edepCharged);
+  accumulate(fPrevTower,towerNum64,edep);
 
   return;
 }
 
-template <typename T>
-void SimG4DRcaloSteppingAction::accumulate(std::vector<T> &input, unsigned int &prev, long long int id64,
-                                           float edep, float edepEle, float edepGamma, float edepCharged) {
+void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, long long int id64, float edep) {
   // search for the element
-  typename std::vector<T>::iterator thePtr = input.begin();
   bool found = false;
+  edm4hep::SimCalorimeterHit* thePtr = nullptr;
 
-  if ( input.size() > prev ) { // check previous element
-    T element = input.at(prev);
+  if ( mEdeps->size() > prev ) { // check previous element
+    auto element = mEdeps->at(prev);
     if ( checkId(element, id64) ) {
-      std::advance(thePtr,prev);
+      thePtr = &element;
       found = true;
     }
   }
 
   if (!found) { // fall back to loop
-    for (unsigned int iElement = 0; iElement < input.size(); iElement++) {
-      T element = input.at(iElement);
+    for (unsigned int iElement = 0; iElement < mEdeps->size(); iElement++) {
+      auto element = mEdeps->at(iElement);
       if ( checkId(element, id64) ) {
         found = true;
         prev = iElement;
-        std::advance(thePtr,prev);
+        thePtr = &element;
 
         break;
       }
@@ -130,33 +108,35 @@ void SimG4DRcaloSteppingAction::accumulate(std::vector<T> &input, unsigned int &
   }
 
   if (!found) { // create
-    T theEdep = create(id64,input);
-    prev = input.size();
-    input.push_back(theEdep);
-    thePtr = input.begin();
-    std::advance(thePtr,prev);
+    auto simEdep = mEdeps->create();
+    simEdep.setCellID(id64);
+    simEdep.setEnergy(0.); // added later
+
+    auto pos = fSeg->position(id64);
+    simEdep.setPosition( { static_cast<float>(pos.x()*CLHEP::millimeter/dd4hep::millimeter),
+                           static_cast<float>(pos.y()*CLHEP::millimeter/dd4hep::millimeter),
+                           static_cast<float>(pos.z()*CLHEP::millimeter/dd4hep::millimeter) } );
+    prev = mEdeps->size();
+    thePtr = &simEdep;
   }
 
-  thePtr->accumulate(edep,edepEle,edepGamma,edepCharged);
+  auto edepPrev = thePtr->getEnergy();
+  thePtr->setEnergy( edepPrev + edep );
 }
 
-bool SimG4DRcaloSteppingAction::checkId(DRsimInterface::DRsimEdepData edep, long long int id64) {
-  int iTheta = fSeg->numEta(id64);
-  int iPhi = fSeg->numPhi(id64);
-  return ( edep.iTheta==iTheta && edep.iPhi==iPhi );
+bool SimG4DRcaloSteppingAction::checkId(edm4hep::SimCalorimeterHit edep, long long int id64) {
+  return ( edep.getCellID()==static_cast<unsigned long long>(id64) );
 }
 
-bool SimG4DRcaloSteppingAction::checkId(DRsimInterface::DRsimEdepFiberData edep, long long int id64) {
-  return edep.fiberNum==id64;
-}
-
-DRsimInterface::DRsimEdepData SimG4DRcaloSteppingAction::create(long long int id64, std::vector<DRsimInterface::DRsimEdepData>&) {
-  int iTheta = fSeg->numEta(id64);
-  int iPhi = fSeg->numPhi(id64);
-
-  return DRsimInterface::DRsimEdepData(iTheta,iPhi);
-}
-
-DRsimInterface::DRsimEdepFiberData SimG4DRcaloSteppingAction::create(long long int id64, std::vector<DRsimInterface::DRsimEdepFiberData>&) {
-  return DRsimInterface::DRsimEdepFiberData(id64);
+void SimG4DRcaloSteppingAction::saveLeakage(G4Track* track, G4StepPoint* presteppoint) {
+  auto leakage = mLeakages->create();
+  leakage.setPDG( track->GetDefinition()->GetPDGEncoding() );
+  leakage.setGeneratorStatus(1); // leakages naturally belong to final states
+  leakage.setCharge( track->GetDefinition()->GetPDGCharge() );
+  leakage.setMomentum( { static_cast<float>(track->GetMomentum().x()*CLHEP::MeV/CLHEP::GeV),
+                         static_cast<float>(track->GetMomentum().y()*CLHEP::MeV/CLHEP::GeV),
+                         static_cast<float>(track->GetMomentum().z()*CLHEP::MeV/CLHEP::GeV) } );
+  leakage.setVertex( { static_cast<float>(presteppoint->GetPosition().x()*CLHEP::millimeter),
+                       static_cast<float>(presteppoint->GetPosition().y()*CLHEP::millimeter),
+                       static_cast<float>(presteppoint->GetPosition().z()*CLHEP::millimeter) } );
 }

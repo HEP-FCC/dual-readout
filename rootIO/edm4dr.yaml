@@ -1,0 +1,20 @@
+---
+options:
+  getSyntax: True
+  exposePODMembers: False
+  includeSubfolder: True
+
+datatypes :
+  #------------- SimCalorimeterHit
+  edm4hep::DRSimCalorimeterHit:
+    Description: "Simulated DR calorimeter hit"
+    Author : "Sanghyun Ko"
+    VectorMembers:
+      - int timeStruct // time structure of detected photons
+      - int wavlenSpectrum // wavelength spectrum of detected photons
+
+    OneToOneRelations:
+      - edm4hep::RawCalorimeterHit edm4hepRawCalorimeterHit // link to edm4hep::RawCalorimeterHit
+    ExtraCode:
+      includes:
+        "#include <edm4hep/RawCalorimeterHit.h>\n #include <edm4hep/RawCalorimeterHitCollection.h>"

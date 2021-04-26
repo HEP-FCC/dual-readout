@@ -1,8 +1,8 @@
 project(P8ptcgen)
 
-find_package(Pythia8)
-find_package(HepMC3)
-find_package(FastJet)
+find_package(Pythia8 REQUIRED)
+find_package(HepMC3 REQUIRED)
+find_package(FastJet REQUIRED)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include

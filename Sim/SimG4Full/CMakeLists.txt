@@ -9,6 +9,8 @@ else()
   find_package(Geant4 REQUIRED)
 endif()
 
+find_package(podio REQUIRED HINTS $ENV{PODIO})
+
 include(${Geant4_USE_FILE})
 
 include_directories(
@@ -29,6 +31,8 @@ target_link_libraries(
   ddDRsensitive
   ddDRsegmentation
   DetComponents
+  podio::podioRootIO
+  edm4dr
 )
 
 install(TARGETS SimG4Full LIBRARY DESTINATION lib)
