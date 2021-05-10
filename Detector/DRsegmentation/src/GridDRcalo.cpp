@@ -54,7 +54,9 @@ Vector3D GridDRcalo::position(const CellID& cID) const {
   DRparamBase* paramBase = setParamBase(noEta);
 
   auto transformA = paramBase->GetSipmTransform3D(noPhi);
-  dd4hep::Position localPos = dd4hep::Position( localPosition(cID) );
+  dd4hep::Position localPos = dd4hep::Position(0.,0.,0.);
+  if ( IsSiPM(cID) ) localPos = dd4hep::Position( localPosition(cID) );
+
   dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
   dd4hep::Transform3D transformB = dd4hep::Transform3D(rot,localPos);
   auto total = transformA*transformB;
@@ -223,6 +225,5 @@ DRparamBase* GridDRcalo::setParamBase(int noEta) const {
   return paramBase;
 }
 
-REGISTER_SEGMENTATION(GridDRcalo)
 }
 }
