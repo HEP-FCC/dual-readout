@@ -14,6 +14,7 @@ find_package(ROOT REQUIRED)
 find_package(HepMC3)
 find_package(podio REQUIRED HINTS $ENV{PODIO})
 find_package(FastJet)
+find_package(k4FWCore)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default

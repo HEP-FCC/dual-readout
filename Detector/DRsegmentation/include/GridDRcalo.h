@@ -100,6 +100,7 @@ protected:
 private:
   DRparamBase* setParamBase(int noEta) const;
 
+  DRparamBase* pCurrentParam;
   DRparamBarrel* fParamBarrel;
   DRparamEndcap* fParamEndcap;
 };

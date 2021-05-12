@@ -25,6 +25,7 @@ DRparamBase::DRparamBase() {
   fSipmHeight = 0.;
   fCurrentInnerHalf = 0.;
   fCurrentOuterHalf = 0.;
+  fCurrentTowerNum = 0;
   fFilled = false;
   fFinalized = false;
 }

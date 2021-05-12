@@ -20,7 +20,6 @@ target_link_libraries(
   DRsim
   ${HEPMC3_LIBRARIES}
   ${HEPMC3_ROOTIO_LIB}
-  rootIO
   DetComponents
   ddDRcalo
   ddDRsensitive

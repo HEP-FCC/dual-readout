@@ -27,8 +27,8 @@ public:
   void SetWriter(podio::ROOTWriter* theWriter) { pWriter = theWriter; }
 
 private:
-  void accumulate(unsigned int &prev, long long int id64, float edep);
-  bool checkId(edm4hep::SimCalorimeterHit edep, long long int id64);
+  void accumulate(unsigned int &prev, dd4hep::DDSegmentation::CellID& id64, float edep);
+  bool checkId(edm4hep::SimCalorimeterHit edep, dd4hep::DDSegmentation::CellID& id64);
 
   void saveLeakage(G4Track* track, G4StepPoint* pre);
 

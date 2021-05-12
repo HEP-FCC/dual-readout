@@ -1,51 +1,61 @@
 #ifndef RecoFiber_h
 #define RecoFiber_h 1
 
-#include "RecoInterface.h"
-#include "DRsimInterface.h"
-#include "fastjet/PseudoJet.hh"
+#include "k4FWCore/DataHandle.h"
 
-#include "GeoSvc.h"
+#include "GaudiAlg/GaudiAlgorithm.h"
+#include "GaudiKernel/ToolHandle.h"
+
+#include "edm4hep/RawCalorimeterHitCollection.h"
+#include "edm4hep/DRSimCalorimeterHitCollection.h"
+#include "edm4hep/CalorimeterHitCollection.h"
+
 #include "GridDRcalo.h"
+#include "k4Interface/IGeoSvc.h"
 
-class RecoFiber {
+class IGeoSvc;
+
+class RecoFiber : public GaudiAlgorithm {
 public:
-  RecoFiber();
-  ~RecoFiber() {};
+  RecoFiber(const std::string& name, ISvcLocator* svcLoc);
+  virtual ~RecoFiber() {};
 
-  void reconstruct(const DRsimInterface::DRsimSiPMData& sipm, RecoInterface::RecoTowerData& recoTower);
-  RecoInterface::RecoFiberData getFiber() { return fData; }
+  StatusCode initialize();
+  StatusCode execute();
+  StatusCode finalize();
 
-  void setCalibS(float calibS) { fCalibS = calibS; }
-  void setCalibC(float calibC) { fCalibC = calibC; }
-  const std::vector<fastjet::PseudoJet>& getFjInputs_S() { return fFjInputs_S; }
-  const std::vector<fastjet::PseudoJet>& getFjInputs_Scorr() { return fFjInputs_Scorr; }
-  const std::vector<fastjet::PseudoJet>& getFjInputs_C() { return fFjInputs_C; }
-  void addFjInputs(const RecoInterface::RecoFiberData& recoFiber);
-  void clear();
-
-  void setSegmentation(dd4hep::DDSegmentation::GridDRcalo* seg) { fSeg = seg; }
+  void readCSV(std::string filename);
 
 private:
   float setTmax(const DRsimInterface::DRsimSiPMData& sipm);
   float setDepth(const float tmax, const RecoInterface::RecoTowerData& recoTower);
-  int cutXtalk(const DRsimInterface::DRsimSiPMData& sipm);
 
-  dd4hep::DDSegmentation::GridDRcalo* fSeg;
-  
-  RecoInterface::RecoFiberData fData;
-  std::vector<fastjet::PseudoJet> fFjInputs_S;
-  std::vector<fastjet::PseudoJet> fFjInputs_Scorr;
-  std::vector<fastjet::PseudoJet> fFjInputs_C;
+  void addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const edm4hep::DRSimCalorimeterHit& input,
+                       dd4hep::DDSegmentation::DRparamBase* paramBase, const std::vector<float>& timeBinCenter, float calib);
+  edm4hep::Vector3f getPosition(dd4hep::DDSegmentation::CellID& cID);
 
-  float fCalibS;
-  float fCalibC;
+  SmartIF<IGeoSvc> m_geoSvc;
+  dd4hep::DDSegmentation::GridDRcalo* pSeg;
+  dd4hep::DDSegmentation::DRparamBase* pParamBase;
 
-  float fSpeed;
-  float fEffSpeedInv;
-  float fDepthEM;
-  float fAbsLen;
-  float fCThres;
+  /// Input collection
+  DataHandle<edm4hep::DRSimCalorimeterHitCollection> m_DRsimHits{"DRSimCalorimeterHits", Gaudi::DataHandle::Reader, this};
+  DataHandle<edm4hep::RawCalorimeterHitCollection> m_rawHits{"RawCalorimeterHits", Gaudi::DataHandle::Reader, this};
+  DataHandle<podio::ColMDMap> m_colMDs{"colMD", Gaudi::DataHandle::Reader, this};
+  /// Output collection
+  DataHandle<edm4hep::CalorimeterHitCollection> m_sHits{"ScintillationHits", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::CalorimeterHitCollection> m_cHits{"CherenkovHits", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::DRrecoCalorimeterHitCollection> m_DRScintHits{"DRrecoScintillationHits", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::DRrecoCalorimeterHitCollection> m_DRCherenHits{"DRrecoCherenkovHits", Gaudi::DataHandle::Writer, this};
+
+  Gaudi::Property<std::string> m_calibPath{this, "calibPath", "calib.csv", "relative path to calibration csv file"};
+  Gaudi::Property<std::string> m_readoutName{this, "readoutName", "DRcaloSiPMreadout", "readout name of DRcalo"};
+  Gaudi::Property<std::string> m_timeMDkey{this, "timeMDkey", "timeBins", "metadata key representing timing bin low edges"};
+
+  Gaudi::Property<float> m_scintSpeed{this, "scintSpeed", 158.8, "effective photon propagation speed inside scintillation channel in mm/ns"};
+  Gaudi::Property<float> m_cherenSpeed{this, "cherenSpeed", 189.5, "effective photon propagation speed inside Cherenkov channel in mm/ns"};
+
+  std::vector<std::pair<float,float>> m_calibs;
 };
 
 #endif
