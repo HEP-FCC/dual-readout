@@ -2,8 +2,6 @@ project(SimG4Fast)
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-find_package(Geant4 REQUIRED)
-
 include(${Geant4_USE_FILE})
 
 include_directories(

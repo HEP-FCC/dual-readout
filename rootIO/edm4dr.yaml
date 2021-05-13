@@ -4,6 +4,22 @@ options:
   exposePODMembers: False
   includeSubfolder: True
 
+components:
+  # Vector3D with floats
+  edm4hep::Vector3f :
+    Members:
+      - float x
+      - float y
+      - float z
+    ExtraCode :
+      declaration: "
+      Vector3f() : x(0),y(0),z(0) {}\n
+      Vector3f(float xx, float yy, float zz) : x(xx),y(yy),z(zz) {}\n
+      Vector3f(const float* v) : x(v[0]),y(v[1]),z(v[2]) {}\n
+      bool operator==(const Vector3f& v) const { return (x==v.x&&y==v.y&&z==v.z) ; }\n
+      float operator[](unsigned i) const { return *( &x + i ) ; }\n
+      "
+
 datatypes :
   #------------- SimCalorimeterHit
   edm4hep::DRSimCalorimeterHit:

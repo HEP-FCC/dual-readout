@@ -11,10 +11,11 @@ set(CMAKE_MODULE_PATH
 include(GNUInstallDirs)
 
 find_package(ROOT REQUIRED)
-find_package(HepMC3)
+find_package(HepMC3) # FIXME setting REQUIRED results Gaudi bug
 find_package(podio REQUIRED HINTS $ENV{PODIO})
 find_package(FastJet)
-find_package(k4FWCore)
+find_package(Gaudi REQUIRED)
+find_package(k4FWCore REQUIRED)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
