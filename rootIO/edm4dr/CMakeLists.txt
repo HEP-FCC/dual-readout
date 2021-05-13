@@ -26,7 +26,7 @@ set_target_properties(edm4dr PROPERTIES PUBLIC_HEADER "${headers}")
 
 PODIO_ADD_ROOT_IO_DICT(edm4drDict edm4dr "${headers}" src/selection.xml)
 
-add_library(edm4dr::edm4drDict ALIAS edm4drDict )
+add_library(edm4dr::edm4drDict ALIAS edm4drDict)
 
 list(APPEND EDM4DR_INSTALL_LIBS edm4dr edm4drDict)
 
@@ -40,15 +40,17 @@ install(TARGETS ${EDM4DR_INSTALL_LIBS}
   EXPORT EDM4DRTargets
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
-  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/edm4hep"
-  COMPONENT dev)
+  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/edm4hep" COMPONENT dev
+)
 
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/edm4drDictDict.rootmap"
-  DESTINATION lib COMPONENT dev)
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT dev
+)
 
 if (${ROOT_VERSION} GREATER 6)
   install(FILES
-      "${CMAKE_CURRENT_BINARY_DIR}/libedm4drDict_rdict.pcm"
-      DESTINATION lib64 COMPONENT dev)
+    "${CMAKE_CURRENT_BINARY_DIR}/libedm4drDict_rdict.pcm"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT dev
+  )
 endif()

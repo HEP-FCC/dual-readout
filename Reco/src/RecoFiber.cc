@@ -2,14 +2,14 @@
 
 #include "GridDRcalo.h"
 
-#include "DD4hepUnits.h"
+#include "DD4hep/DD4hepUnits.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include <cmath>
 
 DECLARE_COMPONENT(RecoFiber)
 
-RecoFiber::RecoFiber(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {
+RecoFiber::RecoFiber(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc), m_geoSvc("GeoSvc", aName) {
   declareProperty("DRSimCalorimeterHits", m_DRsimHits, "DRsim hit collection (input)");
   declareProperty("RawCalorimeterHits", m_rawHits, "Raw hit collection (input)");
   declareProperty("colMD", m_colMDs, "Collection metadata");
@@ -23,12 +23,11 @@ RecoFiber::RecoFiber(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgo
   pParamBase = nullptr;
 }
 
-StatusCode initialize() {
+StatusCode RecoFiber::initialize() {
   StatusCode sc = GaudiAlgorithm::initialize();
 
   if (sc.isFailure()) return sc;
 
-  m_geoSvc = service("GeoSvc");
   if (!m_geoSvc) {
     error() << "Unable to locate Geometry service." << endmsg;
     return StatusCode::FAILURE;
@@ -36,9 +35,9 @@ StatusCode initialize() {
 
   pSeg = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(m_readoutName).segmentation().segmentation());
 
-  readCSV();
+  readCSV(m_calibPath);
 
-  if ( m_calibs.size() != pSeg->paramBarrel()->GetTotTowerNum() + pSeg->paramEndcap()->GetTotTowerNum() ) {
+  if ( static_cast<int>(m_calibs.size()) != pSeg->paramBarrel()->GetTotTowerNum() + pSeg->paramEndcap()->GetTotTowerNum() ) {
     error() << "Number of calibration constants does not match with the number of towers" << endmsg;
     return StatusCode::FAILURE;
   }
@@ -56,12 +55,13 @@ StatusCode RecoFiber::execute() {
   // input
   const edm4hep::DRSimCalorimeterHitCollection* inputs = m_DRsimHits.get();
 
-  auto& colMD = m_colMDs[ inputs->getID() ];
+  podio::ColMDMap colMDs = *(m_colMDs.get());
+  podio::GenericParameters& colMD = colMDs[ static_cast<int>(inputs->getID()) ];
   std::vector<float> timeBinLow {};
   std::vector<float> timeBinCenter {};
   colMD.getFloatVals(m_timeMDkey,timeBinLow);
 
-  for (int bin = 0; bin < timeBinLow.size()-1; bin++)
+  for (unsigned int bin = 0; bin < timeBinLow.size()-1; bin++)
     timeBinCenter.push_back( ( timeBinLow.at(bin)+timeBinLow.at(bin+1) )/2. );
   timeBinCenter.push_back(99999.); // # FIXME hardcoded overflow bin
 
@@ -72,13 +72,13 @@ StatusCode RecoFiber::execute() {
   edm4hep::DRrecoCalorimeterHitCollection* DRcherenHit = m_DRCherenHits.createAndPut();
 
   for (auto& input : *inputs) {
-    edm4hep::RawCalorimeterHit& rawhit = input.getEdm4hepRawCalorimeterHit();
+    auto& rawhit = input.getEdm4hepRawCalorimeterHit();
 
     auto cID = static_cast<dd4hep::DDSegmentation::CellID>( rawhit.getCellID() );
     int numEta = pSeg->numEta(cID);
 
     pParamBase = pSeg->setParamBase(numEta);
-    int absNumEta = pParamBase->unsignedTowerNo();
+    int absNumEta = pParamBase->unsignedTowerNo(numEta);
 
     if (pSeg->IsCerenkov(cID)) {
       auto hit = cherenHit->create();
@@ -95,6 +95,8 @@ StatusCode RecoFiber::execute() {
 
   return StatusCode::SUCCESS;
 }
+
+StatusCode RecoFiber::finalize() { return GaudiAlgorithm::finalize(); }
 
 void RecoFiber::add(edm4hep::DRrecoCalorimeterHit& drHit, edm4hep::CalorimeterHit& hit, const edm4hep::DRSimCalorimeterHit& input,
                     const std::vector<float>& timeBinCenter, float calib) {
@@ -115,7 +117,8 @@ void RecoFiber::addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const edm4
   int numPhi = pSeg->numPhi( cID );
   auto towerPos = pParamBase->GetTowerPos(numPhi);
   auto waferPos = pParamBase->GetSipmLayerPos(numPhi);
-  auto sipmPos = pSeg->position(cID);
+  auto sipmPos_ = pSeg->position(cID);
+  dd4hep::Position sipmPos(sipmPos_.x(),sipmPos_.y(),sipmPos_.z()); // type cast from dd4hep::DDSegmentation::Vector3D to dd4heo::Position
 
   auto fiberDir = waferPos - towerPos; // outward direction
   auto fiberUnit = fiberDir.Unit();
@@ -126,13 +129,14 @@ void RecoFiber::addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const edm4
   for (unsigned int bin = 0; bin < input.timeStruct_size(); bin++) {
     float edep = static_cast<float>( input.getTimeStruct(bin) )/calib;
 
-    float numerator = timeBinCenter.at(bin)*dd4hep::nanosecond/CLHEP::nanosecond - sipmPos.R()/dd4hep::c_light;
+    float numerator = timeBinCenter.at(bin)*dd4hep::nanosecond/CLHEP::nanosecond - std::sqrt(sipmPos.Mag2())/dd4hep::c_light;
     auto pos = sipmPos - ( numerator/invVminusInvC )*fiberUnit;
+    edm4hep::Vector3f posEdm(pos.x() * CLHEP::millimeter/dd4hep::millimeter,
+                             pos.y() * CLHEP::millimeter/dd4hep::millimeter,
+                             pos.z() * CLHEP::millimeter/dd4hep::millimeter);
 
     drHit.addToTimeStruct(edep);
-    drHit.addToPosition( {pos.x() * CLHEP::millimeter/dd4hep::millimeter,
-                          pos.y() * CLHEP::millimeter/dd4hep::millimeter,
-                          pos.z() * CLHEP::millimeter/dd4hep::millimeter} );
+    drHit.addToPosition( posEdm );
   }
 }
 

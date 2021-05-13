@@ -21,7 +21,6 @@ GridDRcalo::GridDRcalo(const std::string& cellEncoding) : Segmentation(cellEncod
   registerIdentifier("identifier_IsCerenkov", "Cell ID identifier for IsCerenkov", fIsCerenkovId, "c");
   registerIdentifier("identifier_module", "Cell ID identifier for module", fModule, "module");
 
-  pCurrentParam = nullptr;
   fParamBarrel = new DRparamBarrel();
   fParamEndcap = new DRparamEndcap();
 }
@@ -39,7 +38,6 @@ GridDRcalo::GridDRcalo(const BitFieldCoder* decoder) : Segmentation(decoder) {
   registerIdentifier("identifier_IsCerenkov", "Cell ID identifier for IsCerenkov", fIsCerenkovId, "c");
   registerIdentifier("identifier_module", "Cell ID identifier for module", fModule, "module");
 
-  pCurrentParam = nullptr;
   fParamBarrel = new DRparamBarrel();
   fParamEndcap = new DRparamEndcap();
 }
@@ -211,21 +209,23 @@ CellID GridDRcalo::convertLast32to64(const int aId32) const {
 }
 
 DRparamBase* GridDRcalo::setParamBase(int noEta) const {
-  if ( pCurrentParam!=nullptr && pCurrentParam->GetCurrentTowerNum()==noEta ) return pCurrentParam; // prevent unnecessary heavy operation
+  DRparamBase* paramBase = nullptr;
 
-  if ( fParamEndcap->unsignedTowerNo(noEta) >= fParamBarrel->GetTotTowerNum() ) pCurrentParam = fParamEndcap;
-  else pCurrentParam = fParamBarrel;
+  if ( fParamEndcap->unsignedTowerNo(noEta) >= fParamBarrel->GetTotTowerNum() ) paramBase = static_cast<DRparamBase*>(fParamEndcap);
+  else paramBase = static_cast<DRparamBase*>(fParamBarrel);
+
+  if ( paramBase->GetCurrentTowerNum()==noEta ) return paramBase;
 
   // This should not be called while building detector geometry
-  if (!pCurrentParam->IsFinalized()) throw std::runtime_error("GridDRcalo::position should not be called while building detector geometry!");
+  if (!paramBase->IsFinalized()) throw std::runtime_error("GridDRcalo::position should not be called while building detector geometry!");
 
-  pCurrentParam->SetDeltaThetaByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
-  pCurrentParam->SetThetaOfCenterByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
-  pCurrentParam->SetIsRHSByTowerNo(noEta);
-  pCurrentParam->SetCurrentTowerNum(noEta);
-  pCurrentParam->init();
+  paramBase->SetDeltaThetaByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
+  paramBase->SetThetaOfCenterByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
+  paramBase->SetIsRHSByTowerNo(noEta);
+  paramBase->SetCurrentTowerNum(noEta);
+  paramBase->init();
 
-  return pCurrentParam;
+  return paramBase;
 }
 
 }

@@ -86,6 +86,8 @@ public:
   DRparamBarrel* paramBarrel() { return fParamBarrel; }
   DRparamEndcap* paramEndcap() { return fParamEndcap; }
 
+  DRparamBase* setParamBase(int noEta) const;
+
 protected:
   std::string fNumEtaId;
   std::string fNumPhiId;
@@ -98,9 +100,6 @@ protected:
   double fSipmSize;
 
 private:
-  DRparamBase* setParamBase(int noEta) const;
-
-  DRparamBase* pCurrentParam;
   DRparamBarrel* fParamBarrel;
   DRparamEndcap* fParamEndcap;
 };

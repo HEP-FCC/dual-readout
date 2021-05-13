@@ -9,6 +9,7 @@
 #include "edm4hep/RawCalorimeterHitCollection.h"
 #include "edm4hep/DRSimCalorimeterHitCollection.h"
 #include "edm4hep/CalorimeterHitCollection.h"
+#include "edm4hep/DRrecoCalorimeterHitCollection.h"
 
 #include "GridDRcalo.h"
 #include "k4Interface/IGeoSvc.h"
@@ -27,14 +28,13 @@ public:
   void readCSV(std::string filename);
 
 private:
-  float setTmax(const DRsimInterface::DRsimSiPMData& sipm);
-  float setDepth(const float tmax, const RecoInterface::RecoTowerData& recoTower);
-
+  void add(edm4hep::DRrecoCalorimeterHit& drHit, edm4hep::CalorimeterHit& hit, const edm4hep::DRSimCalorimeterHit& input,
+           const std::vector<float>& timeBinCenter, float calib);
   void addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const edm4hep::DRSimCalorimeterHit& input,
-                       dd4hep::DDSegmentation::DRparamBase* paramBase, const std::vector<float>& timeBinCenter, float calib);
+                       const std::vector<float>& timeBinCenter, float calib);
   edm4hep::Vector3f getPosition(dd4hep::DDSegmentation::CellID& cID);
 
-  SmartIF<IGeoSvc> m_geoSvc;
+  ServiceHandle<IGeoSvc> m_geoSvc;
   dd4hep::DDSegmentation::GridDRcalo* pSeg;
   dd4hep::DDSegmentation::DRparamBase* pParamBase;
 

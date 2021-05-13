@@ -26,4 +26,7 @@ target_link_libraries(
 
 dd4hep_generate_rootmap(ddDRsegmentation)
 
-install(TARGETS ddDRsegmentation LIBRARY DESTINATION lib)
+install(TARGETS ddDRsegmentation
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
+  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
+)
