@@ -25,7 +25,7 @@ target_link_libraries(
   rootIO
   ${ROOT_LIBRARIES}
   ${CMAKE_DL_LIBS}
-  DetComponents
+  DRcomponents
   ddDRsegmentation
 )
 #target_link_libraries(

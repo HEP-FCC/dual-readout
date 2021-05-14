@@ -1,4 +1,4 @@
-project(DetComponents)
+project(DRcomponents)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -12,20 +12,20 @@ file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
-add_library(DetComponents SHARED ${sources} ${headers})
+add_library(DRcomponents SHARED ${sources} ${headers})
 
-target_include_directories(DetComponents PUBLIC
+target_include_directories(DRcomponents PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${DD4hep_DIR}/include
 )
 
 target_link_libraries(
-  DetComponents
+  DRcomponents
   DD4hep::DDCore
   DD4hep::DDG4
 )
 
-install(TARGETS DetComponents
+install(TARGETS DRcomponents
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
 )

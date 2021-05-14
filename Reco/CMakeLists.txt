@@ -12,12 +12,15 @@ file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
+# Exclude RecoTower temporarily
+LIST(FILTER headers EXCLUDE REGEX RecoTower.h)
+LIST(FILTER sources EXCLUDE REGEX RecoTower.cc)
+
 gaudi_add_module(Reco
   SOURCES ${sources}
   LINK
   edm4dr
   edm4dr::edm4drDict
-  DetComponents
   ddDRsegmentation
   Gaudi::GaudiKernel
   Gaudi::GaudiAlgLib

@@ -21,7 +21,7 @@ target_link_libraries(
   DD4hep::DDG4
   ddDRsensitive
   ddDRsegmentation
-  DetComponents
+  DRcomponents
   podio::podioRootIO
   edm4dr
 )

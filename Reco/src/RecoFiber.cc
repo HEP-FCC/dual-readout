@@ -10,6 +10,7 @@
 DECLARE_COMPONENT(RecoFiber)
 
 RecoFiber::RecoFiber(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc), m_geoSvc("GeoSvc", aName) {
+  declareProperty("GeoSvc", m_geoSvc);
   declareProperty("DRSimCalorimeterHits", m_DRsimHits, "DRsim hit collection (input)");
   declareProperty("RawCalorimeterHits", m_rawHits, "Raw hit collection (input)");
   declareProperty("colMD", m_colMDs, "Collection metadata");

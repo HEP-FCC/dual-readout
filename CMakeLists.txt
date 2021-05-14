@@ -17,6 +17,7 @@ find_package(podio REQUIRED HINTS $ENV{PODIO})
 find_package(FastJet)
 find_package(Gaudi REQUIRED)
 find_package(k4FWCore REQUIRED)
+find_package(k4SimGeant4 REQUIRED)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
