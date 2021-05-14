@@ -5,15 +5,18 @@
 #include "DD4hep/DD4hepUnits.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
+#include "k4FWCore/PodioDataSvc.h"
+#include "TFile.h"
+
 #include <cmath>
 
 DECLARE_COMPONENT(RecoFiber)
 
-RecoFiber::RecoFiber(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc), m_geoSvc("GeoSvc", aName) {
+RecoFiber::RecoFiber(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc), m_geoSvc("GeoSvc", aName), m_dataSvc("EventDataSvc", aName) {
   declareProperty("GeoSvc", m_geoSvc);
+  declareProperty("EventDataSvc", m_dataSvc);
   declareProperty("DRSimCalorimeterHits", m_DRsimHits, "DRsim hit collection (input)");
   declareProperty("RawCalorimeterHits", m_rawHits, "Raw hit collection (input)");
-  declareProperty("colMD", m_colMDs, "Collection metadata");
 
   declareProperty("ScintillationHits", m_sHits, "Scintillation hit collection (output)");
   declareProperty("CherenkovHits", m_cHits, "Cherenkov hit collection (output)");
@@ -22,6 +25,7 @@ RecoFiber::RecoFiber(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgo
 
   pSeg = nullptr;
   pParamBase = nullptr;
+  m_colMDs = std::make_unique<podio::ColMDMap>();
 }
 
 StatusCode RecoFiber::initialize() {
@@ -34,6 +38,11 @@ StatusCode RecoFiber::initialize() {
     return StatusCode::FAILURE;
   }
 
+  if (!m_dataSvc) {
+    error() << "Unable to locate Event data service." << endmsg;
+    return StatusCode::FAILURE;
+  }
+
   pSeg = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(m_readoutName).segmentation().segmentation());
 
   readCSV(m_calibPath);
@@ -43,9 +52,19 @@ StatusCode RecoFiber::initialize() {
     return StatusCode::FAILURE;
   }
 
-  // auto eds = ServiceHandle<IDataProviderSvc>("EventDataSvc", "DataHandle");
-  // StatusCode sc = eds.retrieve();
-  // PodioDataSvc* pds = dynamic_cast<PodioDataSvc*>( eds.get() ); // worst choice
+  PodioDataSvc* pds = dynamic_cast<PodioDataSvc*>( m_dataSvc.get() );
+
+  if (pds!=nullptr) { // FIXME retrieving metadata, expect better approach in the future...
+    TTree* evtTree = pds->eventDataTree();
+    TFile* file = evtTree->GetCurrentFile();
+    TTree* metadataTree = static_cast<TTree*>(file->Get(static_cast<TString>(m_metadataTree.toString()))); // XXX
+    TBranch* branch = static_cast<TBranch*>(metadataTree->FindObject(static_cast<TString>(m_metadataBranch.toString())));
+    branch->SetAddress(&m_colMDs);
+    metadataTree->GetEntry(0);
+  } else {
+    error() << "Failed to retrieve collection metadata" << endmsg;
+    return StatusCode::FAILURE;
+  }
 
   info() << "RecoFiber initialized" << endmsg;
 
@@ -56,7 +75,7 @@ StatusCode RecoFiber::execute() {
   // input
   const edm4hep::DRSimCalorimeterHitCollection* inputs = m_DRsimHits.get();
 
-  podio::ColMDMap colMDs = *(m_colMDs.get());
+  podio::ColMDMap colMDs = *m_colMDs;
   podio::GenericParameters& colMD = colMDs[ static_cast<int>(inputs->getID()) ];
   std::vector<float> timeBinLow {};
   std::vector<float> timeBinCenter {};
@@ -97,7 +116,11 @@ StatusCode RecoFiber::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode RecoFiber::finalize() { return GaudiAlgorithm::finalize(); }
+StatusCode RecoFiber::finalize() {
+  m_calibs.clear();
+
+  return GaudiAlgorithm::finalize();
+}
 
 void RecoFiber::add(edm4hep::DRrecoCalorimeterHit& drHit, edm4hep::CalorimeterHit& hit, const edm4hep::DRSimCalorimeterHit& input,
                     const std::vector<float>& timeBinCenter, float calib) {

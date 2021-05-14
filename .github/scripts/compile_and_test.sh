@@ -1,7 +1,5 @@
 #!/bin/bash
 
-./install_k4.sh
-
 mkdir build install
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17  .. && \
