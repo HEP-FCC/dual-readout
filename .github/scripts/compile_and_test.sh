@@ -1,21 +1,6 @@
 #!/bin/bash
 
-export WORKDIR=$PWD
-
-# FIXME LCG100 does not support k4FWCore and HSF spackages do not support ivy-bridge :( 
-git clone https://github.com/key4hep/k4FWCore
-cd k4FWCore
-git checkout v01-00pre06
-mkdir build install
-cd build
-cmake -DCMAKE_INSTALL_PREFIX=../install .. && \
-make -j `getconf _NPROCESSORS_ONLN` && \
-make install
-cd ../install
-export k4FWCore_DIR=$PWD
-export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$k4FWCore_DIR/lib/cmake/k4FWCore
-
-cd $WORKDIR
+./install_k4.sh
 
 mkdir build install
 cd build
