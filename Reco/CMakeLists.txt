@@ -12,7 +12,7 @@ file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
-# Exclude RecoTower temporarily
+# FIXME Exclude RecoTower temporarily
 LIST(FILTER headers EXCLUDE REGEX RecoTower.h)
 LIST(FILTER sources EXCLUDE REGEX RecoTower.cc)
 
@@ -53,3 +53,4 @@ install(TARGETS Reco
 )
 
 install(FILES ${PROJECT_BINARY_DIR}/calib.csv DESTINATION .)
+install(FILES ${PROJECT_BINARY_DIR}/test/runDRcaloReco.py DESTINATION test)

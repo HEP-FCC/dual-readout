@@ -25,7 +25,6 @@ RecoFiber::RecoFiber(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgo
 
   pSeg = nullptr;
   pParamBase = nullptr;
-  m_colMDs = std::make_unique<podio::ColMDMap>();
 }
 
 StatusCode RecoFiber::initialize() {
@@ -54,13 +53,8 @@ StatusCode RecoFiber::initialize() {
 
   PodioDataSvc* pds = dynamic_cast<PodioDataSvc*>( m_dataSvc.get() );
 
-  if (pds!=nullptr) { // FIXME retrieving metadata, expect better approach in the future...
-    TTree* evtTree = pds->eventDataTree();
-    TFile* file = evtTree->GetCurrentFile();
-    TTree* metadataTree = static_cast<TTree*>(file->Get(static_cast<TString>(m_metadataTree.toString()))); // XXX
-    TBranch* branch = static_cast<TBranch*>(metadataTree->FindObject(static_cast<TString>(m_metadataBranch.toString())));
-    branch->SetAddress(&m_colMDs);
-    metadataTree->GetEntry(0);
+  if (pds!=nullptr) {
+    // FIXME read timing bins from podio metadata
   } else {
     error() << "Failed to retrieve collection metadata" << endmsg;
     return StatusCode::FAILURE;
@@ -75,11 +69,15 @@ StatusCode RecoFiber::execute() {
   // input
   const edm4hep::DRSimCalorimeterHitCollection* inputs = m_DRsimHits.get();
 
-  podio::ColMDMap colMDs = *m_colMDs;
-  podio::GenericParameters& colMD = colMDs[ static_cast<int>(inputs->getID()) ];
   std::vector<float> timeBinLow {};
   std::vector<float> timeBinCenter {};
-  colMD.getFloatVals(m_timeMDkey,timeBinLow);
+
+  // #FIXME read timing bins from podio metadata
+  timeBinLow.push_back(0.);
+  float timeStart = 10.;
+
+  for (int bin = 0; bin < 600; bin++)
+    timeBinLow.push_back(timeStart + bin*0.1);
 
   for (unsigned int bin = 0; bin < timeBinLow.size()-1; bin++)
     timeBinCenter.push_back( ( timeBinLow.at(bin)+timeBinLow.at(bin+1) )/2. );

@@ -6,7 +6,7 @@ options:
 
 components:
   # Vector3D with floats
-  edm4hep::Vector3f :
+  edm4hep::Vector3f : # FIXME already lives in edm4hep, error handling in podio should be improved
     Members:
       - float x
       - float y

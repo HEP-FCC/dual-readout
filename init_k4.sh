@@ -2,6 +2,10 @@
 
 export WORKDIR=$PWD
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+cd $SCRIPT_DIR
+
 if [ ! -d k4FWCore ]; then
   # FIXME LCG100 does not support k4FWCore and HSF spackages do not support ivy-bridge :(
   git clone https://github.com/key4hep/k4FWCore
@@ -12,7 +16,7 @@ if [ ! -d k4FWCore ]; then
   cmake -DCMAKE_INSTALL_PREFIX=../install .. && \
   make -j `getconf _NPROCESSORS_ONLN` && \
   make install
-  cd $WORKDIR
+  cd $SCRIPT_DIR
 fi
 
 cd k4FWCore/install
@@ -23,18 +27,18 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$k4FWCore_DIR/lib
 export PYTHONPATH=$PYTHONPATH:$k4FWCore_DIR/python
 export PATH=$PATH:$k4FWCore_DIR/bin
 
-cd $WORKDIR
+cd $SCRIPT_DIR
 
 if [ ! -d k4SimGeant4 ]; then
-  git clone https://github.com/SanghyunKo/k4SimGeant4 # FIXME move to official repo when LCG CMake issue fixed
+  git clone https://github.com/HEP-FCC/k4SimGeant4
   cd k4SimGeant4
-  git checkout gaudiCMakeFix
+  git checkout bb238a170a1a73bc5cffc5a861fd6a60f412cfb0
   mkdir build install
   cd build
   cmake .. -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17
   make -j `getconf _NPROCESSORS_ONLN`
   make install
-  cd $WORKDIR
+  cd $SCRIPT_DIR
 fi
 
 cd k4SimGeant4/install

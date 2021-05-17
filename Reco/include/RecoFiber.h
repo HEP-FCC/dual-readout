@@ -43,7 +43,7 @@ private:
   /// Input collection
   DataHandle<edm4hep::DRSimCalorimeterHitCollection> m_DRsimHits{"DRSimCalorimeterHits", Gaudi::DataHandle::Reader, this};
   DataHandle<edm4hep::RawCalorimeterHitCollection> m_rawHits{"RawCalorimeterHits", Gaudi::DataHandle::Reader, this};
-  std::unique_ptr<podio::ColMDMap> m_colMDs;
+  // std::unique_ptr<podio::ColMDMap> m_colMDs; // #FIXME read timing bins from podio metadata
   /// Output collection
   DataHandle<edm4hep::CalorimeterHitCollection> m_sHits{"ScintillationHits", Gaudi::DataHandle::Writer, this};
   DataHandle<edm4hep::CalorimeterHitCollection> m_cHits{"CherenkovHits", Gaudi::DataHandle::Writer, this};
