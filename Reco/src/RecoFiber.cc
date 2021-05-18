@@ -77,7 +77,7 @@ StatusCode RecoFiber::execute() {
   float timeStart = 10.;
 
   for (int bin = 0; bin < 600; bin++)
-    timeBinLow.push_back(timeStart + bin*0.1);
+    timeBinLow.push_back(timeStart + static_cast<float>(bin)*0.1);
 
   for (unsigned int bin = 0; bin < timeBinLow.size()-1; bin++)
     timeBinCenter.push_back( ( timeBinLow.at(bin)+timeBinLow.at(bin+1) )/2. );

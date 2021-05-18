@@ -34,6 +34,7 @@ add_library( DRcalo::Reco ALIAS Reco )
 set(
   Reco_SCRIPTS
   calib.csv
+  test/runDRcaloReco.py
 )
 
 foreach(_script ${Reco_SCRIPTS})

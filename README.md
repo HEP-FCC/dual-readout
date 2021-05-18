@@ -6,6 +6,7 @@ Repository for GEANT4 simulation &amp; analysis of the dual-readout calorimeter.
 After fetching the repository, do
 
     source init_lcg.sh
+    source init_k4.sh
     mkdir build
     cd build
     cmake ..
@@ -20,37 +21,38 @@ For a case that needs to install the package (e.g. `condor` requires file transf
 
 Note that to use the installed binary & library files, need to do following (assuming `$PWD=<path_to_install_directory>`)
 
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HEPMC_DIR/lib64:$FASTJET_DIR/lib:$PYTHIA_DIR/lib:$PWD/lib
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/lib:$PWD/lib64
+    export PYTHONPATH=$PYTHONPATH:$PWD/python
 
 ### Running Pythia8
-In build/Gen,
+In the install directory,
 
-    ./P8ptcgun ptcgun.cmnd <seed> <filename>
+    ./bin/P8ptcgun ptcgun.cmnd <seed> <filename>
 
 generates `<filename>_<seed>.root`.
 
 ### Running GEANT4
 #### 1. GEANT4 standalone particle gun
-In build/DRsim,
+In the install directory,
 
-    ./DRsim <run_macro> <filenumber> <filename>
+    ./bin/DRsim <run_macro> <filenumber> <filename>
 
 generates, `<filename>_<filenumber>.root`
 
 #### 2. Using HepMC input
 This requires the ROOT file generated from `Gen`. Assuming the name of the file `<filename>_<filenumber>.root`,
 
-    ./DRsim run_hepmc.mac <filenumber> <filename>
+    ./bin/DRsim run_hepmc.mac <filenumber> <filename>
 
 ### Reconstruction
-This requires the ROOT file generated from `DRsim`. Assuming the name of the file `<filename>_<filenumber>.root`, in build/Reco,
+This requires the ROOT file generated from `DRsim`. The default `Gaudi` configuration template can be found on `test/runDRcaloReco.py`. After modifying the configuration based on your needs, run
 
-    ./Reco <filenumber> <filename>
+    k4run runDRcaloReco.py
 
 ### Analysis
-This requires the ROOT file generated from `Reco`. Assuming the name of the file `<filename>_<filenumber>.root`, in build/analysis,
+~~This requires the ROOT file generated from `Reco`. Assuming the name of the file `<filename>_<filenumber>.root`, in build/analysis,~~
 
-    ./<your_analysis_program> <filenumber> <filename>
+[WIP] Analysis package is currently unavailable due to on-going migration to `edm4hep` and `k4FWCore`
 
 ### Precaution
 Since GEANT4 takes very large amount of time per an event, P8ptcgun, DRsim and Reco are assumed to run a few events only per ROOT file. The executables can be run on parallel using `torque` or `condor`, and can be merged before analysis step using `hadd` from ROOT.
