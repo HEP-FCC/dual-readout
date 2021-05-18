@@ -1,4 +1,4 @@
-project(SimG4Components)
+project(DRSimG4Components)
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
@@ -12,16 +12,16 @@ file(GLOB sources
   ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
 
-add_library(SimG4Components SHARED ${sources})
+add_library(DRSimG4Components SHARED ${sources})
 target_include_directories(
-  SimG4Components
+  DRSimG4Components
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${DD4hep_DIR}/include
 )
 
 target_link_libraries(
-  SimG4Components
+  DRSimG4Components
   PUBLIC
   ${Geant4_LIBRARIES}
   DD4hep::DDCore
@@ -33,7 +33,7 @@ target_link_libraries(
   edm4dr
 )
 
-install(TARGETS SimG4Components
+install(TARGETS DRSimG4Components
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
 )

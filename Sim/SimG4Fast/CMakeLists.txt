@@ -1,4 +1,4 @@
-project(SimG4Fast)
+project(DRSimG4Fast)
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
@@ -12,16 +12,16 @@ file(GLOB sources
   ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
 
-add_library(SimG4Fast SHARED ${sources})
-target_include_directories(SimG4Fast PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${DD4hep_DIR}/include)
+add_library(DRSimG4Fast SHARED ${sources})
+target_include_directories(DRSimG4Fast PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${DD4hep_DIR}/include)
 target_link_libraries(
-  SimG4Fast
+  DRSimG4Fast
   ${Geant4_LIBRARIES}
   DD4hep::DDCore
   DD4hep::DDG4
 )
 
-install(TARGETS SimG4Fast
+install(TARGETS DRSimG4Fast
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
 )
