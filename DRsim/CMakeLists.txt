@@ -23,9 +23,9 @@ target_link_libraries(
   DRcomponents
   ddDRcalo
   ddDRsensitive
-  SimG4Components
-  SimG4Full
-  SimG4Fast
+  DRSimG4Components
+  DRSimG4Full
+  DRSimG4Fast
 )
 
 file(GLOB DRsim_MACROS ${PROJECT_SOURCE_DIR}/*.mac compacts.txt)
