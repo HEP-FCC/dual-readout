@@ -1,8 +1,6 @@
 #ifndef DRcaloSiPMHit_h
 #define DRcaloSiPMHit_h 1
 
-#include "DRsimInterface.h"
-
 #include "G4VHit.hh"
 #include "G4THitsCollection.hh"
 #include "G4Allocator.hh"
@@ -14,6 +12,9 @@
 namespace ddDRcalo {
   class DRcaloSiPMHit : public G4VHit {
   public:
+    typedef std::pair<float,float> hitRange;
+    typedef std::map<hitRange, int> DRsimTimeStruct;
+    typedef std::map<hitRange, int> DRsimWavlenSpectrum;
 
     DRcaloSiPMHit(G4int wavBin, G4int timeBin);
     DRcaloSiPMHit(const DRcaloSiPMHit &right);
@@ -34,17 +35,17 @@ namespace ddDRcalo {
     void SetSiPMnum(dd4hep::DDSegmentation::CellID n) { fSiPMnum = n; }
     const dd4hep::DDSegmentation::CellID& GetSiPMnum() const { return fSiPMnum; }
 
-    void CountWavlenSpectrum(DRsimInterface::hitRange range);
-    const DRsimInterface::DRsimWavlenSpectrum& GetWavlenSpectrum() const { return fWavlenSpectrum; }
+    void CountWavlenSpectrum(hitRange range);
+    const DRsimWavlenSpectrum& GetWavlenSpectrum() const { return fWavlenSpectrum; }
 
-    void CountTimeStruct(DRsimInterface::hitRange range);
-    const DRsimInterface::DRsimTimeStruct& GetTimeStruct() const { return fTimeStruct; }
+    void CountTimeStruct(hitRange range);
+    const DRsimTimeStruct& GetTimeStruct() const { return fTimeStruct; }
 
   private:
     dd4hep::DDSegmentation::CellID fSiPMnum;
     unsigned long fPhotons;
-    DRsimInterface::DRsimWavlenSpectrum fWavlenSpectrum;
-    DRsimInterface::DRsimTimeStruct fTimeStruct;
+    DRsimWavlenSpectrum fWavlenSpectrum;
+    DRsimTimeStruct fTimeStruct;
     G4int fWavBin;
     G4int fTimeBin;
   };

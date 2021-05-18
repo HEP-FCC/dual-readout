@@ -67,16 +67,16 @@ G4bool ddDRcalo::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
 
   hit->photonCount();
 
-  DRsimInterface::hitRange wavRange = findWavRange(energy);
+  DRcaloSiPMHit::hitRange wavRange = findWavRange(energy);
   hit->CountWavlenSpectrum(wavRange);
 
-  DRsimInterface::hitRange timeRange = findTimeRange(hitTime);
+  DRcaloSiPMHit::hitRange timeRange = findTimeRange(hitTime);
   hit->CountTimeStruct(timeRange);
 
   return true;
 }
 
-DRsimInterface::hitRange ddDRcalo::DRcaloSiPMSD::findWavRange(G4double en) {
+ddDRcalo::DRcaloSiPMHit::hitRange ddDRcalo::DRcaloSiPMSD::findWavRange(G4double en) {
   int i = 0;
   for ( ; i < fWavBin+1; i++) {
     if ( en < wavToE( (fWavlenStart - (float)i*fWavlenStep)*nm ) ) break;
@@ -88,7 +88,7 @@ DRsimInterface::hitRange ddDRcalo::DRcaloSiPMSD::findWavRange(G4double en) {
   return std::make_pair( fWavlenStart-(float)i*fWavlenStep, fWavlenStart-(float)(i-1)*fWavlenStep );
 }
 
-DRsimInterface::hitRange ddDRcalo::DRcaloSiPMSD::findTimeRange(G4double stepTime) {
+ddDRcalo::DRcaloSiPMHit::hitRange ddDRcalo::DRcaloSiPMSD::findTimeRange(G4double stepTime) {
   int i = 0;
   for ( ; i < fTimeBin+1; i++) {
     if ( stepTime < ( (fTimeStart + (float)i*fTimeStep)*CLHEP::ns ) ) break;
