@@ -2,15 +2,6 @@ project(SimG4Full)
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" OFF)
-if(WITH_GEANT4_UIVIS)
-  find_package(Geant4 REQUIRED ui_all vis_all)
-else()
-  find_package(Geant4 REQUIRED)
-endif()
-
-find_package(podio REQUIRED HINTS $ENV{PODIO})
-
 include(${Geant4_USE_FILE})
 
 include_directories(
@@ -30,9 +21,12 @@ target_link_libraries(
   DD4hep::DDG4
   ddDRsensitive
   ddDRsegmentation
-  DetComponents
+  DRcomponents
   podio::podioRootIO
   edm4dr
 )
 
-install(TARGETS SimG4Full LIBRARY DESTINATION lib)
+install(TARGETS SimG4Full
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
+  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
+)

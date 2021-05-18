@@ -29,4 +29,7 @@ target_link_libraries(
 
 dd4hep_generate_rootmap(ddDRsensitive)
 
-install(TARGETS ddDRsensitive LIBRARY DESTINATION lib)
+install(TARGETS ddDRsensitive
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
+  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
+)

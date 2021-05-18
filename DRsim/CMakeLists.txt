@@ -20,8 +20,7 @@ target_link_libraries(
   DRsim
   ${HEPMC3_LIBRARIES}
   ${HEPMC3_ROOTIO_LIB}
-  rootIO
-  DetComponents
+  DRcomponents
   ddDRcalo
   ddDRsensitive
   SimG4Components
@@ -32,5 +31,9 @@ target_link_libraries(
 file(GLOB DRsim_MACROS ${PROJECT_SOURCE_DIR}/*.mac compacts.txt)
 file(COPY ${DRsim_MACROS} DESTINATION ${PROJECT_BINARY_DIR})
 
-install(TARGETS DRsim DESTINATION bin)
+install(TARGETS DRsim
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
+  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
+)
+
 install(FILES ${DRsim_MACROS} DESTINATION .)

@@ -55,6 +55,9 @@ namespace DDSegmentation {
     int GetTotTowerNum() { return fTotNum; }
     void SetTotTowerNum(int totNum) { fTotNum = totNum; }
 
+    int GetCurrentTowerNum() { return fCurrentTowerNum; }
+    void SetCurrentTowerNum(int numEta) { fCurrentTowerNum = numEta; }
+
     virtual void init() {};
     void filled() { fFilled = true; }
     void finalized() { fFinalized = true; }
@@ -83,6 +86,7 @@ namespace DDSegmentation {
     double fCurrentOuterHalfSipm;
 
     int fTotNum;
+    int fCurrentTowerNum;
     std::vector<double> fDeltaThetaVec;
     std::vector<double> fThetaOfCenterVec;
     bool fFilled;

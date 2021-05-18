@@ -2,8 +2,6 @@ project(SimG4Fast)
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-find_package(Geant4 REQUIRED)
-
 include(${Geant4_USE_FILE})
 
 include_directories(
@@ -23,4 +21,7 @@ target_link_libraries(
   DD4hep::DDG4
 )
 
-install(TARGETS SimG4Fast LIBRARY DESTINATION lib)
+install(TARGETS SimG4Fast
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
+  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
+)

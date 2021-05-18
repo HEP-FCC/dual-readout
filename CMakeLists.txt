@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 cmake_policy(SET CMP0074 NEW)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(dual-readout)
 
 set(CMAKE_MODULE_PATH
@@ -11,9 +12,12 @@ set(CMAKE_MODULE_PATH
 include(GNUInstallDirs)
 
 find_package(ROOT REQUIRED)
-find_package(HepMC3)
+find_package(HepMC3) # FIXME setting REQUIRED results Gaudi bug
 find_package(podio REQUIRED HINTS $ENV{PODIO})
 find_package(FastJet)
+find_package(Gaudi REQUIRED)
+find_package(k4FWCore REQUIRED)
+find_package(k4SimGeant4 REQUIRED)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -39,9 +43,6 @@ dd4hep_set_compiler_flags()
 dd4hep_print("|++> ddDRcalo: ROOT version: ${ROOT_VERSION}")
 #--------------------------------------------------------------------------
 dd4hep_configure_output()
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(BOOST_ROOT "$ENV{BOOST_ROOT}")
 

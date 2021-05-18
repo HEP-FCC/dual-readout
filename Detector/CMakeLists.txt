@@ -1,4 +1,4 @@
 add_subdirectory(DRcalo)
 add_subdirectory(DRsensitive)
 add_subdirectory(DRsegmentation)
-add_subdirectory(DetComponents)
+add_subdirectory(DRcomponents)

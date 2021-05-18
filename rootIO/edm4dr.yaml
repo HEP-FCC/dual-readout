@@ -4,6 +4,22 @@ options:
   exposePODMembers: False
   includeSubfolder: True
 
+components:
+  # Vector3D with floats
+  edm4hep::Vector3f : # FIXME already lives in edm4hep, error handling in podio should be improved
+    Members:
+      - float x
+      - float y
+      - float z
+    ExtraCode :
+      declaration: "
+      Vector3f() : x(0),y(0),z(0) {}\n
+      Vector3f(float xx, float yy, float zz) : x(xx),y(yy),z(zz) {}\n
+      Vector3f(const float* v) : x(v[0]),y(v[1]),z(v[2]) {}\n
+      bool operator==(const Vector3f& v) const { return (x==v.x&&y==v.y&&z==v.z) ; }\n
+      float operator[](unsigned i) const { return *( &x + i ) ; }\n
+      "
+
 datatypes :
   #------------- SimCalorimeterHit
   edm4hep::DRSimCalorimeterHit:
@@ -18,3 +34,17 @@ datatypes :
     ExtraCode:
       includes:
         "#include <edm4hep/RawCalorimeterHit.h>\n #include <edm4hep/RawCalorimeterHitCollection.h>"
+
+  edm4hep::DRrecoCalorimeterHit:
+    Description: "Reconstructed DR calorimeter hit"
+    Author : "Sanghyun Ko"
+    VectorMembers:
+      - float timeStruct // time structure of reconstructed energy
+      - edm4hep::Vector3f position // position corresponds to timeStruct
+
+    OneToOneRelations:
+      - edm4hep::DRSimCalorimeterHit edm4hepDRSimCalorimeterHit // link to edm4hep::DRSimCalorimeterHit
+      - edm4hep::CalorimeterHit edm4hepCalorimeterHit // link to edm4hep::CalorimeterHit
+    ExtraCode:
+      includes:
+        "#include <edm4hep/DRSimCalorimeterHit.h>\n #include <edm4hep/DRSimCalorimeterHitCollection.h>\n #include <edm4hep/CalorimeterHit.h>\n #include <edm4hep/CalorimeterHitCollection.h>"

@@ -56,7 +56,7 @@ Vector3D GridDRcalo::position(const CellID& cID) const {
   auto transformA = paramBase->GetSipmTransform3D(noPhi);
   dd4hep::Position localPos = dd4hep::Position(0.,0.,0.);
   if ( IsSiPM(cID) ) localPos = dd4hep::Position( localPosition(cID) );
-  
+
   dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
   dd4hep::Transform3D transformB = dd4hep::Transform3D(rot,localPos);
   auto total = transformA*transformB;
@@ -211,8 +211,10 @@ CellID GridDRcalo::convertLast32to64(const int aId32) const {
 DRparamBase* GridDRcalo::setParamBase(int noEta) const {
   DRparamBase* paramBase = nullptr;
 
-  if ( fParamEndcap->unsignedTowerNo(noEta) >= fParamBarrel->GetTotTowerNum() ) paramBase = fParamEndcap;
-  else paramBase = fParamBarrel;
+  if ( fParamEndcap->unsignedTowerNo(noEta) >= fParamBarrel->GetTotTowerNum() ) paramBase = static_cast<DRparamBase*>(fParamEndcap);
+  else paramBase = static_cast<DRparamBase*>(fParamBarrel);
+
+  if ( paramBase->GetCurrentTowerNum()==noEta ) return paramBase;
 
   // This should not be called while building detector geometry
   if (!paramBase->IsFinalized()) throw std::runtime_error("GridDRcalo::position should not be called while building detector geometry!");
@@ -220,11 +222,11 @@ DRparamBase* GridDRcalo::setParamBase(int noEta) const {
   paramBase->SetDeltaThetaByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
   paramBase->SetThetaOfCenterByTowerNo(noEta, fParamBarrel->GetTotTowerNum());
   paramBase->SetIsRHSByTowerNo(noEta);
+  paramBase->SetCurrentTowerNum(noEta);
   paramBase->init();
 
   return paramBase;
 }
 
-REGISTER_SEGMENTATION(GridDRcalo)
 }
 }
