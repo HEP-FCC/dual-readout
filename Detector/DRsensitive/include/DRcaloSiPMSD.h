@@ -2,7 +2,6 @@
 #define DRcaloSiPMSD_h 1
 
 #include "DRcaloSiPMHit.h"
-#include "DRsimInterface.h"
 #include "GridDRcalo.h"
 #include "DD4hep/Segmentations.h"
 
@@ -37,8 +36,8 @@ namespace ddDRcalo {
 
     G4double wavToE(G4double wav) { return h_Planck*c_light/wav; }
 
-    DRsimInterface::hitRange findWavRange(G4double en);
-    DRsimInterface::hitRange findTimeRange(G4double stepTime);
+    DRcaloSiPMHit::hitRange findWavRange(G4double en);
+    DRcaloSiPMHit::hitRange findTimeRange(G4double stepTime);
   };
 }
 

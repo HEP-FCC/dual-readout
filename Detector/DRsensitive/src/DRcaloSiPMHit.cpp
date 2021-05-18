@@ -32,13 +32,13 @@ G4bool ddDRcalo::DRcaloSiPMHit::operator==(const ddDRcalo::DRcaloSiPMHit &right)
   return (fSiPMnum==right.fSiPMnum);
 }
 
-void ddDRcalo::DRcaloSiPMHit::CountWavlenSpectrum(DRsimInterface::hitRange range) {
+void ddDRcalo::DRcaloSiPMHit::CountWavlenSpectrum(hitRange range) {
   auto it = fWavlenSpectrum.find(range);
   if (it==fWavlenSpectrum.end()) fWavlenSpectrum.insert(std::make_pair(range,1));
   else it->second++;
 }
 
-void ddDRcalo::DRcaloSiPMHit::CountTimeStruct(DRsimInterface::hitRange range) {
+void ddDRcalo::DRcaloSiPMHit::CountTimeStruct(hitRange range) {
   auto it = fTimeStruct.find(range);
   if (it==fTimeStruct.end()) fTimeStruct.insert(std::make_pair(range,1));
   else it->second++;
