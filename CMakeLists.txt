@@ -46,10 +46,10 @@ dd4hep_configure_output()
 
 set(BOOST_ROOT "$ENV{BOOST_ROOT}")
 
-add_subdirectory(rootIO)
+add_subdirectory(edm4dr)
 add_subdirectory(Detector)
 add_subdirectory(DRsim)
 add_subdirectory(Sim)
-add_subdirectory(Gen)
+#add_subdirectory(Gen)
 add_subdirectory(Reco)
-add_subdirectory(analysis)
+#add_subdirectory(analysis)

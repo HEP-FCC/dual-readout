@@ -22,8 +22,8 @@ target_link_libraries(
   P8ptcgen
   ${PYTHIA8_LIBRARIES}
   ${HEPMC3_LIBRARIES}
+  ${HEPMC3_ROOTIO_LIB}
   ${FASTJET_LIBRARY}
-  rootIO
   ${CMAKE_DL_LIBS}
 )
 
@@ -32,8 +32,8 @@ target_link_libraries(
   P8generic
   ${PYTHIA8_LIBRARIES}
   ${HEPMC3_LIBRARIES}
+  ${HEPMC3_ROOTIO_LIB}
   ${FASTJET_LIBRARY}
-  rootIO
   ${CMAKE_DL_LIBS}
 )
 

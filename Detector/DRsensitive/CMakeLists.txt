@@ -22,7 +22,8 @@ target_include_directories(ddDRsensitive PUBLIC
 target_link_libraries(
   ddDRsensitive
   ddDRsegmentation
-  rootIO
+  edm4dr
+  edm4dr::edm4drDict
   DD4hep::DDCore
   DD4hep::DDG4
 )
