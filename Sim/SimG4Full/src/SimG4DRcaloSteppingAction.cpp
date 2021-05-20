@@ -133,6 +133,7 @@ void SimG4DRcaloSteppingAction::saveLeakage(G4Track* track, G4StepPoint* prestep
   leakage.setPDG( track->GetDefinition()->GetPDGEncoding() );
   leakage.setGeneratorStatus(1); // leakages naturally belong to final states
   leakage.setCharge( track->GetDefinition()->GetPDGCharge() );
+  leakage.setMass( track->GetDefinition()->GetPDGMass()*CLHEP::MeV/CLHEP::GeV );
   leakage.setMomentum( { static_cast<float>(track->GetMomentum().x()*CLHEP::MeV/CLHEP::GeV),
                          static_cast<float>(track->GetMomentum().y()*CLHEP::MeV/CLHEP::GeV),
                          static_cast<float>(track->GetMomentum().z()*CLHEP::MeV/CLHEP::GeV) } );

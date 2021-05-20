@@ -38,6 +38,7 @@ void SimG4SaveMCParticles::saveOutput(const G4Event* aEvent) const {
       mcparticle.setPDG(ptc->GetPDGcode());
       mcparticle.setGeneratorStatus(1); // primary particles naturally belong to final states
       mcparticle.setCharge(ptc->GetCharge());
+      mcparticle.setMass( ptc->GetMass()*CLHEP::MeV/CLHEP::GeV );
       mcparticle.setMomentum( { static_cast<float>(ptc->GetPx()*CLHEP::MeV/CLHEP::GeV),
                                 static_cast<float>(ptc->GetPy()*CLHEP::MeV/CLHEP::GeV),
                                 static_cast<float>(ptc->GetPz()*CLHEP::MeV/CLHEP::GeV)} );
