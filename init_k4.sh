@@ -4,7 +4,7 @@ export WORKDIR=$PWD
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-cd $SCRIPT_DIR
+cd $SCRIPT_DIR/.. #FIXME libReco.so requires k4FWCore library to coincide with ../../k4FWCore/install/lib/libk4FWCorePlugins.so 
 
 if [ ! -d k4FWCore ]; then
   # FIXME LCG100 does not support k4FWCore and HSF spackages do not support ivy-bridge :(
@@ -16,7 +16,7 @@ if [ ! -d k4FWCore ]; then
   cmake -DCMAKE_INSTALL_PREFIX=../install .. && \
   make -j `getconf _NPROCESSORS_ONLN` && \
   make install
-  cd $SCRIPT_DIR
+  cd $SCRIPT_DIR/..
 fi
 
 cd k4FWCore/install
@@ -27,7 +27,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$k4FWCore_DIR/lib
 export PYTHONPATH=$PYTHONPATH:$k4FWCore_DIR/python
 export PATH=$PATH:$k4FWCore_DIR/bin
 
-cd $SCRIPT_DIR
+cd $SCRIPT_DIR/..
 
 if [ ! -d k4SimGeant4 ]; then
   git clone https://github.com/HEP-FCC/k4SimGeant4
@@ -38,7 +38,7 @@ if [ ! -d k4SimGeant4 ]; then
   cmake .. -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17
   make -j `getconf _NPROCESSORS_ONLN`
   make install
-  cd $SCRIPT_DIR
+  cd $SCRIPT_DIR/..
 fi
 
 cd k4SimGeant4/install
