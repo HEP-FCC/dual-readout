@@ -4,13 +4,13 @@ export WORKDIR=$PWD
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-cd $SCRIPT_DIR/.. #FIXME libReco.so requires k4FWCore library to coincide with ../../k4FWCore/install/lib/libk4FWCorePlugins.so 
+cd $SCRIPT_DIR/.. #FIXME libReco.so requires k4FWCore library to coincide with ../../k4FWCore/install/lib/libk4FWCorePlugins.so
 
 if [ ! -d k4FWCore ]; then
   # FIXME LCG100 does not support k4FWCore and HSF spackages do not support ivy-bridge :(
   git clone https://github.com/key4hep/k4FWCore
   cd k4FWCore
-  git checkout v01-00pre06
+  git checkout v01-00pre09
   mkdir build install
   cd build
   cmake -DCMAKE_INSTALL_PREFIX=../install .. && \
