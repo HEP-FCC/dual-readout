@@ -5,7 +5,7 @@ from Configurables import k4DataSvc
 dataservice = k4DataSvc("EventDataSvc", input="Ele20GeV_1_t0.root")
 
 from Configurables import PodioInput
-podioinput = PodioInput("PodioInput", collections = ["DRSimCalorimeterHits", "RawCalorimeterHits"], OutputLevel = DEBUG)
+podioinput = PodioInput("PodioInput", collections = ["DRSimCalorimeterHits", "RawCalorimeterHits", "SimCalorimeterHits"], OutputLevel = DEBUG)
 
 from Configurables import GeoSvc
 geoservice = GeoSvc(

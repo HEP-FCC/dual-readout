@@ -30,7 +30,7 @@ datatypes :
       - int wavlenSpectrum // wavelength spectrum of detected photons
 
     OneToOneRelations:
-      - edm4hep::RawCalorimeterHit edm4hepRawCalorimeterHit // link to edm4hep::RawCalorimeterHit
+      - edm4hep::RawCalorimeterHit edm4hepHit // link to edm4hep::RawCalorimeterHit
     ExtraCode:
       includes:
         "#include <edm4hep/RawCalorimeterHit.h>\n #include <edm4hep/RawCalorimeterHitCollection.h>"
@@ -43,8 +43,15 @@ datatypes :
       - edm4hep::Vector3f position // position corresponds to timeStruct
 
     OneToOneRelations:
-      - edm4hep::DRSimCalorimeterHit edm4hepDRSimCalorimeterHit // link to edm4hep::DRSimCalorimeterHit
-      - edm4hep::CalorimeterHit edm4hepCalorimeterHit // link to edm4hep::CalorimeterHit
+      - edm4hep::CalorimeterHit edm4hepHit // link to edm4hep::CalorimeterHit
     ExtraCode:
       includes:
-        "#include <edm4hep/DRSimCalorimeterHit.h>\n #include <edm4hep/DRSimCalorimeterHitCollection.h>\n #include <edm4hep/CalorimeterHit.h>\n #include <edm4hep/CalorimeterHitCollection.h>"
+        "#include <edm4hep/CalorimeterHit.h>\n #include <edm4hep/CalorimeterHitCollection.h>"
+
+  edm4hep::DRrecoCaloAssociation:
+    Description: "Association between a CaloHit and the corresponding raw CaloHit"
+    Author: "Sanghyun Ko"
+    Members: {}
+    OneToOneRelations:
+      - edm4hep::DRrecoCalorimeterHit rec // reference to the reconstructed hit
+      - edm4hep::DRSimCalorimeterHit sim // reference to the simulated hit
