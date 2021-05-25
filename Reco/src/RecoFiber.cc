@@ -15,13 +15,6 @@ DECLARE_COMPONENT(RecoFiber)
 RecoFiber::RecoFiber(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc), m_geoSvc("GeoSvc", aName), m_dataSvc("EventDataSvc", aName) {
   declareProperty("GeoSvc", m_geoSvc);
   declareProperty("EventDataSvc", m_dataSvc);
-  declareProperty("DRSimCalorimeterHits", m_DRsimHits, "DRsim hit collection (input)");
-  declareProperty("RawCalorimeterHits", m_rawHits, "Raw hit collection (input)");
-
-  declareProperty("ScintillationHits", m_sHits, "Scintillation hit collection (output)");
-  declareProperty("CherenkovHits", m_cHits, "Cherenkov hit collection (output)");
-  declareProperty("DRrecoScintillationHits", m_DRScintHits, "Extended scintillation hit collection (output)");
-  declareProperty("DRrecoCherenkovHits", m_DRCherenHits, "Extended Cherenkov hit collection (output)");
 
   pSeg = nullptr;
   pParamBase = nullptr;
@@ -68,6 +61,8 @@ StatusCode RecoFiber::initialize() {
 StatusCode RecoFiber::execute() {
   // input
   const edm4hep::DRSimCalorimeterHitCollection* inputs = m_DRsimHits.get();
+  const edm4hep::RawCalorimeterHitCollection* inputRaws = m_rawHits.get();
+  const edm4hep::SimCalorimeterHitCollection* inputSims = m_simHits.get();
 
   std::vector<float> timeBinLow {};
   std::vector<float> timeBinCenter {};
@@ -88,9 +83,12 @@ StatusCode RecoFiber::execute() {
   edm4hep::CalorimeterHitCollection* cherenHit = m_cHits.createAndPut();
   edm4hep::DRrecoCalorimeterHitCollection* DRscintHit = m_DRScintHits.createAndPut();
   edm4hep::DRrecoCalorimeterHitCollection* DRcherenHit = m_DRCherenHits.createAndPut();
+  edm4hep::DRrecoCaloAssociationCollection* scintAssocs = m_scintAssocs.createAndPut();
+  edm4hep::DRrecoCaloAssociationCollection* cherenAssocs = m_cherenAssocs.createAndPut();
 
-  for (auto& input : *inputs) {
-    auto& rawhit = input.getEdm4hepRawCalorimeterHit();
+  for (unsigned int idx = 0; idx < inputs->size(); idx++) {
+    auto input = inputs->at(idx);
+    auto& rawhit = input.getEdm4hepHit();
 
     auto cID = static_cast<dd4hep::DDSegmentation::CellID>( rawhit.getCellID() );
     int numEta = pSeg->numEta(cID);
@@ -101,11 +99,17 @@ StatusCode RecoFiber::execute() {
     if (pSeg->IsCerenkov(cID)) {
       auto hit = cherenHit->create();
       auto drHit = DRcherenHit->create();
+      auto assoc = cherenAssocs->create();
+      assoc.setRec(drHit);
+      assoc.setSim(input);
 
       add(drHit,hit,input,timeBinCenter,m_calibs.at(absNumEta).first);
     } else {
       auto hit = scintHit->create();
       auto drHit = DRscintHit->create();
+      auto assoc = scintAssocs->create();
+      assoc.setRec(drHit);
+      assoc.setSim(input);
 
       add(drHit,hit,input,timeBinCenter,m_calibs.at(absNumEta).second);
     }
@@ -122,20 +126,20 @@ StatusCode RecoFiber::finalize() {
 
 void RecoFiber::add(edm4hep::DRrecoCalorimeterHit& drHit, edm4hep::CalorimeterHit& hit, const edm4hep::DRSimCalorimeterHit& input,
                     const std::vector<float>& timeBinCenter, float calib) {
-  auto& rawhit = input.getEdm4hepRawCalorimeterHit();
+  auto& rawhit = input.getEdm4hepHit();
   auto cID = static_cast<dd4hep::DDSegmentation::CellID>(rawhit.getCellID());
 
   hit.setEnergy( static_cast<float>(rawhit.getAmplitude())/calib );
   hit.setPosition( getPosition(cID) );
+  hit.setCellID( rawhit.getCellID() );
   addToTimeStruct(drHit,input,timeBinCenter,calib);
 
-  drHit.setEdm4hepDRSimCalorimeterHit(input);
-  drHit.setEdm4hepCalorimeterHit(hit);
+  drHit.setEdm4hepHit(hit);
 }
 
 void RecoFiber::addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const edm4hep::DRSimCalorimeterHit& input,
                                 const std::vector<float>& timeBinCenter, float calib) {
-  auto cID = static_cast<dd4hep::DDSegmentation::CellID>(input.getEdm4hepRawCalorimeterHit().getCellID());
+  auto cID = static_cast<dd4hep::DDSegmentation::CellID>(input.getEdm4hepHit().getCellID());
   int numPhi = pSeg->numPhi( cID );
   auto towerPos = pParamBase->GetTowerPos(numPhi);
   auto waferPos = pParamBase->GetSipmLayerPos(numPhi);

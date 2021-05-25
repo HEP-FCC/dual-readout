@@ -81,7 +81,7 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
           addStruct( hit->GetTimeStruct(), std::bind( &edm4hep::DRSimCalorimeterHit::addToTimeStruct, &DRcaloHit, std::placeholders::_1 ) );
           addStruct( hit->GetWavlenSpectrum(), std::bind( &edm4hep::DRSimCalorimeterHit::addToWavlenSpectrum, &DRcaloHit, std::placeholders::_1 ) );
 
-          DRcaloHit.setEdm4hepRawCalorimeterHit( caloHit );
+          DRcaloHit.setEdm4hepHit( caloHit );
         }
       }
     }
