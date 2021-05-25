@@ -15,8 +15,10 @@ file(GLOB headers
 # FIXME Exclude RecoTower temporarily
 LIST(FILTER headers EXCLUDE REGEX RecoTower.h)
 LIST(FILTER sources EXCLUDE REGEX RecoTower.cc)
+LIST(FILTER headers EXCLUDE REGEX RecoStandalone.h)
+LIST(FILTER sources EXCLUDE REGEX RecoStandalone.cc)
 
-gaudi_add_module(Reco
+gaudi_add_module(DRreco
   SOURCES ${sources}
   LINK
   edm4dr
@@ -29,7 +31,14 @@ gaudi_add_module(Reco
   k4FWCore::k4Interface
 )
 
-add_library( DRcalo::Reco ALIAS Reco )
+add_executable(DRrecoExe Reco.cc ${PROJECT_SOURCE_DIR}/src/RecoStandalone.cc ${PROJECT_SOURCE_DIR}/include/RecoStandalone.h)
+
+target_link_libraries(DRrecoExe
+  DRcomponents
+  ddDRsegmentation
+  podio::podioRootIO
+  edm4dr
+)
 
 set(
   Reco_SCRIPTS
@@ -45,12 +54,17 @@ foreach(_script ${Reco_SCRIPTS})
   )
 endforeach()
 
-install(TARGETS Reco
+install(TARGETS DRreco
   EXPORT DRcaloRecoTargets
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
   COMPONENT dev
+)
+
+install(TARGETS DRrecoExe
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
+  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
 )
 
 install(FILES ${PROJECT_BINARY_DIR}/calib.csv DESTINATION .)
