@@ -27,7 +27,11 @@ datatypes :
     Author : "Sanghyun Ko"
     VectorMembers:
       - int timeStruct // time structure of detected photons
+      - float timeBegin // low edge of a time bin
+      - float timeEnd // high edge of a time bin
       - int wavlenSpectrum // wavelength spectrum of detected photons
+      - float wavlenBegin // low edge of a wavelength bin
+      - float wavlenEnd // high edge of a wavelength bin
 
     OneToOneRelations:
       - edm4hep::RawCalorimeterHit edm4hepHit // link to edm4hep::RawCalorimeterHit

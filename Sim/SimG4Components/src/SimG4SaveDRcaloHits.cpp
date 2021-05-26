@@ -61,8 +61,6 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
       if (std::find(m_readoutNames.begin(), m_readoutNames.end(), collect->GetName()) != m_readoutNames.end()) {
         size_t n_hit = collect->GetSize();
 
-        // dd4hep::DDSegmentation::GridDRcalo* segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(collect->GetName()).segmentation().segmentation());
-
         for (size_t iter_hit = 0; iter_hit < n_hit; iter_hit++) {
           hit = dynamic_cast<ddDRcalo::DRcaloSiPMHit*>(collect->GetHit(iter_hit));
 
@@ -70,16 +68,19 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
           caloHit.setCellID( static_cast<unsigned long long>(hit->GetSiPMnum()) );
           caloHit.setAmplitude( hit->GetPhotonCount() );
 
-          // auto globalPos = segmentation->position( hit->GetSiPMnum() );
-          // caloHit.setPosition( { static_cast<float>( globalPos.x() * CLHEP::millimeter/dd4hep::millimeter ),
-          //                        static_cast<float>( globalPos.y() * CLHEP::millimeter/dd4hep::millimeter ),
-          //                        static_cast<float>( globalPos.z() * CLHEP::millimeter/dd4hep::millimeter ) } );
-
           auto DRcaloHit = mDRsimCaloHits->create();
-          checkMetadata(hit);
 
-          addStruct( hit->GetTimeStruct(), std::bind( &edm4hep::DRSimCalorimeterHit::addToTimeStruct, &DRcaloHit, std::placeholders::_1 ) );
-          addStruct( hit->GetWavlenSpectrum(), std::bind( &edm4hep::DRSimCalorimeterHit::addToWavlenSpectrum, &DRcaloHit, std::placeholders::_1 ) );
+          for (auto& timeStruct : hit->GetTimeStruct()) {
+            DRcaloHit.addToTimeStruct(timeStruct.second);
+            DRcaloHit.addToTimeBegin(timeStruct.first.first);
+            DRcaloHit.addToTimeEnd(timeStruct.first.second);
+          }
+
+          for (auto& wavlen : hit->GetWavlenSpectrum()) {
+            DRcaloHit.addToWavlenSpectrum(wavlen.second);
+            DRcaloHit.addToWavlenBegin(wavlen.first.first);
+            DRcaloHit.addToWavlenEnd(wavlen.first.second);
+          }
 
           DRcaloHit.setEdm4hepHit( caloHit );
         }
@@ -88,25 +89,4 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
   }
 
   return;
-}
-
-void SimG4SaveDRcaloHits::checkMetadata(const ddDRcalo::DRcaloSiPMHit* hit) const {
-  auto& colMD = pStore->getCollectionMetaData( mDRsimCaloHits->getID() );
-  if ( !colMD.getStringVal("Producer").empty() ) return;
-
-  auto& timeStruct = hit->GetTimeStruct();
-  std::vector<float> timeBins;
-  std::for_each( timeStruct.begin(), timeStruct.end(), [&](const std::pair< std::pair<float,float>, int >& element) { timeBins.push_back(element.first.first); } );
-
-  auto& wavlenSpectrum = hit->GetWavlenSpectrum();
-  std::vector<float> waveBins;
-  std::for_each( wavlenSpectrum.begin(), wavlenSpectrum.end(), [&](const std::pair< std::pair<float,float>, int >& element) { waveBins.push_back(element.first.first); } );
-
-  colMD.setValues( "timeBins", timeBins );
-  colMD.setValues( "waveBins", waveBins );
-  colMD.setValue( "Producer", "SimG4SaveDRcaloHits" );
-}
-
-void SimG4SaveDRcaloHits::addStruct( const std::map< std::pair<float,float>, int >& structData, std::function<void(int)> addTo ) const {
-  std::for_each( structData.begin(), structData.end(), [&](const std::pair< std::pair<float,float>, int >& element) { addTo(element.second); } );
 }
