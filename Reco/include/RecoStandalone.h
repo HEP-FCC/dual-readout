@@ -30,10 +30,8 @@ public:
   void readCSV(std::string filename);
 
 private:
-  void add(edm4hep::DRrecoCalorimeterHit& drHit, edm4hep::CalorimeterHit& hit, const edm4hep::DRSimCalorimeterHit& input,
-           const std::vector<float>& timeBinCenter, float calib);
-  void addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const edm4hep::DRSimCalorimeterHit& input,
-                       const std::vector<float>& timeBinCenter, float calib);
+  void add(edm4hep::DRrecoCalorimeterHit& drHit, edm4hep::CalorimeterHit& hit, const edm4hep::DRSimCalorimeterHit& input, float calib);
+  void addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const edm4hep::DRSimCalorimeterHit& input, float calib);
   edm4hep::Vector3f getPosition(dd4hep::DDSegmentation::CellID& cID);
 
   template <typename T>
