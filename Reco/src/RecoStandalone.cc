@@ -84,20 +84,6 @@ void RecoStandalone::execute() {
     isFirstEvent = false;
   }
 
-  std::vector<float> timeBinLow {};
-  std::vector<float> timeBinCenter {};
-
-  // #FIXME read timing bins from podio metadata
-  timeBinLow.push_back(0.);
-  float timeStart = 10.;
-
-  for (int bin = 0; bin < 600; bin++)
-    timeBinLow.push_back(timeStart + static_cast<float>(bin)*0.1);
-
-  for (unsigned int bin = 0; bin < timeBinLow.size()-1; bin++)
-    timeBinCenter.push_back( ( timeBinLow.at(bin)+timeBinLow.at(bin+1) )/2. );
-  timeBinCenter.push_back(99999.); // # FIXME hardcoded overflow bin
-
   edm4hep::CalorimeterHitCollection* scintHit = m_sHits;
   edm4hep::CalorimeterHitCollection* cherenHit = m_cHits;
   edm4hep::DRrecoCalorimeterHitCollection* DRscintHit = m_DRScintHits;
@@ -122,7 +108,7 @@ void RecoStandalone::execute() {
       assoc.setRec(drHit);
       assoc.setSim(input);
 
-      add(drHit,hit,input,timeBinCenter,m_calibs.at(absNumEta).first);
+      add(drHit,hit,input,m_calibs.at(absNumEta).first);
     } else {
       auto hit = scintHit->create();
       auto drHit = DRscintHit->create();
@@ -130,7 +116,7 @@ void RecoStandalone::execute() {
       assoc.setRec(drHit);
       assoc.setSim(input);
 
-      add(drHit,hit,input,timeBinCenter,m_calibs.at(absNumEta).second);
+      add(drHit,hit,input,m_calibs.at(absNumEta).second);
     }
   }
 
@@ -145,21 +131,19 @@ void RecoStandalone::finalize() {
   return;
 }
 
-void RecoStandalone::add(edm4hep::DRrecoCalorimeterHit& drHit, edm4hep::CalorimeterHit& hit, const edm4hep::DRSimCalorimeterHit& input,
-                    const std::vector<float>& timeBinCenter, float calib) {
+void RecoStandalone::add(edm4hep::DRrecoCalorimeterHit& drHit, edm4hep::CalorimeterHit& hit, const edm4hep::DRSimCalorimeterHit& input, float calib) {
   auto& rawhit = input.getEdm4hepHit();
   auto cID = static_cast<dd4hep::DDSegmentation::CellID>(rawhit.getCellID());
 
   hit.setEnergy( static_cast<float>(rawhit.getAmplitude())/calib );
   hit.setPosition( getPosition(cID) );
   hit.setCellID( rawhit.getCellID() );
-  addToTimeStruct(drHit,input,timeBinCenter,calib);
+  addToTimeStruct(drHit,input,calib);
 
   drHit.setEdm4hepHit(hit);
 }
 
-void RecoStandalone::addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const edm4hep::DRSimCalorimeterHit& input,
-                                const std::vector<float>& timeBinCenter, float calib) {
+void RecoStandalone::addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const edm4hep::DRSimCalorimeterHit& input, float calib) {
   auto cID = static_cast<dd4hep::DDSegmentation::CellID>(input.getEdm4hepHit().getCellID());
   int numPhi = pSeg->numPhi( cID );
   auto towerPos = pParamBase->GetTowerPos(numPhi);
@@ -176,7 +160,9 @@ void RecoStandalone::addToTimeStruct(edm4hep::DRrecoCalorimeterHit& drHit, const
   for (unsigned int bin = 0; bin < input.timeStruct_size(); bin++) {
     float edep = static_cast<float>( input.getTimeStruct(bin) )/calib;
 
-    float numerator = timeBinCenter.at(bin)*dd4hep::nanosecond/CLHEP::nanosecond - std::sqrt(sipmPos.Mag2())/dd4hep::c_light;
+    float timeBin = (input.getTimeBegin(bin)+input.getTimeEnd(bin))*dd4hep::nanosecond/2.;
+
+    float numerator = timeBin - std::sqrt(sipmPos.Mag2())/dd4hep::c_light;
     auto pos = sipmPos - ( numerator/invVminusInvC )*fiberUnit;
     edm4hep::Vector3f posEdm(pos.x() * CLHEP::millimeter/dd4hep::millimeter,
                              pos.y() * CLHEP::millimeter/dd4hep::millimeter,
