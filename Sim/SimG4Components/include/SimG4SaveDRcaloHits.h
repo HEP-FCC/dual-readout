@@ -23,9 +23,6 @@ public:
   void saveOutput(const G4Event* aEvent) const;
 
 private:
-  void addStruct( const std::map< std::pair<float,float>, int >& structData, std::function<void(int)> addTo ) const;
-  void checkMetadata(const ddDRcalo::DRcaloSiPMHit* hit) const;
-
   /// Pointer to the geometry service
   GeoSvc* m_geoSvc;
 
