@@ -42,6 +42,8 @@ datatypes :
   edm4hep::DRrecoCalorimeterHit:
     Description: "Reconstructed DR calorimeter hit"
     Author : "Sanghyun Ko"
+    Members:
+      - int validTimeStruct // validness of stored time structure (position)
     VectorMembers:
       - float timeStruct // time structure of reconstructed energy
       - edm4hep::Vector3f position // position corresponds to timeStruct
