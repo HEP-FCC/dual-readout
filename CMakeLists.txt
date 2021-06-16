@@ -18,6 +18,7 @@ find_package(FastJet)
 find_package(Gaudi REQUIRED)
 find_package(k4FWCore REQUIRED)
 find_package(k4SimGeant4 REQUIRED)
+find_package(sipm REQUIRED)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -50,6 +51,7 @@ add_subdirectory(edm4dr)
 add_subdirectory(Detector)
 add_subdirectory(DRsim)
 add_subdirectory(Sim)
+add_subdirectory(Digi)
 #add_subdirectory(Gen)
 add_subdirectory(Reco)
 #add_subdirectory(analysis)
