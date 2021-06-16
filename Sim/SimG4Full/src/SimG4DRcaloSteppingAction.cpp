@@ -7,7 +7,7 @@
 #include "G4ParticleTypes.hh"
 #include "G4VProcess.hh"
 
-#include "G4SystemOfUnits.hh"
+#include "CLHEP/Units/SystemOfUnits.h"
 #include "DD4hep/DD4hepUnits.h"
 
 #include <stdexcept>
