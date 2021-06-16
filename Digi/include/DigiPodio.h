@@ -2,8 +2,7 @@
 #define DigiPodio_h 1
 
 #include "edm4hep/RawCalorimeterHitCollection.h"
-#include "edm4hep/DRSimCalorimeterHitCollection.h"
-#include "edm4hep/SimCalorimeterHitCollection.h"
+#include "edm4hep/SparseVectorCollection.h"
 #include "edm4hep/EventHeaderCollection.h"
 
 #include "podio/ROOTWriter.h"
@@ -39,7 +38,7 @@ private:
   std::unique_ptr<podio::EventStore> m_store;
 
   edm4hep::RawCalorimeterHitCollection* m_digiHits;
-  edm4hep::DRSimCalorimeterHitCollection* m_DRdigiHits;
+  edm4hep::SparseVectorCollection* m_waveforms;
 
   std::string m_filenameIn;
   std::string m_filenameOut;

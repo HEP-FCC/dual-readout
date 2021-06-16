@@ -19,11 +19,12 @@ void drc::DigiPodio::initialize() {
 
   m_writer->registerForWrite("SimCalorimeterHits");
   m_writer->registerForWrite("RawCalorimeterHits");
-  m_writer->registerForWrite("DRSimCalorimeterHits");
+  m_writer->registerForWrite("RawTimeStructs");
+  m_writer->registerForWrite("RawWavlenStructs");
   m_writer->registerForWrite("EventHeader");
 
   registerForWrite<edm4hep::RawCalorimeterHitCollection>(m_digiHits,"DigiCalorimeterHits");
-  registerForWrite<edm4hep::DRSimCalorimeterHitCollection>(m_DRdigiHits,"DRdigiCalorimeterHits");
+  registerForWrite<edm4hep::SparseVectorCollection>(m_waveforms,"DigiWaveforms");
 
   m_sensor = std::make_unique<sipm::SiPMSensor>();
   m_sensor->properties().setDcr(m_Dcr);
@@ -39,26 +40,35 @@ void drc::DigiPodio::initialize() {
 }
 
 void drc::DigiPodio::execute() {
-  auto& inputs_ = m_store->get<edm4hep::DRSimCalorimeterHitCollection>("DRSimCalorimeterHits");
-  const edm4hep::DRSimCalorimeterHitCollection* inputs = &inputs_;
+  auto& inputs = m_store->get<edm4hep::SparseVectorCollection>("RawTimeStructs");
 
   if (!isFirstEvent) {
     create<edm4hep::RawCalorimeterHitCollection>(m_digiHits,"DigiCalorimeterHits");
-    create<edm4hep::DRSimCalorimeterHitCollection>(m_DRdigiHits,"DRdigiCalorimeterHits");
+    create<edm4hep::SparseVectorCollection>(m_waveforms,"DigiWaveforms");
   } else {
     isFirstEvent = false;
   }
 
-  for (unsigned int idx = 0; idx < inputs->size(); idx++) {
-    auto input = inputs->at(idx);
-    auto& rawhit = input.getEdm4hepHit();
+  // assume same collection (OneToOneRelation)
+  edm4hep::RawCalorimeterHitCollection* rawHits = nullptr;
+
+  for (unsigned int idx = 0; idx < inputs.size(); idx++) {
+    const auto& input = inputs.at(idx);
+
+    if (idx==0)
+      rawHits = dynamic_cast<edm4hep::RawCalorimeterHitCollection*>(m_store->getFast(inputs.at(idx).getAssocObj().collectionID));
+
+    if (rawHits==nullptr)
+      throw std::runtime_error("cannot find corresponding RawCalorimeterHitCollection for RawTimeStructs!");
+
+    const auto& rawhit = rawHits->at(inputs.at(idx).getAssocObj().index);
 
     std::vector<double> times;
     times.reserve( rawhit.getAmplitude() );
 
-    for (unsigned int bin = 0; bin < input.timeStruct_size(); bin++) {
-      int counts = input.getTimeStruct(bin);
-      double timeBin = (input.getTimeBegin(bin)+input.getTimeEnd(bin))/2.;
+    for (unsigned int bin = 0; bin < input.contents_size(); bin++) {
+      int counts = static_cast<int>( input.getContents(bin) );
+      double timeBin = input.getCenters(bin);
 
       for (int num = 0; num < counts; num++)
         times.emplace_back(timeBin);
@@ -69,7 +79,7 @@ void drc::DigiPodio::execute() {
     m_sensor->runEvent();        // Runs the simulation
 
     auto digiHit = m_digiHits->create();
-    auto DRdigiHit = m_DRdigiHits->create();
+    auto waveforms = m_waveforms->create();
 
     sipm::SiPMAnalogSignal anaSignal = m_sensor->signal();
     sipm::SiPMDigitalSignal digiSignal = m_adc->digitize(anaSignal);
@@ -80,7 +90,8 @@ void drc::DigiPodio::execute() {
     digiHit.setAmplitude( integral );
     digiHit.setCellID( rawhit.getCellID() );
     digiHit.setTimeStamp( toa );
-    DRdigiHit.setEdm4hepHit(digiHit);
+    waveforms.setAssocObj( edm4hep::ObjectID( digiHit.getObjectID() ) );
+    waveforms.setSampling( m_sampling );
 
     std::vector<int> waveform = digiSignal.waveform();
 
@@ -92,9 +103,8 @@ void drc::DigiPodio::execute() {
       float tStart = static_cast<float>(bin)*m_sampling;
       float tEnd = static_cast<float>(bin+1)*m_sampling;
 
-      DRdigiHit.addToTimeStruct( amp );
-      DRdigiHit.addToTimeBegin( tStart );
-      DRdigiHit.addToTimeEnd( tEnd );
+      waveforms.addToContents( amp );
+      waveforms.addToCenters( (tStart+tEnd)/2. );
     }
   }
 

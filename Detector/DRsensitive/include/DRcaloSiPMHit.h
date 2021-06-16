@@ -9,14 +9,13 @@
 #include "DD4hep/Objects.h"
 #include "DD4hep/Segmentations.h"
 
-namespace ddDRcalo {
+namespace drc {
   class DRcaloSiPMHit : public G4VHit {
   public:
-    typedef std::pair<float,float> hitRange;
-    typedef std::map<hitRange, int> DRsimTimeStruct;
-    typedef std::map<hitRange, int> DRsimWavlenSpectrum;
+    typedef std::map<float, int> DRsimTimeStruct;
+    typedef std::map<float, int> DRsimWavlenSpectrum;
 
-    DRcaloSiPMHit(G4int wavBin, G4int timeBin);
+    DRcaloSiPMHit(float wavSampling, float timeSampling);
     DRcaloSiPMHit(const DRcaloSiPMHit &right);
     virtual ~DRcaloSiPMHit();
 
@@ -35,19 +34,22 @@ namespace ddDRcalo {
     void SetSiPMnum(dd4hep::DDSegmentation::CellID n) { fSiPMnum = n; }
     const dd4hep::DDSegmentation::CellID& GetSiPMnum() const { return fSiPMnum; }
 
-    void CountWavlenSpectrum(hitRange range);
+    void CountWavlenSpectrum(float center);
     const DRsimWavlenSpectrum& GetWavlenSpectrum() const { return fWavlenSpectrum; }
 
-    void CountTimeStruct(hitRange range);
+    void CountTimeStruct(float center);
     const DRsimTimeStruct& GetTimeStruct() const { return fTimeStruct; }
+
+    float GetSamplingTime() { return mTimeSampling; }
+    float GetSamplingWavlen() { return mWavSampling; }
 
   private:
     dd4hep::DDSegmentation::CellID fSiPMnum;
     unsigned long fPhotons;
     DRsimWavlenSpectrum fWavlenSpectrum;
     DRsimTimeStruct fTimeStruct;
-    G4int fWavBin;
-    G4int fTimeBin;
+    float mWavSampling;
+    float mTimeSampling;
   };
 
   typedef G4THitsCollection<DRcaloSiPMHit> DRcaloSiPMHitsCollection;

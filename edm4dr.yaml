@@ -20,44 +20,28 @@ components:
       float operator[](unsigned i) const { return *( &x + i ) ; }\n
       "
 
+  #------ ObjectID helper struct for references/relations
+  edm4hep::ObjectID:
+    Members:
+      - int index
+      - int collectionID
+    ExtraCode :
+      includes: "#include <podio/ObjectID.h>\n"
+      declaration: "
+      ObjectID() = default;\n
+      ObjectID(const podio::ObjectID& id ): index(id.index), collectionID(id.collectionID) {}\n
+    "
+
 datatypes :
-  #------------- SimCalorimeterHit
-  edm4hep::DRSimCalorimeterHit:
-    Description: "Simulated DR calorimeter hit"
-    Author : "Sanghyun Ko"
-    VectorMembers:
-      - int timeStruct // time structure of detected photons
-      - float timeBegin // low edge of a time bin
-      - float timeEnd // high edge of a time bin
-      - int wavlenSpectrum // wavelength spectrum of detected photons
-      - float wavlenBegin // low edge of a wavelength bin
-      - float wavlenEnd // high edge of a wavelength bin
-
-    OneToOneRelations:
-      - edm4hep::RawCalorimeterHit edm4hepHit // link to edm4hep::RawCalorimeterHit
-    ExtraCode:
-      includes:
-        "#include <edm4hep/RawCalorimeterHit.h>\n #include <edm4hep/RawCalorimeterHitCollection.h>"
-
-  edm4hep::DRrecoCalorimeterHit:
-    Description: "Reconstructed DR calorimeter hit"
+  edm4hep::SparseVector:
+    Description: "User class to store sparse vector"
     Author : "Sanghyun Ko"
     Members:
-      - int validTimeStruct // validness of stored time structure (position)
+      - float sampling // size of a bin
+      - edm4hep::ObjectID assocObj // associated object ID
     VectorMembers:
-      - float timeStruct // time structure of reconstructed energy
-      - edm4hep::Vector3f position // position corresponds to timeStruct
-
-    OneToOneRelations:
-      - edm4hep::CalorimeterHit edm4hepHit // link to edm4hep::CalorimeterHit
+      - float centers  // center value of the bin
+      - float contents // content of the vector within [ center-sampling/2., center+sampling/2. )
     ExtraCode:
       includes:
-        "#include <edm4hep/CalorimeterHit.h>\n #include <edm4hep/CalorimeterHitCollection.h>"
-
-  edm4hep::DRrecoCaloAssociation:
-    Description: "Association between a CaloHit and the corresponding raw CaloHit"
-    Author: "Sanghyun Ko"
-    Members: {}
-    OneToOneRelations:
-      - edm4hep::DRrecoCalorimeterHit rec // reference to the reconstructed hit
-      - edm4hep::DRSimCalorimeterHit sim // reference to the simulated hit
+        "#include <edm4hep/ObjectID.h>"

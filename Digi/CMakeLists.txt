@@ -15,7 +15,7 @@ target_include_directories(DRdigi PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-set_target_properties(DRdigi PROPERTIES PUBLIC_HEADER ${headers})
+set_target_properties(DRdigi PROPERTIES PUBLIC_HEADER "${headers}")
 
 target_link_libraries(DRdigi
   podio::podioRootIO
