@@ -11,7 +11,7 @@
 // Data model
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/RawCalorimeterHitCollection.h"
-#include "edm4hep/DRSimCalorimeterHitCollection.h"
+#include "edm4hep/SparseVectorCollection.h"
 
 class SimG4SaveDRcaloHits {
 public:
@@ -33,7 +33,8 @@ private:
   podio::ROOTWriter* pWriter;
 
   edm4hep::RawCalorimeterHitCollection* mRawCaloHits;
-  edm4hep::DRSimCalorimeterHitCollection* mDRsimCaloHits;
+  edm4hep::SparseVectorCollection* mTimeStruct;
+  edm4hep::SparseVectorCollection* mWavlenStruct;
 };
 
 #endif

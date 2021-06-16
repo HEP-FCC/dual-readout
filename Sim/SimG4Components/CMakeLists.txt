@@ -1,24 +1,22 @@
 project(DRSimG4Components)
 
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-
-include(${Geant4_USE_FILE})
-
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
 file(GLOB sources
   ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
 
-add_library(DRSimG4Components SHARED ${sources})
-target_include_directories(
-  DRSimG4Components
-  PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${DD4hep_DIR}/include
+file(GLOB headers
+  ${PROJECT_SOURCE_DIR}/include/*.h
 )
+
+add_library(DRSimG4Components SHARED ${sources} ${headers})
+
+target_include_directories(DRSimG4Components
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
+set_target_properties(DRSimG4Components PROPERTIES PUBLIC_HEADER "${headers}")
 
 target_link_libraries(
   DRSimG4Components
@@ -26,14 +24,14 @@ target_link_libraries(
   ${Geant4_LIBRARIES}
   DD4hep::DDCore
   DD4hep::DDG4
-  ddDRsensitive
+  DRsensitive
   ddDRsegmentation
   DRcomponents
   podio::podioRootIO
   edm4dr
 )
 
-install(TARGETS DRSimG4Components
+install(TARGETS DRSimG4Components EXPORT SimTargets
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
 )
