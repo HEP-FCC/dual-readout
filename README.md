@@ -7,6 +7,7 @@ After fetching the repository, do
 
     source init_lcg.sh
     source init_k4.sh
+    source init_sipm.sh
     mkdir build
     cd build
     cmake ..
@@ -35,14 +36,18 @@ generates `<filename>_<seed>.root`.
 #### 1. GEANT4 standalone particle gun
 In the install directory,
 
-    ./bin/DRsim <run_macro> <filenumber> <filename>
+    ./bin/DRsim <etc/run_macro> <filenumber> <filename>
 
 generates, `<filename>_<filenumber>.root`
 
 #### 2. Using HepMC input
 This requires the ROOT file generated from `Gen`. Assuming the name of the file `<filename>_<filenumber>.root`,
 
-    ./bin/DRsim run_hepmc.mac <filenumber> <filename>
+    ./bin/DRsim etc/run_hepmc.mac <filenumber> <filename>
+
+### Digitization
+
+    ./bin/DRdigi `<inputfile>.root <outputfile>.root`
 
 ### Reconstruction
 This requires the ROOT file generated from `DRsim`. The default `Gaudi` configuration template can be found on `test/runDRcaloReco.py`. After modifying the configuration based on your needs, run

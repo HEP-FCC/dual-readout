@@ -6,7 +6,7 @@
 // DD4hep
 #include "DDG4/Geant4Hits.h"
 
-#include "G4SystemOfUnits.hh"
+#include "CLHEP/Units/SystemOfUnits.h"
 #include "DD4hep/DD4hepUnits.h"
 
 #include <stdexcept>

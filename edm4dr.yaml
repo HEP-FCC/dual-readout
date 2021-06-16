@@ -42,6 +42,3 @@ datatypes :
     VectorMembers:
       - float centers  // center value of the bin
       - float contents // content of the vector within [ center-sampling/2., center+sampling/2. )
-    ExtraCode:
-      includes:
-        "#include <edm4hep/ObjectID.h>"

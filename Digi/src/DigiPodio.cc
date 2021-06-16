@@ -55,11 +55,15 @@ void drc::DigiPodio::execute() {
   for (unsigned int idx = 0; idx < inputs.size(); idx++) {
     const auto& input = inputs.at(idx);
 
-    if (idx==0)
-      rawHits = dynamic_cast<edm4hep::RawCalorimeterHitCollection*>(m_store->getFast(inputs.at(idx).getAssocObj().collectionID));
+    if (idx==0) {
+      podio::CollectionBase* collBase = nullptr;
+      bool isOk = m_store->get(inputs.at(idx).getAssocObj().collectionID,collBase);
 
-    if (rawHits==nullptr)
-      throw std::runtime_error("cannot find corresponding RawCalorimeterHitCollection for RawTimeStructs!");
+      if (!isOk)
+        throw std::runtime_error("cannot find corresponding RawCalorimeterHitCollection for RawTimeStructs!");
+
+      rawHits = dynamic_cast<edm4hep::RawCalorimeterHitCollection*>(collBase);
+    }
 
     const auto& rawhit = rawHits->at(inputs.at(idx).getAssocObj().index);
 
@@ -89,7 +93,7 @@ void drc::DigiPodio::execute() {
 
     digiHit.setAmplitude( integral );
     digiHit.setCellID( rawhit.getCellID() );
-    digiHit.setTimeStamp( toa );
+    digiHit.setTimeStamp( static_cast<int>(toa/m_sampling) );
     waveforms.setAssocObj( edm4hep::ObjectID( digiHit.getObjectID() ) );
     waveforms.setSampling( m_sampling );
 
