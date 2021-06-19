@@ -11,7 +11,7 @@ dd4hep_add_plugin(ddDRcalo SOURCES src/*.cpp USES
   ROOT::Geom
   ROOT::GenVector
   ROOT::MathCore
-  ddDRsegmentation
+  DRsegmentation
 )
 
 install(TARGETS ddDRcalo
