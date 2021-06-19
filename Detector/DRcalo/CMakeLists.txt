@@ -1,5 +1,9 @@
 project(ddDRcalo)
 
+file(GLOB headers
+  ${PROJECT_SOURCE_DIR}/include/*.h
+)
+
 dd4hep_add_plugin(ddDRcalo SOURCES src/*.cpp USES
   DD4hep::DDCore
   DD4hep::DDCond
@@ -15,7 +19,7 @@ target_include_directories(ddDRcalo PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-set_target_properties(DRsensitive PROPERTIES PUBLIC_HEADER "${headers}")
+set_target_properties(ddDRcalo PROPERTIES PUBLIC_HEADER "${headers}")
 
 install(TARGETS ddDRcalo
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib

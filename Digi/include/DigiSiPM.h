@@ -45,7 +45,7 @@ private:
 
   // integration parameters
   Gaudi::Property<double> m_gateStart{this, "gateStart", 10., "Integration gate starting time in ns"};
-  Gaudi::Property<double> m_gateEnd{this, "gateEnd", 250., "Integration gate end time in ns"};
+  Gaudi::Property<double> m_gateL{this, "gateLength", 250., "Integration gate length in ns"};
   Gaudi::Property<int> m_thres{this, "threshold", static_cast<int>( 0.5 * (std::pow(10.,20./20.) * std::pow(2., 16.) / std::pow(2., 15.) ) ), "Integration threshold"};
 };
 

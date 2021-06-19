@@ -57,8 +57,8 @@ StatusCode DigiSiPM::execute() {
     sipm::SiPMAnalogSignal anaSignal = m_sensor->signal();
     sipm::SiPMDigitalSignal digiSignal = m_adc->digitize(anaSignal);
 
-    int integral = digiSignal.integral(m_gateStart,m_gateEnd,m_thres);   // (intStart, intGate, threshold)
-    double toa = digiSignal.toa(m_gateStart,m_gateEnd,m_thres);          // (intStart, intGate, threshold)
+    int integral = digiSignal.integral(m_gateStart,m_gateL,m_thres);   // (intStart, intGate, threshold)
+    double toa = digiSignal.toa(m_gateStart,m_gateL,m_thres);          // (intStart, intGate, threshold)
 
     digiHit.setAmplitude( integral );
     digiHit.setCellID( rawhit.getCellID() );
