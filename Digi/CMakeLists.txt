@@ -1,14 +1,21 @@
 project(Digi)
 
 file(GLOB sources
-  ${PROJECT_SOURCE_DIR}/src/*.cc
+  ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
 
 file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
-add_executable(DRdigi Digi.cc ${sources} ${headers})
+gaudi_add_module(DRdigi
+  SOURCES ${sources}
+  LINK
+  edm4dr
+  sipm::sipm
+  Gaudi::GaudiKernel
+  k4FWCore::k4FWCore
+)
 
 target_include_directories(DRdigi PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -17,13 +24,17 @@ target_include_directories(DRdigi PUBLIC
 
 set_target_properties(DRdigi PROPERTIES PUBLIC_HEADER "${headers}")
 
-target_link_libraries(DRdigi
-  podio::podioRootIO
-  edm4dr
-  sipm::sipm
+file(GLOB scripts
+  ${PROJECT_SOURCE_DIR}/test/*.py
 )
 
+file(COPY ${scripts} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
+
 install(TARGETS DRdigi
+  EXPORT DigiTargets
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
 )
+
+install(FILES ${scripts} DESTINATION test)
