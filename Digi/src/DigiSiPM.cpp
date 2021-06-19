@@ -73,8 +73,8 @@ StatusCode DigiSiPM::execute() {
 
       if (amp < m_thres) continue;
 
-      float tStart = static_cast<float>(bin)*m_sampling;
-      float tEnd = static_cast<float>(bin+1)*m_sampling;
+      double tStart = static_cast<double>(bin)*m_sampling;
+      double tEnd = static_cast<double>(bin+1)*m_sampling;
 
       waveform.addToContents( amp );
       waveform.addToCenters( (tStart+tEnd)/2. );

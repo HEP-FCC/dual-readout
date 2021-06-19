@@ -18,7 +18,7 @@ gaudi_add_module(DRreco
   SOURCES ${sources}
   LINK
   edm4dr
-  ddDRsegmentation
+  DRsegmentation
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore
 )

@@ -23,7 +23,7 @@ target_link_libraries(
   ${Geant4_LIBRARIES}
   DD4hep::DDCore
   DD4hep::DDG4
-  ddDRsegmentation
+  DRsegmentation
   DRcomponents
   podio::podioRootIO
   edm4dr
