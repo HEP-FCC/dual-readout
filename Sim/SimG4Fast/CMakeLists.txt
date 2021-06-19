@@ -1,19 +1,22 @@
 project(DRSimG4Fast)
 
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-
-include(${Geant4_USE_FILE})
-
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
 file(GLOB sources
   ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
 
-add_library(DRSimG4Fast SHARED ${sources})
-target_include_directories(DRSimG4Fast PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${DD4hep_DIR}/include)
+file(GLOB headers
+  ${PROJECT_SOURCE_DIR}/include/*.h
+)
+
+add_library(DRSimG4Fast SHARED ${sources} ${headers})
+
+target_include_directories(DRSimG4Fast PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
+set_target_properties(DRSimG4Fast PROPERTIES PUBLIC_HEADER "${headers}")
+
 target_link_libraries(
   DRSimG4Fast
   ${Geant4_LIBRARIES}

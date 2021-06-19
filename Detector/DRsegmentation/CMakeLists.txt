@@ -15,7 +15,7 @@ target_include_directories(DRsegmentation PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-set_target_properties(DRsensitive PROPERTIES PUBLIC_HEADER "${headers}")
+set_target_properties(DRsegmentation PROPERTIES PUBLIC_HEADER "${headers}")
 
 target_link_libraries(
   DRsegmentation
