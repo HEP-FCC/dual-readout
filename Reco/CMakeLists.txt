@@ -1,11 +1,7 @@
 project(Reco)
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
 file(GLOB sources
-  ${PROJECT_SOURCE_DIR}/src/*.cc
+  ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
 
 file(GLOB headers
@@ -22,50 +18,29 @@ gaudi_add_module(DRreco
   SOURCES ${sources}
   LINK
   edm4dr
-  edm4dr::edm4drDict
   ddDRsegmentation
   Gaudi::GaudiKernel
-  Gaudi::GaudiAlgLib
   k4FWCore::k4FWCore
-  k4FWCore::k4FWCorePlugins
-  k4FWCore::k4Interface
 )
 
-add_executable(DRrecoExe Reco.cc ${PROJECT_SOURCE_DIR}/src/RecoStandalone.cc ${PROJECT_SOURCE_DIR}/include/RecoStandalone.h)
-
-target_link_libraries(DRrecoExe
-  DRcomponents
-  ddDRsegmentation
-  podio::podioRootIO
-  edm4dr
+target_include_directories(DRreco PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
 )
 
-set(
-  Reco_SCRIPTS
-  calib.csv
-  test/runDRcaloReco.py
-)
+set_target_properties(DRreco PROPERTIES PUBLIC_HEADER "${headers}")
 
-foreach(_script ${Reco_SCRIPTS})
-  configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
-    COPYONLY
-  )
-endforeach()
+file(GLOB scripts ${PROJECT_SOURCE_DIR}/test/*.py)
+
+file(COPY ${scripts} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
+file(COPY calib.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 install(TARGETS DRreco
-  EXPORT DRcaloRecoTargets
+  EXPORT RecoTargets
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
-  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-  COMPONENT dev
-)
-
-install(TARGETS DRrecoExe
-  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
 )
 
-install(FILES ${PROJECT_BINARY_DIR}/calib.csv DESTINATION .)
-install(FILES ${PROJECT_BINARY_DIR}/test/runDRcaloReco.py DESTINATION test)
+install(FILES ${scripts} DESTINATION test)
+install(FILES calib.csv DESTINATION ${CMAKE_INSTALL_PREFIX})
