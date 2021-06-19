@@ -2,31 +2,43 @@ from Gaudi.Configuration import *
 from Configurables import ApplicationMgr
 
 from Configurables import k4DataSvc
-dataservice = k4DataSvc("EventDataSvc", input="Ele20GeV_1_t0.root")
+dataservice = k4DataSvc("EventDataSvc", input="digi.root")
 
 from Configurables import PodioInput
-podioinput = PodioInput("PodioInput", collections = ["DRSimCalorimeterHits", "RawCalorimeterHits", "SimCalorimeterHits"], OutputLevel = DEBUG)
+podioinput = PodioInput("PodioInput",
+  collections = [
+    "DigiCalorimeterHits",
+    "DigiWaveforms",
+    "RawTimeStructs",
+    "RawCalorimeterHits",
+    "SimCalorimeterHits",
+    "RawWavlenStructs",
+    "MCParticles",
+    "Leakages"
+  ],
+  OutputLevel = DEBUG
+)
 
 from Configurables import GeoSvc
 geoservice = GeoSvc(
     "GeoSvc",
     detectors = [
-        'file:bin/compact/DRcalo.xml'
+        'file:share/compact/DRcalo.xml'
     ]
 )
 
-from Configurables import RecoFiber
-reco = RecoFiber("RecoFiber", OutputLevel=DEBUG)
+from Configurables import DRcalib2D
+calib2d = DRcalib2D("DRcalib2D", OutputLevel=DEBUG)
 
 from Configurables import PodioOutput
-out = PodioOutput("PodioOutput", filename = "Ele20GeV_1_reco.root", OutputLevel = DEBUG)
-out.outputCommands = ["keep *"]
+podiooutput = PodioOutput("PodioOutput", filename = "reco.root", OutputLevel = DEBUG)
+podiooutput.outputCommands = ["keep *"]
 
 ApplicationMgr(
     TopAlg = [
         podioinput,
-        reco,
-        out
+        calib2d,
+        podiooutput
     ],
     EvtSel = 'NONE',
     EvtMax = 10,

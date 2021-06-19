@@ -43,4 +43,4 @@ install(TARGETS DRreco
 )
 
 install(FILES ${scripts} DESTINATION test)
-install(FILES calib.csv DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES calib.csv DESTINATION ${CMAKE_INSTALL_DATADIR})
