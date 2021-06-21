@@ -22,7 +22,7 @@ For a case that needs to install the package (e.g. `condor` requires file transf
 
 Note that to use the installed binary & library files, need to do following (assuming `$PWD=<path_to_install_directory>`)
 
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/lib:$PWD/lib64
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/lib64
     export PYTHONPATH=$PYTHONPATH:$PWD/python
 
 ### Running Pythia8
@@ -46,18 +46,19 @@ This requires the ROOT file generated from `Gen`. Assuming the name of the file 
     ./bin/DRsim etc/run_hepmc.mac <filenumber> <filename>
 
 ### Digitization
+This requires the ROOT file generated from `DRsim`. The default `Gaudi` configuration template can be found on `test/runDigi.py`. After modifying the configuration based on your needs, run
 
-    ./bin/DRdigi `<inputfile>.root <outputfile>.root`
+    k4run `runDigi.py`
 
 ### Reconstruction
-This requires the ROOT file generated from `DRsim`. The default `Gaudi` configuration template can be found on `test/runDRcaloReco.py`. After modifying the configuration based on your needs, run
+This requires the ROOT file generated from `runDigi.py`. The default `Gaudi` configuration template can be found on `test/runDRcalib.py`. After modifying the configuration based on your needs, run
 
-    k4run runDRcaloReco.py
+    k4run `runDRcalib.py`
 
 ### Analysis
-~~This requires the ROOT file generated from `Reco`. Assuming the name of the file `<filename>_<filenumber>.root`, in build/analysis,~~
+This requires the ROOT file generated from `runDRcalib.py`. Assuming the name of the file `<filename.root>`,
 
-[WIP] Analysis package is currently unavailable due to on-going migration to `edm4hep` and `k4FWCore`
+    ./bin/analysis <filename.root> <histogram lower edge in [GeV]> <histogram higher edge in [GeV]>
 
 ### Precaution
 Since GEANT4 takes very large amount of time per an event, P8ptcgun, DRsim and Reco are assumed to run a few events only per ROOT file. The executables can be run on parallel using `torque` or `condor`, and can be merged before analysis step using `hadd` from ROOT.
