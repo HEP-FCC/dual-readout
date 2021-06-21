@@ -17,6 +17,11 @@ StatusCode DigiSiPM::initialize() {
   properties.setXt(m_Xt);
   properties.setSampling(m_sampling);
   properties.setRecoveryTime(m_recovery);
+  properties.setPitch(m_cellPitch);
+  properties.setAp(m_afterpulse);
+  properties.setFallTimeFast(m_falltimeFast);
+  properties.setRiseTime(m_risetime);
+  properties.setSnr(m_snr);
 
   m_sensor = std::make_unique<sipm::SiPMSensor>(properties); // must be constructed from SiPMProperties
 
