@@ -1,14 +1,14 @@
 project(analysis)
 
 file(GLOB sources
-  ${PROJECT_SOURCE_DIR}/src/*.cc
+  ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
 
 file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
-add_executable(analysis analysis.cc ${sources} ${headers})
+add_executable(analysis analysis.cpp ${sources} ${headers})
 
 target_link_libraries(
   analysis
