@@ -1,13 +1,17 @@
-#include "RootInterface.h"
-#include "RecoInterface.h"
-#include "DRsimInterface.h"
 #include "functions.h"
 
-#include "GeoSvc.h"
-#include "GridDRcalo.h"
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/SimCalorimeterHitCollection.h"
+#include "edm4hep/RawCalorimeterHitCollection.h"
+#include "edm4hep/CalorimeterHitCollection.h"
+#include "edm4hep/SparseVectorCollection.h"
+
+#include "podio/ROOTReader.h"
+#include "podio/EventStore.h"
 
 #include "TROOT.h"
 #include "TStyle.h"
+#include "TFile.h"
 #include "TH1.h"
 #include "TCanvas.h"
 #include "TF1.h"
@@ -24,24 +28,9 @@ int main(int , char* argv[]) {
   float low = std::stof(argv[2]);
   float high = std::stof(argv[3]);
 
-  new GeoSvc({"./bin/compact/DRcalo.xml"});
-
-  auto m_geoSvc = GeoSvc::GetInstance();
-  std::string m_readoutName = "DRcaloSiPMreadout";
-
-  auto lcdd = m_geoSvc->lcdd();
-  auto allReadouts = lcdd->readouts();
-  if (allReadouts.find(m_readoutName) == allReadouts.end()) {
-    throw std::runtime_error("Readout " + m_readoutName + " not found! Please check tool configuration.");
-  } else {
-    std::cout << "Reading EDM from the collection " << m_readoutName << std::endl;
-  }
-
-  auto segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(m_readoutName).segmentation().segmentation());
-
   gStyle->SetOptFit(1);
 
-  TH1F* tEdep = new TH1F("totEdep","Total Energy deposit;MeV;Evt",100,low*1000.,high*1000.);
+  TH1F* tEdep = new TH1F("totEdep","Total Energy deposit;GeV;Evt",100,low,high);
   tEdep->Sumw2(); tEdep->SetLineColor(kRed); tEdep->SetLineWidth(2);
   TH1F* tE_C = new TH1F("E_C","Energy of Cerenkov ch.;GeV;Evt",100,low,high);
   tE_C->Sumw2(); tE_C->SetLineColor(kBlue); tE_C->SetLineWidth(2);
@@ -51,130 +40,102 @@ int main(int , char* argv[]) {
   tE_SC->Sumw2(); tE_SC->SetLineColor(kBlack); tE_SC->SetLineWidth(2);
   TH1F* tE_DR = new TH1F("E_DR","Dual-readout corrected Energy;GeV;Evt",100,low,high);
   tE_DR->Sumw2(); tE_DR->SetLineColor(kBlack); tE_DR->SetLineWidth(2);
-  TH1F* tP_leak = new TH1F("Pleak","Momentum leak;MeV;Evt",100,0.,1000.*high);
-  tP_leak->Sumw2(); tP_leak->SetLineWidth(2);
-  TH1F* tP_leak_nu = new TH1F("Pleak_nu","Neutrino energy leak;MeV;Evt",100,0.,1000.*high);
-  tP_leak_nu->Sumw2(); tP_leak_nu->SetLineWidth(2);
-  TH1F* tDepth = new TH1F("depth","Incident particle depth;m;Evt",100,-0.5,2.5);
-  tDepth->Sumw2(); tDepth->SetLineWidth(2);
 
-  TH1F* tEdep_noLeak = new TH1F("totEdep_noLeak","Total Energy deposit;MeV;Evt",100,low*1000.,high*1000.);
-  tEdep_noLeak->Sumw2(); tEdep_noLeak->SetLineColor(kRed); tEdep_noLeak->SetLineWidth(2);
+  functions::dualhist1D* tT_dual = new functions::dualhist1D("time","time;ns;p.e.",150,10.,70.);
+  functions::dualhist1D* tWav_dual = new functions::dualhist1D("wavlen","wavelength;nm;p.e.",120,300.,900.);
+  functions::dualhist1D* tNhit_dual = new functions::dualhist1D("nHits","of Scint p.e./SiPM;p.e.;n",200,0.,200.);
+  functions::dualhist1D* tD_dual = new functions::dualhist1D("digi","digi waveform;ns;a.u.",300,10.,250.);
+  functions::dualhist1D* tToa_dual = new functions::dualhist1D("ToA","Time of Arrival;ns;a.u.",150,10.,70.);
 
-  TH1F* tT_C = new TH1F("time_C","Cerenkov time;ns;p.e.",150,10.,70.);
-  tT_C->Sumw2(); tT_C->SetLineColor(kBlue); tT_C->SetLineWidth(2);
-  TH1F* tT_S = new TH1F("time_S","Scint time;ns;p.e.",150,10.,70.);
-  tT_S->Sumw2(); tT_S->SetLineColor(kRed); tT_S->SetLineWidth(2);
-  TH1F* tWav_S = new TH1F("wavlen_S","Scint wavelength;nm;p.e.",120,300.,900.);
-  tWav_S->Sumw2(); tWav_S->SetLineColor(kRed); tWav_S->SetLineWidth(2);
-  TH1F* tWav_C = new TH1F("wavlen_C","Cerenkov wavelength;nm;p.e.",120,300.,900.);
-  tWav_C->Sumw2(); tWav_C->SetLineColor(kBlue); tWav_C->SetLineWidth(2);
-  TH1F* tNhit_S = new TH1F("nHits_S","Number of Scint p.e./SiPM;p.e.;n",200,0.,200.);
-  tNhit_S->Sumw2(); tNhit_S->SetLineColor(kRed); tNhit_S->SetLineWidth(2);
-  TH1F* tNhit_C = new TH1F("nHits_C","Number of Cerenkov p.e./SiPM;p.e.;n",50,0.,50.);
-  tNhit_C->Sumw2(); tNhit_C->SetLineColor(kBlue); tNhit_C->SetLineWidth(2);
+  auto pReader = std::make_unique<podio::ROOTReader>();
+  pReader->openFile(static_cast<std::string>(filename));
 
-  RootInterface<RecoInterface::RecoEventData>* recoInterface = new RootInterface<RecoInterface::RecoEventData>(std::string(filename)+".root");
-  recoInterface->set("Reco","RecoEventData");
+  auto pStore = std::make_unique<podio::EventStore>();
+  pStore->setReader(pReader.get());
 
-  RootInterface<DRsimInterface::DRsimEventData>* drInterface = new RootInterface<DRsimInterface::DRsimEventData>(std::string(filename)+".root");
-  drInterface->set("DRsim","DRsimEventData");
-
-  int nLeak = 0;
   std::vector<float> E_Ss,E_Cs;
-  std::vector<float> E_Ss_noLeak,E_Cs_noLeak;
 
-  unsigned int entries = recoInterface->entries();
-  while (recoInterface->numEvt() < entries) {
-    if (recoInterface->numEvt() % 100 == 0) printf("Analyzing %dth event ...\n", recoInterface->numEvt());
+  unsigned int entries = pReader->getEntries();
+  for (unsigned int iEvt = 0; iEvt < entries; iEvt++) {
+    if (iEvt % 100 == 0) printf("Analyzing %dth event ...\n", iEvt);
 
-    RecoInterface::RecoEventData evt;
-    recoInterface->read(evt);
-
-    DRsimInterface::DRsimEventData drEvt;
-    drInterface->read(drEvt);
+    auto& edepHits = pStore->get<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
+    auto& rawTimeStructs = pStore->get<edm4hep::SparseVectorCollection>("RawTimeStructs");
+    auto& rawWavlenStructs = pStore->get<edm4hep::SparseVectorCollection>("RawWavlenStructs");
+    auto& digiWaveforms = pStore->get<edm4hep::SparseVectorCollection>("DigiWaveforms");
+    auto& caloHits = pStore->get<edm4hep::CalorimeterHitCollection>("DRcalo2dHits");
+    auto& rawHits = pStore->get<edm4hep::RawCalorimeterHitCollection>("RawCalorimeterHits");
+    auto& digiHits = pStore->get<edm4hep::RawCalorimeterHitCollection>("DigiCalorimeterHits");
 
     float Edep = 0.;
-    for (auto edepItr = drEvt.Edeps.begin(); edepItr != drEvt.Edeps.end(); ++edepItr) {
-      auto edep = *edepItr;
-      Edep += edep.Edep;
-    }
+    for (unsigned int iEdep = 0; iEdep < edepHits.size(); iEdep++)
+      Edep += edepHits[iEdep].getEnergy();
     tEdep->Fill(Edep);
 
-    float Pleak = 0.;
-    float Eleak_nu = 0.;
-    for (auto leak : drEvt.leaks) {
-      TLorentzVector leak4vec;
-      leak4vec.SetPxPyPzE(leak.px,leak.py,leak.pz,leak.E);
-      if ( std::abs(leak.pdgId)==12 || std::abs(leak.pdgId)==14 || std::abs(leak.pdgId)==16 ) {
-        Eleak_nu += leak4vec.P();
-      } else {
-        Pleak += leak4vec.P();
+    float en_S = 0.; float en_C = 0.;
+    for (unsigned int idx = 0; idx < caloHits.size(); idx++) {
+      auto& caloHit = caloHits.at(idx);
+      auto& rawHit = rawHits.at(idx);
+      auto& digiHit = digiHits.at(idx);
+      auto& timeStruct = rawTimeStructs.at(idx);
+      auto& wavlenStruct = rawWavlenStructs.at(idx);
+      auto& waveform = digiWaveforms.at(idx);
+
+      int type = caloHit.getType();
+      float en = caloHit.getEnergy();
+      int nhits = rawHit.getAmplitude();
+
+      TH1F* tNhit = tNhit_dual->getHist(type);
+      TH1F* tT = tT_dual->getHist(type);
+      TH1F* tWav = tWav_dual->getHist(type);
+      TH1F* tD = tD_dual->getHist(type);
+      TH1F* tToa = tToa_dual->getHist(type);
+
+      (type==0) ? en_S += en : en_C += en;
+
+      tNhit->Fill(nhits);
+      tToa->Fill(caloHit.getTime());
+
+      for (unsigned int bin = 0; bin < timeStruct.centers_size(); bin++) {
+        float timeBin = timeStruct.getCenters(bin);
+        tT->Fill(timeBin,timeStruct.getContents(bin));
+      }
+
+      for (unsigned int bin = 0; bin < wavlenStruct.centers_size(); bin++) {
+        float wavlenBin = wavlenStruct.getCenters(bin);
+        tWav->Fill(wavlenBin,wavlenStruct.getContents(bin));
+      }
+
+      for (unsigned int bin = 0; bin < waveform.centers_size(); bin++) {
+        float timeBin = waveform.getCenters(bin);
+        tD->Fill(timeBin,waveform.getContents(bin));
       }
     }
-    tP_leak->Fill(Pleak);
-    tP_leak_nu->Fill(Eleak_nu);
 
-    TH1F* tT_max = new TH1F("tmax","",600,10.,70.);
+    E_Ss.push_back(en_S);
+    E_Cs.push_back(en_C);
 
-    for (auto tower = drEvt.towers.begin(); tower != drEvt.towers.end(); ++tower) {
-      for (auto sipm = tower->SiPMs.begin(); sipm != tower->SiPMs.end(); ++sipm) {
-        if ( segmentation->IsCerenkov(sipm->SiPMnum) ) {
-          tNhit_C->Fill(sipm->count);
+    tE_S->Fill(en_S);
+    tE_C->Fill(en_C);
+    tE_SC->Fill(en_C+en_S);
+    tE_DR->Fill(functions::E_DR291(en_C,en_S));
 
-          for (const auto timepair : sipm->timeStruct) {
-            tT_C->Fill(timepair.first.first+0.05,timepair.second);
-            tT_max->Fill(timepair.first.first+0.05,timepair.second);
-          }
-          for (const auto wavpair : sipm->wavlenSpectrum) {
-            tWav_C->Fill(wavpair.first.first,wavpair.second);
-          }
-        } else {
-          tNhit_S->Fill(sipm->count);
-
-          for (const auto timepair : sipm->timeStruct) {
-            tT_S->Fill(timepair.first.first+0.05,timepair.second);
-          }
-          for (const auto wavpair : sipm->wavlenSpectrum) {
-            tWav_S->Fill(wavpair.first.first,wavpair.second);
-          }
-        }
-      }
-    }
-
-    float T_max = tT_max->GetBinCenter( tT_max->GetMaximumBin() );
-    float depth = ( T_max - 1.8/0.3 - 2.0/0.1895 ) / ( 1./0.3 - 1./0.1895 ); // 1895
-
-    delete tT_max;
-
-    float E_Scorr = evt.E_S*std::exp( -(depth-0.1368)/12.78 );
-
-    E_Ss.push_back(E_Scorr);
-    E_Cs.push_back(evt.E_C);
-
-    // if (Pleak > 3000.) {
-    //   nLeak++;
-    //   continue;
-    // }
-
-    tEdep_noLeak->Fill(Edep);
-
-    E_Ss_noLeak.push_back(E_Scorr);
-    E_Cs_noLeak.push_back(evt.E_C);
-
-    tE_C->Fill(evt.E_C);
-    tE_S->Fill(evt.E_S);
-    tE_SC->Fill(evt.E_C+E_Scorr);
-    // tE_SC->Fill(evt.E_C+evt.E_S);
-    // tE_DR->Fill(evt.E_DR);
-    tE_DR->Fill(functions::E_DR291(evt.E_C,E_Scorr));
-    tDepth->Fill(depth);
+    pStore->clear();
+    pReader->endOfEvent();
   } // event loop
+
+  std::string filenameStd = static_cast<std::string>(filename);
+  std::string extension = ".root";
+  auto where = filenameStd.find(extension);
+  if (where != std::string::npos) {
+    filenameStd.erase(where, extension.length());
+  }
+
+  filename = static_cast<TString>(filenameStd);
 
   TCanvas* c = new TCanvas("c","");
 
   tEdep->Draw("Hist"); c->SaveAs(filename+"_Edep.png");
-  tEdep_noLeak->Draw("Hist"); c->SaveAs(filename+"_Edep_noLeak.png");
 
   c->cd();
   tE_S->SetTitle("");
@@ -220,13 +181,6 @@ int main(int , char* argv[]) {
   tE_SC->Draw(""); c->SaveAs(filename+"_Esum.png");
   tE_DR->Draw(""); c->SaveAs(filename+"_Ecorr.png");
 
-  tDepth->Draw("Hist"); c->SaveAs(filename+"_depth.png");
-
-  c->SetLogy(1);
-  tP_leak->Draw("Hist"); c->SaveAs(filename+"_Pleak.png");
-  tP_leak_nu->Draw("Hist"); c->SaveAs(filename+"_Pleak_nu.png");
-  c->SetLogy(0);
-
   TGraph* grSvsC = new TGraph(entries,&(E_Ss[0]),&(E_Cs[0]));
   grSvsC->SetTitle("SvsC;E_S;E_C");
   grSvsC->SetMarkerSize(0.5); grSvsC->SetMarkerStyle(20);
@@ -237,31 +191,27 @@ int main(int , char* argv[]) {
   grSvsC->Draw("ap");
   c->SaveAs(filename+"_SvsC.png");
 
-  TGraph* grSvsC_noLeak = new TGraph(entries-nLeak,&(E_Ss_noLeak[0]),&(E_Cs_noLeak[0]));
-  grSvsC_noLeak->SetTitle("SvsC_noLeak;E_S;E_C");
-  grSvsC_noLeak->SetMarkerSize(0.5); grSvsC_noLeak->SetMarkerStyle(20);
-  grSvsC_noLeak->GetXaxis()->SetLimits(0.,high);
-  grSvsC_noLeak->GetYaxis()->SetRangeUser(0.,high);
-  grSvsC_noLeak->SetMaximum(high);
-  grSvsC_noLeak->SetMinimum(0.);
-  grSvsC_noLeak->Draw("ap");
-  c->SaveAs(filename+"_SvsC_noLeak.png");
+  tT_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_tC.png");
+  tT_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_tS.png");
+  tWav_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_wavC.png");
+  tWav_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_wavS.png");
+  tNhit_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_nhitC.png");
+  tNhit_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_nhitS.png");
 
-  tT_C->Draw("Hist"); c->SaveAs(filename+"_tC.png");
-  tT_S->Draw("Hist"); c->SaveAs(filename+"_tS.png");
-  tWav_C->Draw("Hist"); c->SaveAs(filename+"_wavC.png");
-  tWav_S->Draw("Hist"); c->SaveAs(filename+"_wavS.png");
-  tNhit_C->Draw("Hist"); c->SaveAs(filename+"_nhitC.png");
-  tNhit_S->Draw("Hist"); c->SaveAs(filename+"_nhitS.png");
+  tD_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_dC.png");
+  tD_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_dS.png");
+
+  tToa_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_toaC.png");
+  tToa_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_toaS.png");
 
   TFile* validFile = new TFile(filename+"_validation.root","RECREATE");
 
-  validFile->WriteTObject(tT_C);
-  validFile->WriteTObject(tT_S);
-  validFile->WriteTObject(tWav_C);
-  validFile->WriteTObject(tWav_S);
-  validFile->WriteTObject(tNhit_C);
-  validFile->WriteTObject(tNhit_S);
+  validFile->WriteTObject(tT_dual->getHist(1));
+  validFile->WriteTObject(tT_dual->getHist(0));
+  validFile->WriteTObject(tWav_dual->getHist(1));
+  validFile->WriteTObject(tWav_dual->getHist(0));
+  validFile->WriteTObject(tNhit_dual->getHist(1));
+  validFile->WriteTObject(tNhit_dual->getHist(0));
   validFile->WriteTObject(tEdep);
 
   validFile->Close();
