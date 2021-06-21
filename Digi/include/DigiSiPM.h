@@ -37,6 +37,11 @@ private:
   Gaudi::Property<double> m_Xt{this, "Xtalk", 0.01, "SiPM crosstalk"};
   Gaudi::Property<double> m_sampling{this, "sampling", 0.1, "SiPM sampling rate in ns"};
   Gaudi::Property<double> m_recovery{this, "recovery", 20., "SiPM cell recovery time in ns"};
+  Gaudi::Property<double> m_cellPitch{this, "cellpitch", 25., "SiPM cell size in um"};
+  Gaudi::Property<double> m_afterpulse{this, "afterpulse", 0.03, "afterpulse probability"};
+  Gaudi::Property<double> m_falltimeFast{this, "falltimeFast", 50., "signal fast component decay time in ns"};
+  Gaudi::Property<double> m_risetime{this, "risetime", 1., "signal rise time in ns"};
+  Gaudi::Property<double> m_snr{this, "SNR", 30., "SNR value in dB"};
 
   // ADC parameters
   Gaudi::Property<unsigned int> m_bits{this, "bits", 16, "ADC bits"};
