@@ -1,60 +1,31 @@
 project(analysis)
 
-find_package(ROOT REQUIRED)
-find_package(HepMC3)
-
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${FASTJET_DIR}/include
-  ${HEPMC_DIR}/include
-)
 file(GLOB sources
   ${PROJECT_SOURCE_DIR}/src/*.cc
 )
+
 file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
-include(${ROOT_USE_FILE})
 add_executable(analysis analysis.cc ${sources} ${headers})
-#add_executable(JER JER.cc ${sources} ${headers})
-#add_executable(calib calib.cc ${sources} ${headers})
+
 target_link_libraries(
   analysis
-  ${HEPMC3_LIBRARIES}
-  rootIO
   ${ROOT_LIBRARIES}
-  ${CMAKE_DL_LIBS}
-  DRcomponents
-  ddDRsegmentation
-)
-#target_link_libraries(
-#  JER
-#  ${HEPMC_DIR}/lib64/libHepMC3.so
-#  ${HEPMC_DIR}/lib64/libHepMC3rootIO.so
-#  rootIO
-#  ${ROOT_LIBRARIES}
-#  ${CMAKE_DL_LIBS}
-#)
-#target_link_libraries(
-#  calib
-#  ${HEPMC_DIR}/lib64/libHepMC3.so
-#  ${HEPMC_DIR}/lib64/libHepMC3rootIO.so
-#  rootIO
-#  ${ROOT_LIBRARIES}
-#  ${CMAKE_DL_LIBS}
-#)
-
-set(
-  analysis_SCRIPTS
+  podio::podioRootIO
+  edm4dr
+  edm4dr::edm4drDict
 )
 
-foreach(_script ${analysis_SCRIPTS})
-  configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
-    COPYONLY
-  )
-endforeach()
+target_include_directories(analysis PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 
-install(TARGETS analysis DESTINATION bin) # JER calib
+set_target_properties(analysis PROPERTIES PUBLIC_HEADER "${headers}")
+
+install(TARGETS analysis EXPORT analysisTargets
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
+  PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
+)

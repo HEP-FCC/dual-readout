@@ -12,11 +12,13 @@ StatusCode DigiSiPM::initialize() {
 
   if (sc.isFailure()) return sc;
 
-  m_sensor = std::make_unique<sipm::SiPMSensor>();
-  m_sensor->properties().setDcr(m_Dcr);
-  m_sensor->properties().setXt(m_Xt);
-  m_sensor->properties().setSampling(m_sampling);
-  m_sensor->properties().setRecoveryTime(m_recovery);
+  sipm::SiPMProperties properties;
+  properties.setDcr(m_Dcr);
+  properties.setXt(m_Xt);
+  properties.setSampling(m_sampling);
+  properties.setRecoveryTime(m_recovery);
+
+  m_sensor = std::make_unique<sipm::SiPMSensor>(properties); // must be constructed from SiPMProperties
 
   m_adc = std::make_unique<sipm::SiPMAdc>(m_bits,m_range,m_gain);
 
@@ -62,7 +64,7 @@ StatusCode DigiSiPM::execute() {
 
     digiHit.setAmplitude( integral );
     digiHit.setCellID( rawhit.getCellID() );
-    digiHit.setTimeStamp( static_cast<int>(toa/m_sampling) );
+    digiHit.setTimeStamp( static_cast<int>((toa+m_gateStart)/m_sampling) );
     waveform.setAssocObj( edm4hep::ObjectID( digiHit.getObjectID() ) );
     waveform.setSampling( m_sampling );
 

@@ -42,11 +42,12 @@ private:
   Gaudi::Property<unsigned int> m_bits{this, "bits", 16, "ADC bits"};
   Gaudi::Property<double> m_range{this, "range", std::pow(2., 15.), "ADC output range"};
   Gaudi::Property<double> m_gain{this, "gain", 20., "ADC gain in dB i.e. gain(linear) = 10^(m_gain/20)"};
+  // reciprocal_width (multiplication factor) = 1. / (range / gain(linear) / 2^bits);
 
   // integration parameters
   Gaudi::Property<double> m_gateStart{this, "gateStart", 10., "Integration gate starting time in ns"};
-  Gaudi::Property<double> m_gateL{this, "gateLength", 250., "Integration gate length in ns"};
-  Gaudi::Property<int> m_thres{this, "threshold", static_cast<int>( 0.5 * (std::pow(10.,20./20.) * std::pow(2., 16.) / std::pow(2., 15.) ) ), "Integration threshold"};
+  Gaudi::Property<double> m_gateL{this, "gateLength", 240., "Integration gate length in ns"};
+  Gaudi::Property<int> m_thres{this, "threshold", static_cast<int>( 1.5 * 20. ), "Integration threshold"};
 };
 
 #endif
