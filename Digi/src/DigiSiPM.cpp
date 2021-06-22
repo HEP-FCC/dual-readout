@@ -13,6 +13,8 @@ StatusCode DigiSiPM::initialize() {
   if (sc.isFailure()) return sc;
 
   sipm::SiPMProperties properties;
+  properties.setSignalLength(m_sigLength);
+  properties.setSize(m_sipmSize);
   properties.setDcr(m_Dcr);
   properties.setXt(m_Xt);
   properties.setSampling(m_sampling);
