@@ -33,8 +33,8 @@ private:
   std::unique_ptr<sipm::SiPMAdc> m_adc;
 
   // Hamamatsu S14160-1310PS
-  Gaudi::property<double> m_sigLength{this, "signalLength", 200., "signal length in ns"};
-  Gaudi::property<double> m_sipmSize{this, "SiPMsize", 1.3, "width of photosensitive area in mm"};
+  Gaudi::Property<double> m_sigLength{this, "signalLength", 200., "signal length in ns"};
+  Gaudi::Property<double> m_sipmSize{this, "SiPMsize", 1.3, "width of photosensitive area in mm"};
   Gaudi::Property<double> m_Dcr{this, "DCR", 120e3, "SiPM DCR"};
   Gaudi::Property<double> m_Xt{this, "Xtalk", 0.01, "SiPM crosstalk"};
   Gaudi::Property<double> m_sampling{this, "sampling", 0.1, "SiPM sampling rate in ns"};

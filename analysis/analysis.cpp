@@ -43,9 +43,10 @@ int main(int , char* argv[]) {
 
   functions::dualhist1D* tT_dual = new functions::dualhist1D("time","time;ns;p.e.",150,10.,70.);
   functions::dualhist1D* tWav_dual = new functions::dualhist1D("wavlen","wavelength;nm;p.e.",120,300.,900.);
-  functions::dualhist1D* tNhit_dual = new functions::dualhist1D("nHits","of Scint p.e./SiPM;p.e.;n",200,0.,200.);
-  functions::dualhist1D* tD_dual = new functions::dualhist1D("digi","digi waveform;ns;a.u.",300,10.,250.);
+  functions::dualhist1D* tNhit_dual = new functions::dualhist1D("nHits","of Scint p.e./SiPM;p.e.;n",100,0.,100.);
+  functions::dualhist1D* tD_dual = new functions::dualhist1D("digi","digi waveform;ns;a.u.",300,10.,100.);
   functions::dualhist1D* tToa_dual = new functions::dualhist1D("ToA","Time of Arrival;ns;a.u.",150,10.,70.);
+  functions::dualhist1D* tInt_dual = new functions::dualhist1D("Int","ADC integration;ADC counts;a.u.",400,0.,2000.);
 
   auto pReader = std::make_unique<podio::ROOTReader>();
   pReader->openFile(static_cast<std::string>(filename));
@@ -90,11 +91,15 @@ int main(int , char* argv[]) {
       TH1F* tWav = tWav_dual->getHist(type);
       TH1F* tD = tD_dual->getHist(type);
       TH1F* tToa = tToa_dual->getHist(type);
+      TH1F* tInt = tInt_dual->getHist(type);
 
       (type==0) ? en_S += en : en_C += en;
 
       tNhit->Fill(nhits);
       tToa->Fill(caloHit.getTime());
+
+      if ( digiHit.getAmplitude() > 0 )
+        tInt->Fill(static_cast<double>(digiHit.getAmplitude()));
 
       for (unsigned int bin = 0; bin < timeStruct.centers_size(); bin++) {
         float timeBin = timeStruct.getCenters(bin);
@@ -197,6 +202,9 @@ int main(int , char* argv[]) {
   tWav_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_wavS.png");
   tNhit_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_nhitC.png");
   tNhit_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_nhitS.png");
+
+  tInt_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_intC.png");
+  tInt_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_intS.png");
 
   tD_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_dC.png");
   tD_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_dS.png");
