@@ -5,23 +5,8 @@ options:
   includeSubfolder: True
 
 components:
-  # Vector3D with floats
-  edm4hep::Vector3f : # FIXME already lives in edm4hep, error handling in podio should be improved
-    Members:
-      - float x
-      - float y
-      - float z
-    ExtraCode :
-      declaration: "
-      Vector3f() : x(0),y(0),z(0) {}\n
-      Vector3f(float xx, float yy, float zz) : x(xx),y(yy),z(zz) {}\n
-      Vector3f(const float* v) : x(v[0]),y(v[1]),z(v[2]) {}\n
-      bool operator==(const Vector3f& v) const { return (x==v.x&&y==v.y&&z==v.z) ; }\n
-      float operator[](unsigned i) const { return *( &x + i ) ; }\n
-      "
-
   #------ ObjectID helper struct for references/relations
-  edm4hep::ObjectID:
+  edm4hep::ObjectID: # FIXME already lives in edm4hep, error handling in podio should be improved
     Members:
       - int index
       - int collectionID
