@@ -9,19 +9,28 @@
 
 #include "G4LogicalVolume.hh"
 
+#include "GaudiAlg/GaudiTool.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "k4Interface/ISimG4RegionTool.h"
+
 // Geant
 class G4VFastSimulationModel;
 class G4Region;
 
-class SimG4FastSimOpFiberRegion {
+class SimG4FastSimOpFiberRegion : public GaudiTool, virtual public ISimG4RegionTool {
 public:
-  explicit SimG4FastSimOpFiberRegion();
+  explicit SimG4FastSimOpFiberRegion(const std::string& type, const std::string& name, const IInterface* parent);
   virtual ~SimG4FastSimOpFiberRegion();
-  
-  void create();
+
+  virtual StatusCode initialize() final;
+  virtual StatusCode finalize() final;
+
+  virtual StatusCode create() final;
 
 private:
-  FastSimModelOpFiber* fModel;
+  std::unique_ptr<FastSimModelOpFiber> m_model;
+
+  Gaudi::Property<std::string> m_regionName{this, "regionName", "FastSimOpFiberRegion", "fast fiber region name"};
 };
 
 #endif
