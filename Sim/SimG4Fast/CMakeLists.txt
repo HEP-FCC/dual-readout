@@ -8,7 +8,13 @@ file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
-add_library(DRSimG4Fast SHARED ${sources} ${headers})
+gaudi_add_module(DRSimG4Fast
+  SOURCES ${sources}
+  LINK
+  Gaudi::GaudiKernel
+  k4FWCore::k4FWCore
+  ${Geant4_LIBRARIES}
+)
 
 target_include_directories(DRSimG4Fast PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -16,13 +22,6 @@ target_include_directories(DRSimG4Fast PUBLIC
 )
 
 set_target_properties(DRSimG4Fast PROPERTIES PUBLIC_HEADER "${headers}")
-
-target_link_libraries(
-  DRSimG4Fast
-  ${Geant4_LIBRARIES}
-  DD4hep::DDCore
-  DD4hep::DDG4
-)
 
 install(TARGETS DRSimG4Fast
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib

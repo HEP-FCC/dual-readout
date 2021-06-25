@@ -1,64 +1,56 @@
 #include "SimG4SaveDRcaloHits.h"
 
-#include "GridDRcalo.h"
-
 // Geant4
 #include "G4Event.hh"
 
 // DD4hep
-#include "DDG4/Geant4Hits.h"
+#include "DD4hep/Detector.h"
 
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "DD4hep/DD4hepUnits.h"
+DECLARE_COMPONENT(SimG4SaveDRcaloHits)
 
-#include <stdexcept>
-#include <functional>
-
-SimG4SaveDRcaloHits::SimG4SaveDRcaloHits(podio::EventStore* store, podio::ROOTWriter* writer)
-: pStore(store), pWriter(writer) {
-  m_geoSvc = GeoSvc::GetInstance();
-  m_readoutNames = {"DRcaloSiPMreadout"};
-
-  initialize();
-
-  if (m_geoSvc==0) throw std::runtime_error("Attempt to save hits while GeoSvc is not initialized!");
+SimG4SaveDRcaloHits::SimG4SaveDRcaloHits(const std::string& aType, const std::string& aName, const IInterface* aParent)
+: GaudiTool(aType, aName, aParent), m_geoSvc("GeoSvc", aName) {
+  declareInterface<ISimG4SaveOutputTool>(this);
 }
 
 SimG4SaveDRcaloHits::~SimG4SaveDRcaloHits() {}
 
-void SimG4SaveDRcaloHits::initialize() {
-  // DD4hep readouts
+StatusCode SimG4SaveDRcaloHits::initialize() {
+  if (GaudiTool::initialize().isFailure())
+    return StatusCode::FAILURE;
+
+  if (!m_geoSvc) {
+    error() << "Unable to locate Geometry Service. "
+            << "Make sure you have GeoSvc and SimSvc in the right order in the configuration." << endmsg;
+    return StatusCode::FAILURE;
+  }
+
   auto lcdd = m_geoSvc->lcdd();
   auto allReadouts = lcdd->readouts();
   for (auto& readoutName : m_readoutNames) {
     if (allReadouts.find(readoutName) == allReadouts.end()) {
-      throw std::runtime_error("Readout " + readoutName + " not found! Please check tool configuration.");
+      error() << "Readout " << readoutName << " not found! Please check tool configuration." << endmsg;
+      return StatusCode::FAILURE;
     } else {
-      std::cout << "Hits will be saved to EDM from the collection " << readoutName << std::endl;
+      debug() << "Hits will be saved to EDM from the collection " << readoutName << endmsg;
     }
   }
 
-  auto& rawCaloHits = pStore->create<edm4hep::RawCalorimeterHitCollection>("RawCalorimeterHits");
-  mRawCaloHits = &rawCaloHits;
-  pWriter->registerForWrite("RawCalorimeterHits");
-
-  auto& timeStruct = pStore->create<edm4hep::SparseVectorCollection>("RawTimeStructs");
-  mTimeStruct = &timeStruct;
-  pWriter->registerForWrite("RawTimeStructs");
-
-  auto& wavlenStruct = pStore->create<edm4hep::SparseVectorCollection>("RawWavlenStructs");
-  mWavlenStruct = &wavlenStruct;
-  pWriter->registerForWrite("RawWavlenStructs");
-
-  return;
+  return StatusCode::SUCCESS;
 }
 
-void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
-  G4HCofThisEvent* collections = aEvent->GetHCofThisEvent();
+StatusCode SimG4SaveDRcaloHits::finalize() { return GaudiTool::finalize(); }
+
+StatusCode SimG4SaveDRcaloHits::saveOutput(const G4Event& aEvent) {
+  G4HCofThisEvent* collections = aEvent.GetHCofThisEvent();
   G4VHitsCollection* collect;
   drc::DRcaloSiPMHit* hit;
 
   if (collections != nullptr) {
+    edm4hep::RawCalorimeterHitCollection* caloHits = mRawCaloHits.createAndPut();
+    edm4hep::SparseVectorCollection* timeStructs = mTimeStruct.createAndPut();
+    edm4hep::SparseVectorCollection* wavStructs = mWavlenStruct.createAndPut();
+
     for (int iter_coll = 0; iter_coll < collections->GetNumberOfCollections(); iter_coll++) {
       collect = collections->GetHC(iter_coll);
 
@@ -68,30 +60,35 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
         for (size_t iter_hit = 0; iter_hit < n_hit; iter_hit++) {
           hit = dynamic_cast<drc::DRcaloSiPMHit*>(collect->GetHit(iter_hit));
 
-          auto caloHit = mRawCaloHits->create();
-          auto timeStruct = mTimeStruct->create();
-          auto wavStruct = mWavlenStruct->create();
+          auto caloHit = caloHits->create();
+          auto timeStruct = timeStructs->create();
+          auto wavStruct = wavStructs->create();
 
-          float sumT = 0.;
+          float peakTime = 0.;
+          int peakVal = 0;
           float samplingT = hit->GetSamplingTime();
           for (auto& i_timeStruct : hit->GetTimeStruct()) {
             timeStruct.addToContents(i_timeStruct.second);
             timeStruct.addToCenters( i_timeStruct.first );
-            sumT += i_timeStruct.first;
+
+            int candidate = std::max( peakVal, i_timeStruct.second );
+
+            if ( peakVal < candidate ) {
+              peakVal = candidate;
+              peakTime = i_timeStruct.first;
+            }
           }
 
           caloHit.setCellID( static_cast<unsigned long long>(hit->GetSiPMnum()) );
           caloHit.setAmplitude( hit->GetPhotonCount() );
-          caloHit.setTimeStamp( static_cast<int>( sumT / static_cast<float>(hit->GetTimeStruct().size()) / samplingT ) );
+          caloHit.setTimeStamp( static_cast<int>( peakTime / samplingT ) );
           timeStruct.setSampling( samplingT );
           timeStruct.setAssocObj( edm4hep::ObjectID( caloHit.getObjectID() ) );
 
-          float sumW = 0.;
           float samplingW = hit->GetSamplingWavlen();
           for (auto& i_wavlen : hit->GetWavlenSpectrum()) {
             wavStruct.addToContents(i_wavlen.second);
             wavStruct.addToCenters( i_wavlen.first );
-            sumW += i_wavlen.first;
           }
           wavStruct.setSampling( samplingW );
           wavStruct.setAssocObj( edm4hep::ObjectID( caloHit.getObjectID() ) );
@@ -100,5 +97,5 @@ void SimG4SaveDRcaloHits::saveOutput(const G4Event* aEvent) const {
     }
   }
 
-  return;
+  return StatusCode::SUCCESS;
 }

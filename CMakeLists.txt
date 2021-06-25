@@ -49,7 +49,7 @@ set(BOOST_ROOT "$ENV{BOOST_ROOT}")
 
 add_subdirectory(edm4dr)
 add_subdirectory(Detector)
-add_subdirectory(DRsim)
+#add_subdirectory(DRsim)
 add_subdirectory(Sim)
 add_subdirectory(Digi)
 #add_subdirectory(Gen)

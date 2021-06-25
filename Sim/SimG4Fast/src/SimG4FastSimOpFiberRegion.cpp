@@ -5,21 +5,31 @@
 #include "G4TransportationManager.hh"
 #include "G4VFastSimulationModel.hh"
 
-#include "G4SystemOfUnits.hh"
+DECLARE_COMPONENT(SimG4FastSimOpFiberRegion)
 
-#include <stdexcept>
-
-SimG4FastSimOpFiberRegion::SimG4FastSimOpFiberRegion() {}
-
-SimG4FastSimOpFiberRegion::~SimG4FastSimOpFiberRegion() {
-  if (fModel) delete fModel;
+SimG4FastSimOpFiberRegion::SimG4FastSimOpFiberRegion(const std::string& type, const std::string& name, const IInterface* parent)
+: GaudiTool(type, name, parent) {
+  declareInterface<ISimG4RegionTool>(this);
 }
 
-void SimG4FastSimOpFiberRegion::create() {
-  auto regionStore = G4RegionStore::GetInstance();
-  auto region = regionStore->GetRegion("FastSimOpFiberRegion");
+SimG4FastSimOpFiberRegion::~SimG4FastSimOpFiberRegion() {}
 
-  fModel = new FastSimModelOpFiber("FastSimModelOpFiber",region);
+StatusCode SimG4FastSimOpFiberRegion::initialize() {
+  if (GaudiTool::initialize().isFailure())
+    return StatusCode::FAILURE;
 
-  return;
+  return StatusCode::SUCCESS;
+}
+
+StatusCode SimG4FastSimOpFiberRegion::finalize() { return GaudiTool::finalize(); }
+
+StatusCode SimG4FastSimOpFiberRegion::create() {
+  auto* regionStore = G4RegionStore::GetInstance();
+  auto* region = regionStore->GetRegion( static_cast<std::string>(m_regionName) );
+
+  m_model = std::make_unique<FastSimModelOpFiber>("FastSimModelOpFiber",region);
+
+  info() << "Creating FastSimModelOpFiber model with the region " << m_regionName << endmsg;
+
+  return StatusCode::SUCCESS;
 }

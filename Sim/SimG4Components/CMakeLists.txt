@@ -8,7 +8,14 @@ file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
-add_library(DRSimG4Components SHARED ${sources} ${headers})
+gaudi_add_module(DRSimG4Components
+  SOURCES ${sources}
+  LINK
+  Gaudi::GaudiKernel
+  k4FWCore::k4FWCore
+  edm4dr
+  DRsensitive
+)
 
 target_include_directories(DRSimG4Components
   PUBLIC
@@ -17,18 +24,6 @@ target_include_directories(DRSimG4Components
 )
 
 set_target_properties(DRSimG4Components PROPERTIES PUBLIC_HEADER "${headers}")
-
-target_link_libraries(
-  DRSimG4Components
-  PUBLIC
-  ${Geant4_LIBRARIES}
-  DD4hep::DDCore
-  DD4hep::DDG4
-  DRsensitive
-  DRcomponents
-  podio::podioRootIO
-  edm4dr
-)
 
 install(TARGETS DRSimG4Components EXPORT SimTargets
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
