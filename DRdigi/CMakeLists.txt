@@ -1,4 +1,4 @@
-project(Digi)
+project(DRdigi)
 
 file(GLOB sources
   ${PROJECT_SOURCE_DIR}/src/*.cpp
