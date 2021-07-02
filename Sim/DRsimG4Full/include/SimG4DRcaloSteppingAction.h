@@ -11,8 +11,6 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
 
-#include "k4FWCore/DataHandle.h"
-
 namespace drc {
 class SimG4DRcaloSteppingAction : public G4UserSteppingAction {
 public:
