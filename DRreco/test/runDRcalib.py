@@ -13,7 +13,7 @@ podioinput = PodioInput("PodioInput",
     "RawCalorimeterHits",
     "SimCalorimeterHits",
     "RawWavlenStructs",
-    "MCParticles",
+    "GenParticles",
     "Leakages"
   ],
   OutputLevel = DEBUG
