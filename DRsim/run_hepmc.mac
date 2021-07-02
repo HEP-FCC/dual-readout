@@ -1,8 +1,0 @@
-#This macro can not be executed standalone
-/DRsim/action/useHepMC True
-
-/run/numberOfThreads 1
-/run/verbose 1
-/run/initialize
-
-/run/beamOn 2
