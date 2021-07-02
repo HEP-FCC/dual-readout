@@ -12,12 +12,9 @@ set(CMAKE_MODULE_PATH
 include(GNUInstallDirs)
 
 find_package(ROOT REQUIRED)
-find_package(HepMC3) # FIXME setting REQUIRED results Gaudi bug
 find_package(podio REQUIRED HINTS $ENV{PODIO})
-find_package(FastJet)
 find_package(Gaudi REQUIRED)
 find_package(k4FWCore REQUIRED)
-find_package(k4SimGeant4 REQUIRED)
 find_package(sipm REQUIRED)
 
 #----------------------------------------------------------------------------
@@ -40,9 +37,6 @@ IF(NOT TARGET DD4hep::DDCore)
 ENDIF()
 
 dd4hep_set_compiler_flags()
-#==========================================================================
-dd4hep_print("|++> ddDRcalo: ROOT version: ${ROOT_VERSION}")
-#--------------------------------------------------------------------------
 dd4hep_configure_output()
 
 set(BOOST_ROOT "$ENV{BOOST_ROOT}")
