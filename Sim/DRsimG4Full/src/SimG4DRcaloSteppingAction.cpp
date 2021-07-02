@@ -1,8 +1,5 @@
 #include "SimG4DRcaloSteppingAction.h"
 
-#include "DDG4/Geant4Mapping.h"
-#include "DDG4/Geant4VolumeManager.h"
-
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTypes.hh"
 #include "G4VProcess.hh"
@@ -10,46 +7,12 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "DD4hep/DD4hepUnits.h"
 
-#include <stdexcept>
+namespace drc {
 
 SimG4DRcaloSteppingAction::SimG4DRcaloSteppingAction()
-: G4UserSteppingAction(), fPrevTower(0), fPrevFiber(0)
-{
-  m_geoSvc = GeoSvc::GetInstance();
-  m_readoutName = "DRcaloSiPMreadout";
-
-  initialize();
-
-  if (m_geoSvc==0) throw std::runtime_error("Attempt to save Edeps while GeoSvc is not initialized!");
-}
+: G4UserSteppingAction(), fPrevTower(0), fPrevFiber(0) {}
 
 SimG4DRcaloSteppingAction::~SimG4DRcaloSteppingAction() {}
-
-void SimG4DRcaloSteppingAction::initialize() {
-  auto lcdd = m_geoSvc->lcdd();
-  auto allReadouts = lcdd->readouts();
-  if (allReadouts.find(m_readoutName) == allReadouts.end()) {
-    throw std::runtime_error("Readout " + m_readoutName + " not found! Please check tool configuration.");
-  } else {
-    std::cout << "Edeps will be saved to EDM from the collection " << m_readoutName << std::endl;
-  }
-
-  fSeg = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(m_readoutName).segmentation().segmentation());
-
-  return;
-}
-
-void SimG4DRcaloSteppingAction::initializeEDM() {
-  auto& leakages = pStore->create<edm4hep::MCParticleCollection>("Leakages");
-  mLeakages = &leakages;
-  pWriter->registerForWrite("Leakages");
-
-  auto& edeps = pStore->create<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
-  mEdeps = &edeps;
-  pWriter->registerForWrite("SimCalorimeterHits");
-
-  return;
-}
 
 void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
   G4Track* track = step->GetTrack();
@@ -74,7 +37,7 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
   float edep = step->GetTotalEnergyDeposit()*CLHEP::MeV/CLHEP::GeV;
 
   int towerNum32 = theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 );
-  auto towerNum64 = fSeg->convertFirst32to64( towerNum32 );
+  auto towerNum64 = pSeg->convertFirst32to64( towerNum32 );
 
   accumulate(fPrevTower,towerNum64,edep);
 
@@ -86,8 +49,8 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, dd4hep::DDSegment
   bool found = false;
   edm4hep::SimCalorimeterHit* thePtr = nullptr;
 
-  if ( mEdeps->size() > prev ) { // check previous element
-    auto element = mEdeps->at(prev);
+  if ( m_Edeps->size() > prev ) { // check previous element
+    auto element = m_Edeps->at(prev);
     if ( checkId(element, id64) ) {
       thePtr = &element;
       found = true;
@@ -95,8 +58,8 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, dd4hep::DDSegment
   }
 
   if (!found) { // fall back to loop
-    for (unsigned int iElement = 0; iElement < mEdeps->size(); iElement++) {
-      auto element = mEdeps->at(iElement);
+    for (unsigned int iElement = 0; iElement < m_Edeps->size(); iElement++) {
+      auto element = m_Edeps->at(iElement);
       if ( checkId(element, id64) ) {
         found = true;
         prev = iElement;
@@ -108,15 +71,15 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, dd4hep::DDSegment
   }
 
   if (!found) { // create
-    auto simEdep = mEdeps->create();
+    auto simEdep = m_Edeps->create();
     simEdep.setCellID( static_cast<unsigned long long>(id64) );
     simEdep.setEnergy(0.); // added later
 
-    auto pos = fSeg->position(id64);
+    auto pos = pSeg->position(id64);
     simEdep.setPosition( { static_cast<float>(pos.x()*CLHEP::millimeter/dd4hep::millimeter),
                            static_cast<float>(pos.y()*CLHEP::millimeter/dd4hep::millimeter),
                            static_cast<float>(pos.z()*CLHEP::millimeter/dd4hep::millimeter) } );
-    prev = mEdeps->size();
+    prev = m_Edeps->size();
     thePtr = &simEdep;
   }
 
@@ -129,7 +92,7 @@ bool SimG4DRcaloSteppingAction::checkId(edm4hep::SimCalorimeterHit edep, dd4hep:
 }
 
 void SimG4DRcaloSteppingAction::saveLeakage(G4Track* track, G4StepPoint* presteppoint) {
-  auto leakage = mLeakages->create();
+  auto leakage = m_Leakages->create();
   leakage.setPDG( track->GetDefinition()->GetPDGEncoding() );
   leakage.setGeneratorStatus(1); // leakages naturally belong to final states
   leakage.setCharge( track->GetDefinition()->GetPDGCharge() );
@@ -141,3 +104,5 @@ void SimG4DRcaloSteppingAction::saveLeakage(G4Track* track, G4StepPoint* prestep
                        static_cast<float>(presteppoint->GetPosition().y()*CLHEP::millimeter),
                        static_cast<float>(presteppoint->GetPosition().z()*CLHEP::millimeter) } );
 }
+
+} // namespace drc
