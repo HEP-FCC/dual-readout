@@ -48,4 +48,25 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$k4SimGeant4_DIR/lib
 export PYTHONPATH=$PYTHONPATH:$k4SimGeant4_DIR/python
 export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$k4SimGeant4_DIR/lib/cmake/k4SimGeant4
 
+cd $SCRIPT_DIR/..
+
+if [ ! -d k4Gen ]; then
+  git clone https://github.com/HEP-FCC/k4Gen
+  cd k4Gen
+  git checkout b7c735e401298a8c72915819dc0404a83f46a0fe
+  mkdir build install
+  cd build
+  cmake -DCMAKE_INSTALL_PREFIX=../install .. && \
+  make -j `getconf _NPROCESSORS_ONLN` && \
+  make install
+  cd $SCRIPT_DIR/..
+fi
+
+cd k4Gen/install
+
+export k4Gen_DIR=$PWD
+export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$k4Gen_DIR/lib/cmake/k4Gen
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$k4Gen_DIR/lib
+export PYTHONPATH=$PYTHONPATH:$k4Gen_DIR/python
+
 cd $WORKDIR

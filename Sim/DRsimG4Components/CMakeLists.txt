@@ -15,6 +15,7 @@ gaudi_add_module(DRsimG4Components
   k4FWCore::k4FWCore
   edm4dr
   DRsensitive
+  DRsimG4Full
 )
 
 target_include_directories(DRsimG4Components

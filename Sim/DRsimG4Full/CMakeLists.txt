@@ -14,6 +14,7 @@ gaudi_add_module(DRsimG4Full
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore
   ${Geant4_LIBRARIES}
+  DRsegmentation
 )
 
 target_include_directories(DRsimG4Full

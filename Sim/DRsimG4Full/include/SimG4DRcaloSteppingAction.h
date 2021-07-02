@@ -1,18 +1,19 @@
 #ifndef SimG4DRcaloSteppingAction_h
 #define SimG4DRcaloSteppingAction_h 1
 
-#include "GeoSvc.h"
 #include "GridDRcalo.h"
 
 #include "G4UserSteppingAction.hh"
-
-#include "podio/ROOTWriter.h"
-#include "podio/EventStore.h"
+#include "G4Track.hh"
+#include "G4StepPoint.hh"
 
 // Data model
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
 
+#include "k4FWCore/DataHandle.h"
+
+namespace drc {
 class SimG4DRcaloSteppingAction : public G4UserSteppingAction {
 public:
   SimG4DRcaloSteppingAction();
@@ -20,11 +21,9 @@ public:
 
   virtual void UserSteppingAction(const G4Step*);
 
-  void initialize();
-  void initializeEDM();
-
-  void SetEventStore(podio::EventStore* theStore) { pStore = theStore; }
-  void SetWriter(podio::ROOTWriter* theWriter) { pWriter = theWriter; }
+  void setSegmentation(dd4hep::DDSegmentation::GridDRcalo* seg) { pSeg = seg; }
+  void setEdepsCollection(edm4hep::SimCalorimeterHitCollection* data) { m_Edeps = data; }
+  void setLeakagesCollection(edm4hep::MCParticleCollection* data) { m_Leakages = data; }
 
 private:
   void accumulate(unsigned int &prev, dd4hep::DDSegmentation::CellID& id64, float edep);
@@ -32,22 +31,15 @@ private:
 
   void saveLeakage(G4Track* track, G4StepPoint* pre);
 
-  /// Pointer to the geometry service
-  GeoSvc* m_geoSvc;
-
-  dd4hep::DDSegmentation::GridDRcalo* fSeg;
-
-  /// Name of the readout to save
-  std::string m_readoutName;
-
   unsigned int fPrevTower;
   unsigned int fPrevFiber;
 
-  podio::EventStore* pStore;
-  podio::ROOTWriter* pWriter;
+  dd4hep::DDSegmentation::GridDRcalo* pSeg;
 
-  edm4hep::MCParticleCollection* mLeakages;
-  edm4hep::SimCalorimeterHitCollection* mEdeps;
+  // collections owned by SimG4DRcaloEventAction
+  edm4hep::SimCalorimeterHitCollection* m_Edeps;
+  edm4hep::MCParticleCollection* m_Leakages;
 };
+}
 
 #endif

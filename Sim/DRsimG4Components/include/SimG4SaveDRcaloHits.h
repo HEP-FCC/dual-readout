@@ -4,7 +4,6 @@
 #include "DRcaloSiPMHit.h"
 
 // Data model
-#include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/RawCalorimeterHitCollection.h"
 #include "edm4hep/SparseVectorCollection.h"
 
