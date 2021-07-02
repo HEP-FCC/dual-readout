@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        SETUP: ['init_lcg.sh', 'init_hsf.sh']
     steps:
     - uses: actions/checkout@v2
     - name: Install CVMFS
@@ -25,12 +28,31 @@ jobs:
         sudo mv default.local /etc/cvmfs/default.local
         sudo cvmfs_config probe
         ls /cvmfs/sft.cern.ch
-        ls /cvmfs/fcc.cern.ch
-        ls /cvmfs/geant4.cern.ch
+        ls /cvmfs/sw.hsf.org
 
     - name: Start container
       run: |
         docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v /cvmfs:/cvmfs:shared -d clicdp/cc7-lcg /bin/bash
-    - name: Compile and test
+    - name: Initialize dependencies
       run: |
-        docker exec CI_container /bin/bash -c "yum -y install environment-modules; source /etc/profile.d/modules.sh; ln -s /usr/lib64/liblzma.so.5.2.2 /usr/lib64/liblzma.so; cd ./Package; source init_lcg.sh; source init_k4.sh; source init_sipm.sh; ./.github/scripts/compile_and_test.sh;"
+        docker exec CI_container /bin/bash -c "ln -s /usr/lib64/liblzma.so.5.2.2 /usr/lib64/liblzma.so; cd ./Package;\
+        source ${{ matrix.SETUP }};"
+    - name: CMake Configure
+      run: |
+        docker exec CI_container /bin/bash -c "ln -s /usr/lib64/liblzma.so.5.2.2 /usr/lib64/liblzma.so; cd ./Package;\
+        source ${{ matrix.SETUP }};\
+        mkdir build install;\
+        cd build;\
+        cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17 ..;"
+    - name: Compile
+      run: |
+        docker exec CI_container /bin/bash -c "ln -s /usr/lib64/liblzma.so.5.2.2 /usr/lib64/liblzma.so; cd ./Package;\
+        source ${{ matrix.SETUP }};\
+        cd build;\
+        make -j `getconf _NPROCESSORS_ONLN`;"
+    - name: Install
+      run: |
+        docker exec CI_container /bin/bash -c "ln -s /usr/lib64/liblzma.so.5.2.2 /usr/lib64/liblzma.so; cd ./Package;\
+        source ${{ matrix.SETUP }};\
+        cd build;\
+        make install;"
