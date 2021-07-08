@@ -10,7 +10,8 @@ ddDRcalo::DRconstructor::DRconstructor(xml_det_t& x_det)
   fX_dim( fX_struct.child( _Unicode(dim) ) ),
   fX_cladC( fX_struct.child( _Unicode(cladC) ) ),
   fX_coreC( fX_struct.child( _Unicode(coreC) ) ),
-  fX_coreS( fX_struct.child( _Unicode(coreS) ) ) {
+  fX_coreS( fX_struct.child( _Unicode(coreS) ) ),
+  fX_hole( fX_struct.child( _Unicode(hole) ) ) {
   fExperimentalHall = nullptr;
   fParamBarrel = nullptr;
   fDescription = nullptr;
@@ -130,7 +131,7 @@ void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volum
       dd4hep::Position pos = dd4hep::Position(localPosition);
 
       if ( std::abs(pos.x()) + fX_cladC.rmax() < rootTrap->GetBl1() && std::abs(pos.y()) + fX_cladC.rmax() < rootTrap->GetH1() ) {
-        implementFiber(towerVol, pos, column, row, fiber, fiberC, fiberS); // full length fiber
+        implementFiber(towerVol, trap, pos, column, row, fiber, fiberC, fiberS); // full length fiber
         fFiberCoords.push_back( std::make_pair(column,row) );
       } else {
         // outside tower
@@ -167,20 +168,29 @@ void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volum
         dd4hep::Tube shortFiberC = dd4hep::Tube(0.,fX_coreC.rmin(),fiberLen/2.);
         dd4hep::Tube shortFiberS = dd4hep::Tube(0.,fX_coreS.rmin(),fiberLen/2.);
 
-        implementFiber(towerVol, centerPos, column, row, shortFiber, shortFiberC, shortFiberS);
+        implementFiber(towerVol, trap, centerPos, column, row, shortFiber, shortFiberC, shortFiberS);
         fFiberCoords.push_back( std::make_pair(column,row) );
       }
     }
   }
 }
 
-void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::Position& pos, int col, int row,
-                                              dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS) {
+void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::Position& pos, int col, int row,
+                                             dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS) {
   dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
   dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
 
   auto fiberId64 = fSegmentation->setCellID(fTowerNoLR, 0, col, row);
   int fiberId32 = fSegmentation->getLast32bits(fiberId64);
+
+  // punch air hole
+  if ( pos.z() > 0. ) {
+    dd4hep::Tube airHoleTube = dd4hep::Tube(0.,fX_cladC.rmax(),pos.z());
+    dd4hep::Position airPos( pos.x(), pos.y(), -fiber.dZ() );
+    dd4hep::IntersectionSolid airHole = dd4hep::IntersectionSolid(trap,airHoleTube,airPos);
+    dd4hep::Volume airHoleVol("airHole", airHole, fDescription->material(fX_hole.materialStr()));
+    towerVol.placeVolume(airHoleVol, fiberId32, airPos);
+  }
 
   if ( fSegmentation->IsCerenkov(col,row) ) { //c fiber
     dd4hep::Volume cladVol("cladC", fiber, fDescription->material(fX_cladC.materialStr()));
