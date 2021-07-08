@@ -189,7 +189,7 @@ void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::T
     dd4hep::Position airPos( pos.x(), pos.y(), -fiber.dZ() );
     dd4hep::IntersectionSolid airHole = dd4hep::IntersectionSolid(trap,airHoleTube,airPos);
     dd4hep::Volume airHoleVol("airHole", airHole, fDescription->material(fX_hole.materialStr()));
-    towerVol.placeVolume(airHoleVol, fiberId32, airPos);
+    towerVol.placeVolume(airHoleVol, fiberId32);
   }
 
   if ( fSegmentation->IsCerenkov(col,row) ) { //c fiber
