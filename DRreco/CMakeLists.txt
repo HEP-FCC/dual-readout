@@ -8,12 +8,6 @@ file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
-# FIXME Exclude RecoTower temporarily
-LIST(FILTER headers EXCLUDE REGEX RecoTower.h)
-LIST(FILTER sources EXCLUDE REGEX RecoTower.cc)
-LIST(FILTER headers EXCLUDE REGEX RecoStandalone.h)
-LIST(FILTER sources EXCLUDE REGEX RecoStandalone.cc)
-
 gaudi_add_module(DRreco
   SOURCES ${sources}
   LINK
