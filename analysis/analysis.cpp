@@ -47,6 +47,7 @@ int main(int , char* argv[]) {
   functions::dualhist1D* tD_dual = new functions::dualhist1D("digi","digi waveform;ns;a.u.",300,10.,100.);
   functions::dualhist1D* tToa_dual = new functions::dualhist1D("ToA","Time of Arrival;ns;a.u.",150,10.,70.);
   functions::dualhist1D* tInt_dual = new functions::dualhist1D("Int","ADC integration;ADC counts;a.u.",400,0.,2000.);
+  functions::dualhist1D* tProc_dual = new functions::dualhist1D("proc","processed waveform;ns;a.u.",300,10.,100.);
 
   auto pReader = std::make_unique<podio::ROOTReader>();
   pReader->openFile(static_cast<std::string>(filename));
@@ -67,6 +68,7 @@ int main(int , char* argv[]) {
     auto& caloHits = pStore->get<edm4hep::CalorimeterHitCollection>("DRcalo2dHits");
     auto& rawHits = pStore->get<edm4hep::RawCalorimeterHitCollection>("RawCalorimeterHits");
     auto& digiHits = pStore->get<edm4hep::RawCalorimeterHitCollection>("DigiCalorimeterHits");
+    auto& procTimes = pStore->get<edm4hep::SparseVectorCollection>("DRpostprocTime");
 
     float Edep = 0.;
     for (unsigned int iEdep = 0; iEdep < edepHits.size(); iEdep++)
@@ -81,6 +83,7 @@ int main(int , char* argv[]) {
       auto& timeStruct = rawTimeStructs.at(idx);
       auto& wavlenStruct = rawWavlenStructs.at(idx);
       auto& waveform = digiWaveforms.at(idx);
+      auto& procTime = procTimes.at(idx);
 
       int type = caloHit.getType();
       float en = caloHit.getEnergy();
@@ -92,6 +95,7 @@ int main(int , char* argv[]) {
       TH1F* tD = tD_dual->getHist(type);
       TH1F* tToa = tToa_dual->getHist(type);
       TH1F* tInt = tInt_dual->getHist(type);
+      TH1F* tProc = tProc_dual->getHist(type);
 
       (type==0) ? en_S += en : en_C += en;
 
@@ -114,6 +118,11 @@ int main(int , char* argv[]) {
       for (unsigned int bin = 0; bin < waveform.centers_size(); bin++) {
         float timeBin = waveform.getCenters(bin);
         tD->Fill(timeBin,waveform.getContents(bin));
+      }
+
+      for (unsigned int bin = 0; bin < procTime.centers_size(); bin++) {
+        float timeBin = procTime.getCenters(bin);
+        tProc->Fill(timeBin,procTime.getContents(bin));
       }
     }
 
@@ -211,6 +220,9 @@ int main(int , char* argv[]) {
 
   tToa_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_toaC.png");
   tToa_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_toaS.png");
+
+  tProc_dual->getHist(1)->Draw("Hist"); c->SaveAs(filename+"_procC.png");
+  tProc_dual->getHist(0)->Draw("Hist"); c->SaveAs(filename+"_procS.png");
 
   TFile* validFile = new TFile(filename+"_validation.root","RECREATE");
 

@@ -57,14 +57,12 @@ from Configurables import SimG4Alg, SimG4PrimariesFromEdmTool
 # next, create the G4 algorithm, giving the list of names of tools ("XX/YY")
 edmConverter = SimG4PrimariesFromEdmTool("EdmConverter")
 
-from Configurables import SimG4SaveSmearedParticles, SimG4SaveDRcaloHits, SimG4SaveDRcaloMCTruth
-savePtcTool = SimG4SaveSmearedParticles("saveSmearedParticles")
+from Configurables import SimG4SaveDRcaloHits, SimG4SaveDRcaloMCTruth
 saveDRcaloTool = SimG4SaveDRcaloHits("saveDRcaloTool", readoutNames = ["DRcaloSiPMreadout"])
 saveMCTruthTool = SimG4SaveDRcaloMCTruth("saveMCTruthTool") # need SimG4DRcaloActions
 
 geantsim = SimG4Alg("SimG4Alg",
   outputs = [
-    "SimG4SaveSmearedParticles/saveSmearedParticles",
     "SimG4SaveDRcaloHits/saveDRcaloTool",
     "SimG4SaveDRcaloMCTruth/saveMCTruthTool"
   ],
@@ -73,12 +71,24 @@ geantsim = SimG4Alg("SimG4Alg",
 
 from Configurables import PodioOutput
 podiooutput = PodioOutput("PodioOutput", filename = "sim.root")
-podiooutput.outputCommands = ["drop RecParticlesSmeared*", "drop SmearedParticlesToParticles*"]
+podiooutput.outputCommands = ["keep *"]
+
+from Configurables import RndmGenSvc, HepRndm__Engine_CLHEP__RanluxEngine_
+rndmEngine = HepRndm__Engine_CLHEP__RanluxEngine_("RndmGenSvc.Engine",
+  SetSingleton = True,
+  UseTable = True,
+  Column = 0, # 0 or 1
+  Row = 123 # 0 to 214
+)
+
+rndmGenSvc = RndmGenSvc("RndmGenSvc",
+  Engine = rndmEngine.name()
+)
 
 ApplicationMgr(
   TopAlg = [gen, hepmc2edm, geantsim, podiooutput],
   EvtSel = 'NONE',
   EvtMax = 10,
   # order is important, as GeoSvc is needed by SimG4Svc
-  ExtSvc = [dataservice, geoservice, geantservice]
+  ExtSvc = [rndmEngine, rndmGenSvc, dataservice, geoservice, geantservice]
 )
