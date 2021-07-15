@@ -67,8 +67,8 @@ StatusCode DRcalib3D::execute() {
     auto postprocTime = postprocTimes->create();
 
     for (int bin = 1; bin <= waveProcessed->GetNbinsX(); bin++) {
-      double con = waveProcessed->GetBinContent(bin);
-      double cen = m_gateStart + m_gateL*waveProcessed->GetBinCenter(bin)/static_cast<double>(m_nbins);
+      double con = waveProcessed->GetBinContent(bin)/static_cast<double>(m_nbins.value());
+      double cen = m_gateStart + m_gateL*waveProcessed->GetBinCenter(bin)/static_cast<double>(m_nbins.value());
 
       if (con < m_thres) continue;
 
@@ -113,7 +113,7 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
   double fwhm = fwhm_f-fwhm_i;
   double decay = std::exp( -std::acosh(2.-std::cos(M_PI*fwhm/static_cast<double>(nbins))) );
 
-  TVirtualFFT *fft = TVirtualFFT::GetCurrentTransform();
+  TVirtualFFT* fft = TVirtualFFT::GetCurrentTransform();
   std::vector<double> re_full(nbins,0.);
   std::vector<double> im_full(nbins,0.);
   fft->GetPointsComplex(&(re_full[0]),&(im_full[0]));
