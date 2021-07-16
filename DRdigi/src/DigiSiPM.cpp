@@ -27,8 +27,6 @@ StatusCode DigiSiPM::initialize() {
 
   m_sensor = std::make_unique<sipm::SiPMSensor>(properties); // must be constructed from SiPMProperties
 
-  m_adc = std::make_unique<sipm::SiPMAdc>(m_bits,m_range,m_gain);
-
   info() << "DigiSiPM initialized" << endmsg;
 
   return StatusCode::SUCCESS;
@@ -63,22 +61,22 @@ StatusCode DigiSiPM::execute() {
     auto digiHit = digiHits->create();
     auto waveform = waveforms->create();
 
-    sipm::SiPMAnalogSignal anaSignal = m_sensor->signal();
-    sipm::SiPMDigitalSignal digiSignal = m_adc->digitize(anaSignal);
+    // Using only analog signal (ADC conversion is still experimental)
+    const sipm::SiPMAnalogSignal anaSignal = m_sensor->signal();
 
-    int integral = digiSignal.integral(m_gateStart,m_gateL,m_thres);   // (intStart, intGate, threshold)
-    double toa = digiSignal.toa(m_gateStart,m_gateL,m_thres);          // (intStart, intGate, threshold)
+    const double integral = anaSignal.integral(m_gateStart,m_gateL,m_thres); // (intStart, intGate, threshold)
+    const double toa = anaSignal.toa(m_gateStart,m_gateL,m_thres);           // (intStart, intGate, threshold)
 
     digiHit.setAmplitude( integral );
     digiHit.setCellID( rawhit.getCellID() );
+    // Toa and m_gateStart are in ns
     digiHit.setTimeStamp( static_cast<int>((toa+m_gateStart)/m_sampling) );
     waveform.setAssocObj( edm4hep::ObjectID( digiHit.getObjectID() ) );
     waveform.setSampling( m_sampling );
 
-    std::vector<int> waveformVec = digiSignal.waveform();
-
-    for (unsigned bin = 0; bin < waveformVec.size(); bin++) {
-      int amp = waveformVec.at(bin);
+    // sipm::SiPMAnalogSignal can be iterated as an std::vector<double>
+    for (unsigned bin = 0; bin < anaSignal.size(); bin++) {
+      double amp = anaSignal[bin];
 
       if (amp < m_thres) continue;
 
