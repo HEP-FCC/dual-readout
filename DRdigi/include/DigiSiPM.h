@@ -39,7 +39,7 @@ private:
   Gaudi::Property<double> m_recovery{this, "recovery", 10., "SiPM cell recovery time in ns"}; // https://arxiv.org/abs/2001.10322
   Gaudi::Property<double> m_cellPitch{this, "cellpitch", 10., "SiPM cell size in um"};
   Gaudi::Property<double> m_afterpulse{this, "afterpulse", 0.03, "afterpulse probability"};
-  Gaudi::Property<double> m_falltimeFast{this, "falltimeFast", 6.5, "signal fast component decay time in ns"};  // This looks too fast
+  Gaudi::Property<double> m_falltimeFast{this, "falltimeFast", 6.5, "signal fast component decay time in ns"};
   Gaudi::Property<double> m_risetime{this, "risetime", 1., "signal rise time in ns"};
   Gaudi::Property<double> m_snr{this, "SNR", 30., "SNR value in dB"};
 

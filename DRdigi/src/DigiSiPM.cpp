@@ -64,13 +64,13 @@ StatusCode DigiSiPM::execute() {
     // Using only analog signal (ADC conversion is still experimental)
     const sipm::SiPMAnalogSignal anaSignal = m_sensor->signal();
 
-    const double integral = anaSignal.integral(m_gateStart,m_gateL,m_thres);   // (intStart, intGate, threshold)
-    const double toa = anaSignal.toa(m_gateStart,m_gateL,m_thres);          // (intStart, intGate, threshold)
+    const double integral = anaSignal.integral(m_gateStart,m_gateL,m_thres); // (intStart, intGate, threshold)
+    const double toa = anaSignal.toa(m_gateStart,m_gateL,m_thres);           // (intStart, intGate, threshold)
 
     digiHit.setAmplitude( integral );
     digiHit.setCellID( rawhit.getCellID() );
     // Toa and m_gateStart are in ns
-    digiHit.setTimeStamp( static_cast<int>(toa+m_gateStart) );
+    digiHit.setTimeStamp( static_cast<int>((toa+m_gateStart)/m_sampling) );
     waveform.setAssocObj( edm4hep::ObjectID( digiHit.getObjectID() ) );
     waveform.setSampling( m_sampling );
 
