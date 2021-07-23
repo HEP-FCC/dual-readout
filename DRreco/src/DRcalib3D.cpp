@@ -97,7 +97,21 @@ StatusCode DRcalib3D::execute() {
       postprocTime.addToContents( con );
       postprocTime.addToCenters( cen );
 
-      addToTimeStruct(caloHits, hit2d, sipmPos, fiberUnit, invVminusInvC, integral, con, cen);
+      // estimate 3d hit position
+      double energy = hit2d.getEnergy()*con/integral;
+      double timeBin = cen*dd4hep::nanosecond;
+      double numerator = timeBin - std::sqrt(sipmPos.Mag2())/dd4hep::c_light;
+      dd4hep::Position pos = sipmPos - ( numerator/invVminusInvC )*fiberUnit;
+      edm4hep::Vector3f posEdm(pos.x() * CLHEP::millimeter/dd4hep::millimeter,
+                               pos.y() * CLHEP::millimeter/dd4hep::millimeter,
+                               pos.z() * CLHEP::millimeter/dd4hep::millimeter);
+
+      auto caloHit = caloHits->create();
+      caloHit.setPosition( posEdm );
+      caloHit.setCellID( hit2d.getCellID() );
+      caloHit.setTime( hit2d.getTime() );
+      caloHit.setType( hit2d.getType() );
+      caloHit.setEnergy( energy );
     }
 
     delete waveProcessed;
@@ -170,23 +184,4 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
   zAns = TH1::TransformHisto(fft_own, zAns, "MAG M"); // need to delete manually
 
   return zAns;
-}
-
-void DRcalib3D::addToTimeStruct(edm4hep::CalorimeterHitCollection* caloHits, const edm4hep::CalorimeterHit& hit2d,
-                                const dd4hep::Position& sipmPos, const dd4hep::Position& fiberUnit,
-                                double invVminusInvC, double integral, double con, double cen) {
-  double energy = hit2d.getEnergy()*con/integral;
-  double timeBin = cen*dd4hep::nanosecond;
-  double numerator = timeBin - std::sqrt(sipmPos.Mag2())/dd4hep::c_light;
-  dd4hep::Position pos = sipmPos - ( numerator/invVminusInvC )*fiberUnit;
-  edm4hep::Vector3f posEdm(pos.x() * CLHEP::millimeter/dd4hep::millimeter,
-                           pos.y() * CLHEP::millimeter/dd4hep::millimeter,
-                           pos.z() * CLHEP::millimeter/dd4hep::millimeter);
-
-  auto caloHit = caloHits->create();
-  caloHit.setPosition( posEdm );
-  caloHit.setCellID( hit2d.getCellID() );
-  caloHit.setTime( hit2d.getTime() );
-  caloHit.setType( hit2d.getType() );
-  caloHit.setEnergy( energy );
 }
