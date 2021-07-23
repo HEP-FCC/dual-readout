@@ -27,10 +27,6 @@ public:
   TH1* processFFT(TH1* waveHist);
 
 private:
-  void addToTimeStruct(edm4hep::CalorimeterHitCollection* caloHits, const edm4hep::CalorimeterHit& hit2d,
-                       const dd4hep::Position& sipmPos, const dd4hep::Position& fiberUnit,
-                       double invVminusInvC, double integral, double con, double cen);
-
   ServiceHandle<IGeoSvc> m_geoSvc;
   dd4hep::DDSegmentation::GridDRcalo* pSeg;
   dd4hep::DDSegmentation::DRparamBase* pParamBase;
