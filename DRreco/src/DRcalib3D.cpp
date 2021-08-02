@@ -65,7 +65,9 @@ StatusCode DRcalib3D::execute() {
     auto position = hit2d.getPosition();
     auto towerPos = pParamBase->GetTowerPos(numPhi);
     auto waferPos = pParamBase->GetSipmLayerPos(numPhi);
-    dd4hep::Position sipmPos(position.x,position.y,position.z); // type cast to dd4hep::Position
+    dd4hep::Position sipmPos(position.x * dd4hep::millimeter/CLHEP::millimeter,
+                             position.y * dd4hep::millimeter/CLHEP::millimeter,
+                             position.z * dd4hep::millimeter/CLHEP::millimeter); // type cast to dd4hep::Position
 
     auto fiberDir = waferPos - towerPos; // outward direction
     auto fiberUnit = fiberDir.Unit();
@@ -84,12 +86,17 @@ StatusCode DRcalib3D::execute() {
 
     // Fast Fourier Transform (Z-transform)
     auto* waveProcessed = processFFT(waveHist.get()); // need to delete manually
-    double integral = waveProcessed->Integral();
 
-    auto postprocTime = postprocTimes->create();
+    double integral = waveProcessed->Integral();
+    double amplitude = static_cast<double>(digiHit.getAmplitude());
+
+    auto postprocTime = postprocTimes->create(); // create an object even if integral is 0 to match the order with other collections
 
     for (int bin = 1; bin <= waveProcessed->GetNbinsX(); bin++) {
-      double con = waveProcessed->GetBinContent(bin)/static_cast<double>(m_nbins.value());
+      if ( integral <= 0. )
+        break;
+
+      double con = waveProcessed->GetBinContent(bin)*amplitude/integral;
       double cen = m_gateStart + m_gateL*waveProcessed->GetBinCenter(bin)/static_cast<double>(m_nbins.value());
 
       if (con < m_thres) continue;
@@ -98,7 +105,7 @@ StatusCode DRcalib3D::execute() {
       postprocTime.addToCenters( cen );
 
       // estimate 3d hit position
-      double energy = hit2d.getEnergy()*con/integral;
+      double energy = hit2d.getEnergy()*con/amplitude;
       double timeBin = cen*dd4hep::nanosecond;
       double numerator = timeBin - std::sqrt(sipmPos.Mag2())/dd4hep::c_light;
       dd4hep::Position pos = sipmPos - ( numerator/invVminusInvC )*fiberUnit;
@@ -127,6 +134,7 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
   TVirtualFFT::SetTransform(0);
   zMag = waveHist->FFT(zMag, "MAG M"); // need to delete manually
 
+  // shift the histogram range from [0, 2*freq_xmax] to [-freq_xmax, freq_xmax]
   double freq_xmax = zMag->GetXaxis()->GetXmax()/2.;
   std::unique_ptr<TH1D> mirror = std::make_unique<TH1D>("mirror","mirror",zMag->GetNbinsX(),-freq_xmax,freq_xmax);
   for (int bin = 1; bin <= zMag->GetNbinsX(); bin++) {
@@ -142,6 +150,7 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
     mirror->SetBinContent(bin_new,con);
   }
 
+  // estimate FWHM and exponential decay term
   int nbins = m_nbins.value();
   double mirrorMax = mirror->GetMaximum()/1.41422;
   int fwhmBegin = mirror->FindFirstBinAbove(mirrorMax);
@@ -162,6 +171,7 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
   shift_re.reserve(nbins_new);
   shift_im.reserve(nbins_new);
 
+  // cancel exponential decay term
   for (int idx = 0; idx < nbins_new; idx++) {
     auto in = TComplex(re_full[idx],im_full[idx]);
     double freq = 2.*M_PI*zMag->GetBinCenter(idx+1)/static_cast<double>(nbins);
@@ -176,6 +186,7 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
 
   delete zMag;
 
+  // reverse FFT
   TVirtualFFT* fft_own = TVirtualFFT::FFT(1, &nbins, "C2R M");
   fft_own->SetPointsComplex(&(shift_re[0]),&(shift_im[0]));
   fft_own->Transform();
