@@ -29,6 +29,7 @@ StatusCode SimG4DRcaloActions::finalize() { return AlgTool::finalize(); }
 G4VUserActionInitialization* SimG4DRcaloActions::userActionInitialization() {
   auto* actions = new drc::SimG4DRcaloActionInitialization();
   actions->setSegmentation(pSeg);
+  actions->setBirksConstant(m_scintName,m_birks);
 
   return actions;
 }
