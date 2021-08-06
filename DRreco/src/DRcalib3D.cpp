@@ -55,6 +55,14 @@ StatusCode DRcalib3D::execute() {
       return StatusCode::FAILURE;
     }
 
+    auto postprocTime = postprocTimes->create(); // create an object even if integral is 0 to match the order with other collections
+    postprocTime.setSampling( waveform.getSampling() );
+    postprocTime.setAssocObj( waveform.getAssocObj() );
+    double amplitude = static_cast<double>(digiHit.getAmplitude());
+
+    if (amplitude <= 0.)
+      continue;
+
     // set segmentation parameter
     auto cID = static_cast<dd4hep::DDSegmentation::CellID>( hit2d.getCellID() );
     int numEta = pSeg->numEta(cID);
@@ -86,39 +94,35 @@ StatusCode DRcalib3D::execute() {
 
     // Fast Fourier Transform (Z-transform)
     auto* waveProcessed = processFFT(waveHist.get()); // need to delete manually
-
     double integral = waveProcessed->Integral();
-    double amplitude = static_cast<double>(digiHit.getAmplitude());
+    double peak = waveProcessed->GetMaximum();
 
-    auto postprocTime = postprocTimes->create(); // create an object even if integral is 0 to match the order with other collections
+    if ( integral > 0. ) {
+      for (int bin = 1; bin <= waveProcessed->GetNbinsX(); bin++) {
+        double con = waveProcessed->GetBinContent(bin)*amplitude/integral;
+        double cen = m_gateStart + m_gateL*waveProcessed->GetBinCenter(bin)/static_cast<double>(m_nbins.value());
 
-    for (int bin = 1; bin <= waveProcessed->GetNbinsX(); bin++) {
-      if ( integral <= 0. )
-        break;
+        if (con < peak*m_zero.value()*amplitude/integral) continue;
 
-      double con = waveProcessed->GetBinContent(bin)*amplitude/integral;
-      double cen = m_gateStart + m_gateL*waveProcessed->GetBinCenter(bin)/static_cast<double>(m_nbins.value());
+        postprocTime.addToContents( con );
+        postprocTime.addToCenters( cen );
 
-      if (con < m_thres) continue;
+        // estimate 3d hit position
+        double energy = hit2d.getEnergy()*con/amplitude;
+        double timeBin = cen*dd4hep::nanosecond;
+        double numerator = timeBin - std::sqrt(sipmPos.Mag2())/dd4hep::c_light;
+        dd4hep::Position pos = sipmPos - ( numerator/invVminusInvC )*fiberUnit;
+        edm4hep::Vector3f posEdm(pos.x() * CLHEP::millimeter/dd4hep::millimeter,
+                                 pos.y() * CLHEP::millimeter/dd4hep::millimeter,
+                                 pos.z() * CLHEP::millimeter/dd4hep::millimeter);
 
-      postprocTime.addToContents( con );
-      postprocTime.addToCenters( cen );
-
-      // estimate 3d hit position
-      double energy = hit2d.getEnergy()*con/amplitude;
-      double timeBin = cen*dd4hep::nanosecond;
-      double numerator = timeBin - std::sqrt(sipmPos.Mag2())/dd4hep::c_light;
-      dd4hep::Position pos = sipmPos - ( numerator/invVminusInvC )*fiberUnit;
-      edm4hep::Vector3f posEdm(pos.x() * CLHEP::millimeter/dd4hep::millimeter,
-                               pos.y() * CLHEP::millimeter/dd4hep::millimeter,
-                               pos.z() * CLHEP::millimeter/dd4hep::millimeter);
-
-      auto caloHit = caloHits->create();
-      caloHit.setPosition( posEdm );
-      caloHit.setCellID( hit2d.getCellID() );
-      caloHit.setTime( hit2d.getTime() );
-      caloHit.setType( hit2d.getType() );
-      caloHit.setEnergy( energy );
+        auto caloHit = caloHits->create();
+        caloHit.setPosition( posEdm );
+        caloHit.setCellID( hit2d.getCellID() );
+        caloHit.setTime( hit2d.getTime() );
+        caloHit.setType( hit2d.getType() );
+        caloHit.setEnergy( energy );
+      }
     }
 
     delete waveProcessed;
@@ -130,6 +134,19 @@ StatusCode DRcalib3D::execute() {
 StatusCode DRcalib3D::finalize() { return GaudiAlgorithm::finalize(); }
 
 TH1* DRcalib3D::processFFT(TH1* waveHist) {
+  int firstBin = waveHist->FindFirstBinAbove(0.);
+  int lastBin = 0;
+
+  // define the signal range
+  for (int bin = firstBin; bin <= waveHist->GetNbinsX(); bin++) {
+    double con = waveHist->GetBinContent(bin);
+
+    if (con==0.) {
+      lastBin = bin-1;
+      break;
+    }
+  }
+
   TH1* zMag = 0;
   TVirtualFFT::SetTransform(0);
   zMag = waveHist->FFT(zMag, "MAG M"); // need to delete manually
@@ -193,6 +210,31 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
 
   TH1* zAns = 0;
   zAns = TH1::TransformHisto(fft_own, zAns, "MAG M"); // need to delete manually
+
+  // remove contents outside the signal range
+  for (int bin = 1; bin <= zAns->GetNbinsX(); bin++) {
+    if (bin < firstBin)
+      zAns->SetBinContent(bin,0.);
+
+    if (bin >= lastBin)
+      zAns->SetBinContent(bin,0.);
+  }
+
+  int maxBin = zAns->GetMaximumBin();
+  double peak = zAns->GetMaximum();
+  bool zero = false;
+
+  // remove contents after the first zero
+  for (int bin = maxBin; bin <= zAns->GetNbinsX(); bin++) {
+    double con = zAns->GetBinContent(bin);
+
+    // find the first zero (under threshold)
+    if (con < peak*m_zero.value())
+      zero = true;
+
+    if (zero)
+      zAns->SetBinContent(bin,0.);
+  }
 
   return zAns;
 }
