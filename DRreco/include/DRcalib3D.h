@@ -42,7 +42,7 @@ private:
   Gaudi::Property<double> m_sampling{this, "sampling", 0.1, "SiPM sampling rate in ns"};
   Gaudi::Property<double> m_gateStart{this, "gateStart", 10., "Integration gate starting time in ns"};
   Gaudi::Property<double> m_gateL{this, "gateLength", 90., "Integration gate length in ns"};
-  Gaudi::Property<int> m_thres{this, "threshold", static_cast<int>( 1.5 ), "Integration threshold"};
+  Gaudi::Property<double> m_zero{this, "threshold", 0.01, "FFT postprocessing threshold (ratio to the peak)"};
   Gaudi::Property<int> m_nbins{this, "nbins", 900, "number of bins for FFT"};
 
   Gaudi::Property<double> m_scintSpeed{this, "scintSpeed", 174.2, "effective scintillation photon speed in mm/ns"}; // candidate_1 173.5 // candidate_2 158.8
