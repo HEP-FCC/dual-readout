@@ -8,6 +8,7 @@
 #include "TComplex.h"
 
 #include <cmath>
+#include <limits>
 
 DECLARE_COMPONENT(DRcalib3D)
 
@@ -81,8 +82,8 @@ StatusCode DRcalib3D::execute() {
     auto fiberUnit = fiberDir.Unit();
 
     double speed = pSeg->IsCerenkov(cID) ? m_cherenSpeed.value() : m_scintSpeed.value();
+    double alpha = pSeg->IsCerenkov(cID) ? m_cherenAlpha.value() : m_scintAlpha.value();
     float effVelocity = speed*dd4hep::millimeter/dd4hep::nanosecond;
-    float invVminusInvC = 1./effVelocity - 1./dd4hep::c_light;
 
     // create a histogram to do FFT and fill it
     std::unique_ptr<TH1D> waveHist = std::make_unique<TH1D>("waveHist","waveHist",m_nbins,m_gateStart,m_gateStart+m_gateL);
@@ -96,16 +97,22 @@ StatusCode DRcalib3D::execute() {
     auto* waveProcessed = processFFT(waveHist.get()); // need to delete manually
     double integral = waveProcessed->Integral();
     double peak = waveProcessed->GetMaximum();
+    double thres = peak*m_zero.value()*amplitude/integral;
+    double toaProc = m_gateStart + m_gateL*waveProcessed->GetBinCenter(waveProcessed->FindFirstBinAbove(0.))/static_cast<double>(m_nbins.value());
 
     if ( integral > 0. ) {
       for (int bin = 1; bin <= waveProcessed->GetNbinsX(); bin++) {
         double con = waveProcessed->GetBinContent(bin)*amplitude/integral;
         double cen = m_gateStart + m_gateL*waveProcessed->GetBinCenter(bin)/static_cast<double>(m_nbins.value());
 
-        if (con < peak*m_zero.value()*amplitude/integral) continue;
+        if (con < thres) continue;
 
         postprocTime.addToContents( con );
         postprocTime.addToCenters( cen );
+
+        // scale effective velocity
+        double veloScaled = effVelocity*( 1. - alpha*(cen-toaProc) );
+        double invVminusInvC = (veloScaled > 0.) ? 1./veloScaled - 1./dd4hep::c_light : std::numeric_limits<double>::max();
 
         // estimate 3d hit position
         double energy = hit2d.getEnergy()*con/amplitude;
@@ -222,6 +229,7 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
 
   int maxBin = zAns->GetMaximumBin();
   double peak = zAns->GetMaximum();
+  double thres = peak*m_zero.value();
   bool zero = false;
 
   // remove contents after the first zero
@@ -229,7 +237,7 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
     double con = zAns->GetBinContent(bin);
 
     // find the first zero (under threshold)
-    if (con < peak*m_zero.value())
+    if (con < thres)
       zero = true;
 
     if (zero)
