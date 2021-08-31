@@ -45,10 +45,14 @@ private:
   Gaudi::Property<double> m_zero{this, "threshold", 0.01, "FFT postprocessing threshold (ratio to the peak)"};
   Gaudi::Property<int> m_nbins{this, "nbins", 900, "number of bins for FFT"};
 
-  Gaudi::Property<double> m_scintSpeed{this, "scintSpeed", 153.8, "effective scintillation photon speed in mm/ns"};
-  Gaudi::Property<double> m_cherenSpeed{this, "cherenSpeed", 172.2, "effective Cherenkov photon speed in mm/ns"};
-  Gaudi::Property<double> m_scintAlpha{this, "scintAlpha", 0.055, "effective scintillation velocity scale coefficient in ns^-1"};
-  Gaudi::Property<double> m_cherenAlpha{this, "cherenAlpha", 0.0624, "effective Cherenkov velocity scale coefficient in ns^-1"};
+  Gaudi::Property<double> m_scintTruth{this, "scintTruth", 188.7, "Truth scintillation photon speed in mm/ns"};
+  Gaudi::Property<double> m_cherenTruth{this, "cherenTruth", 201.3, "Truth Cherenkov photon speed in mm/ns"};
+  Gaudi::Property<double> m_scintSpeed{this, "scintSpeed", 151.9, "effective scintillation photon speed in mm/ns"};
+  Gaudi::Property<double> m_cherenSpeed{this, "cherenSpeed", 170.2, "effective Cherenkov photon speed in mm/ns"};
+  Gaudi::Property<double> m_scintAlpha{this, "scintAlpha", 0.05046, "effective scintillation velocity scale coefficient in ns^-1"};
+  Gaudi::Property<double> m_cherenAlpha{this, "cherenAlpha", 0.06414, "effective Cherenkov velocity scale coefficient in ns^-1"};
+  Gaudi::Property<double> m_scintScale{this, "scintScale", 1.258, "Scintillation longitudinal scale"};
+  Gaudi::Property<double> m_cherenScale{this, "cherenScale", 1.145, "Cherenkov longitudinal scale"};
 };
 
 #endif
