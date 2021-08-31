@@ -12,6 +12,7 @@ podioinput = PodioInput("PodioInput",
     "RawTimeStructs",
     "RawCalorimeterHits",
     "SimCalorimeterHits",
+    "Sim3dCalorimeterHits",
     "RawWavlenStructs",
     "GenParticles",
     "Leakages"

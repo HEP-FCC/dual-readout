@@ -21,6 +21,7 @@ public:
   void setSteppingAction(SimG4DRcaloSteppingAction* steppingAction) { pSteppingAction = steppingAction; }
 
   edm4hep::SimCalorimeterHitCollection* getEdepsCollection() { return m_Edeps; }
+  edm4hep::SimCalorimeterHitCollection* getEdeps3dCollection() { return m_Edeps3d; }
   edm4hep::MCParticleCollection* getLeakagesCollection() { return m_Leakages; }
 
 private:
@@ -28,6 +29,7 @@ private:
 
   // ownership of collections transferred to DataWrapper<T>
   edm4hep::SimCalorimeterHitCollection* m_Edeps;
+  edm4hep::SimCalorimeterHitCollection* m_Edeps3d;
   edm4hep::MCParticleCollection* m_Leakages;
 };
 }

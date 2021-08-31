@@ -16,6 +16,7 @@ void SimG4DRcaloActionInitialization::setBirksConstant(const std::string scintNa
 void SimG4DRcaloActionInitialization::Build() const {
   SimG4DRcaloSteppingAction* steppingAction = new SimG4DRcaloSteppingAction(); // deleted by G4
   steppingAction->setSegmentation(pSeg);
+  steppingAction->setThreshold(m_thres);
   SetUserAction(steppingAction);
 
   SimG4DRcaloEventAction* eventAction = new SimG4DRcaloEventAction(); // deleted by G4

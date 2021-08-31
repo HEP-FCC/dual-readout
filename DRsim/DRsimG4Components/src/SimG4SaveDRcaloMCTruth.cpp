@@ -37,9 +37,11 @@ StatusCode SimG4SaveDRcaloMCTruth::finalize() { return GaudiTool::finalize(); }
 
 StatusCode SimG4SaveDRcaloMCTruth::saveOutput(const G4Event&) {
   auto* edeps = m_eventAction->getEdepsCollection();
+  auto* edeps3d = m_eventAction->getEdeps3dCollection();
   auto* leakages = m_eventAction->getLeakagesCollection();
 
   m_Edeps.put(edeps);
+  m_Edeps3d.put(edeps3d);
   m_Leakages.put(leakages);
 
   return StatusCode::SUCCESS;

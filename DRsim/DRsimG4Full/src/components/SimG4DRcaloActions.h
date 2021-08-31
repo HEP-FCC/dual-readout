@@ -32,6 +32,7 @@ private:
   Gaudi::Property<std::string> m_readoutName{this, "readoutName", "DRcaloSiPMreadout", "readout name of DRcalo"};
   Gaudi::Property<std::string> m_scintName{this, "scintName", "DR_Polystyrene", "Name of the scintillators"};
   Gaudi::Property<double> m_birks{this, "birks", 0.126, "Birk's constant for the scintillators in mm/MeV"};
+  Gaudi::Property<double> m_thres{this, "thres", 0.0001, "Energy threshold to store 3d SimCalorimeterHits in GeV"};
 };
 
 #endif
