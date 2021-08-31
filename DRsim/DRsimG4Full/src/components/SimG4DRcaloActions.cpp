@@ -30,6 +30,7 @@ G4VUserActionInitialization* SimG4DRcaloActions::userActionInitialization() {
   auto* actions = new drc::SimG4DRcaloActionInitialization();
   actions->setSegmentation(pSeg);
   actions->setBirksConstant(m_scintName,m_birks);
+  actions->setThreshold(m_thres);
 
   return actions;
 }

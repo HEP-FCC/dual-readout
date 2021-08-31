@@ -39,6 +39,17 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
   int towerNum32 = theTouchable->GetCopyNumber( theTouchable->GetHistoryDepth()-2 );
   auto towerNum64 = pSeg->convertFirst32to64( towerNum32 );
 
+  if (edep > m_thres) {
+    auto simEdep3d = m_Edeps3d->create();
+    simEdep3d.setCellID( static_cast<unsigned long long>(towerNum64) );
+    simEdep3d.setEnergy(edep);
+
+    auto& pos = presteppoint->GetPosition();
+    simEdep3d.setPosition( { static_cast<float>(pos.x()*CLHEP::millimeter),
+                             static_cast<float>(pos.y()*CLHEP::millimeter),
+                             static_cast<float>(pos.z()*CLHEP::millimeter) } );
+  }
+
   accumulate(fPrevTower,towerNum64,edep);
 
   return;
