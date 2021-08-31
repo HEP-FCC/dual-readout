@@ -80,9 +80,13 @@ StatusCode DRcalib3D::execute() {
 
     auto fiberDir = waferPos - towerPos; // outward direction
     auto fiberUnit = fiberDir.Unit();
+    double towerH = pParamBase->GetTowerH();
 
+    double truth = pSeg->IsCerenkov(cID) ? m_cherenTruth.value() : m_scintTruth.value();
     double speed = pSeg->IsCerenkov(cID) ? m_cherenSpeed.value() : m_scintSpeed.value();
     double alpha = pSeg->IsCerenkov(cID) ? m_cherenAlpha.value() : m_scintAlpha.value();
+    double scale = pSeg->IsCerenkov(cID) ? m_cherenScale.value() : m_scintScale.value();
+    float truthVelocity = truth*dd4hep::millimeter/dd4hep::nanosecond;
     float effVelocity = speed*dd4hep::millimeter/dd4hep::nanosecond;
 
     // create a histogram to do FFT and fill it
@@ -111,14 +115,14 @@ StatusCode DRcalib3D::execute() {
         postprocTime.addToCenters( cen );
 
         // scale effective velocity
-        double veloScaled = effVelocity*( 1. - alpha*(cen-toaProc) );
+        double veloScaled = truthVelocity*std::cos( alpha*(cen-toaProc) + std::acos(effVelocity/truthVelocity) );
         double invVminusInvC = (veloScaled > 0.) ? 1./veloScaled - 1./dd4hep::c_light : std::numeric_limits<double>::max();
 
         // estimate 3d hit position
         double energy = hit2d.getEnergy()*con/amplitude;
         double timeBin = cen*dd4hep::nanosecond;
         double numerator = timeBin - std::sqrt(sipmPos.Mag2())/dd4hep::c_light;
-        dd4hep::Position pos = sipmPos - ( numerator/invVminusInvC )*fiberUnit;
+        dd4hep::Position pos = sipmPos + ( (scale-1.)*towerH - scale*( numerator/invVminusInvC ) )*fiberUnit;
         edm4hep::Vector3f posEdm(pos.x() * CLHEP::millimeter/dd4hep::millimeter,
                                  pos.y() * CLHEP::millimeter/dd4hep::millimeter,
                                  pos.z() * CLHEP::millimeter/dd4hep::millimeter);
