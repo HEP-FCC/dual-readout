@@ -25,9 +25,10 @@ target_include_directories(DRreco PUBLIC
 set_target_properties(DRreco PROPERTIES PUBLIC_HEADER "${headers}")
 
 file(GLOB scripts ${PROJECT_SOURCE_DIR}/test/*.py)
+file(GLOB datafiles ${PROJECT_SOURCE_DIR}/data/*)
 
 file(COPY ${scripts} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
-file(COPY calib.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${datafiles} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 install(TARGETS DRreco
   EXPORT RecoTargets
@@ -37,4 +38,4 @@ install(TARGETS DRreco
 )
 
 install(FILES ${scripts} DESTINATION test)
-install(FILES calib.csv DESTINATION ${CMAKE_INSTALL_DATADIR})
+install(FILES ${datafiles} DESTINATION ${CMAKE_INSTALL_DATADIR})

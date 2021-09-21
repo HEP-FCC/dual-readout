@@ -6,6 +6,7 @@
 #include "TH1D.h"
 #include "TVirtualFFT.h"
 #include "TComplex.h"
+#include "TFile.h"
 
 #include <cmath>
 #include <limits>
@@ -30,6 +31,13 @@ StatusCode DRcalib3D::initialize() {
   }
 
   pSeg = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(m_readoutName).segmentation().segmentation());
+
+  auto veloFile = std::make_unique<TFile>(m_veloFile.value().c_str(),"READ");
+  m_veloC.reset( static_cast<TH1D*>(veloFile->Get(m_cherenProf.value().c_str())) );
+  m_veloS.reset( static_cast<TH1D*>(veloFile->Get(m_scintProf.value().c_str())) );
+  m_veloC->SetDirectory(0);
+  m_veloS->SetDirectory(0);
+  veloFile->Close();
 
   info() << "DRcalib3D initialized" << endmsg;
 
@@ -80,14 +88,9 @@ StatusCode DRcalib3D::execute() {
 
     auto fiberDir = waferPos - towerPos; // outward direction
     auto fiberUnit = fiberDir.Unit();
-    double towerH = pParamBase->GetTowerH();
 
-    double truth = pSeg->IsCerenkov(cID) ? m_cherenTruth.value() : m_scintTruth.value();
-    double speed = pSeg->IsCerenkov(cID) ? m_cherenSpeed.value() : m_scintSpeed.value();
-    double alpha = pSeg->IsCerenkov(cID) ? m_cherenAlpha.value() : m_scintAlpha.value();
+    double towerH = pParamBase->GetTowerH();
     double scale = pSeg->IsCerenkov(cID) ? m_cherenScale.value() : m_scintScale.value();
-    float truthVelocity = truth*dd4hep::millimeter/dd4hep::nanosecond;
-    float effVelocity = speed*dd4hep::millimeter/dd4hep::nanosecond;
 
     // create a histogram to do FFT and fill it
     std::unique_ptr<TH1D> waveHist = std::make_unique<TH1D>("waveHist","waveHist",m_nbins,m_gateStart,m_gateStart+m_gateL);
@@ -98,7 +101,7 @@ StatusCode DRcalib3D::execute() {
     }
 
     // Fast Fourier Transform (Z-transform)
-    auto* waveProcessed = processFFT(waveHist.get()); // need to delete manually
+    std::unique_ptr<TH1> waveProcessed( processFFT(waveHist.get()) );
     double integral = waveProcessed->Integral();
     double peak = waveProcessed->GetMaximum();
     double thres = peak*m_zero.value()*amplitude/integral;
@@ -115,7 +118,8 @@ StatusCode DRcalib3D::execute() {
         postprocTime.addToCenters( cen );
 
         // scale effective velocity
-        double veloScaled = truthVelocity*std::cos( alpha*(cen-toaProc) + std::acos(effVelocity/truthVelocity) );
+        double veloScaled = pSeg->IsCerenkov(cID) ? m_veloC->Interpolate(cen-toaProc) : m_veloS->Interpolate(cen-toaProc);
+        veloScaled *= dd4hep::millimeter/dd4hep::nanosecond;
         double invVminusInvC = (veloScaled > 0.) ? 1./veloScaled - 1./dd4hep::c_light : std::numeric_limits<double>::max();
 
         // estimate 3d hit position
@@ -135,8 +139,6 @@ StatusCode DRcalib3D::execute() {
         caloHit.setEnergy( energy );
       }
     }
-
-    delete waveProcessed;
   }
 
   return StatusCode::SUCCESS;
