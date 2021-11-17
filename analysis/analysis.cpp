@@ -77,13 +77,13 @@ int main(int , char* argv[]) {
 
     float en_S = 0.; float en_C = 0.;
     for (unsigned int idx = 0; idx < caloHits.size(); idx++) {
-      auto& caloHit = caloHits.at(idx);
-      auto& rawHit = rawHits.at(idx);
-      auto& digiHit = digiHits.at(idx);
-      auto& timeStruct = rawTimeStructs.at(idx);
-      auto& wavlenStruct = rawWavlenStructs.at(idx);
-      auto& waveform = digiWaveforms.at(idx);
-      auto& procTime = procTimes.at(idx);
+      const auto& caloHit = caloHits.at(idx);
+      const auto& rawHit = rawHits.at(idx);
+      const auto& digiHit = digiHits.at(idx);
+      const auto& timeStruct = rawTimeStructs.at(idx);
+      const auto& wavlenStruct = rawWavlenStructs.at(idx);
+      const auto& waveform = digiWaveforms.at(idx);
+      const auto& procTime = procTimes.at(idx);
 
       int type = caloHit.getType();
       float en = caloHit.getEnergy();

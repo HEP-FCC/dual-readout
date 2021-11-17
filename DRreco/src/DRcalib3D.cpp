@@ -53,11 +53,11 @@ StatusCode DRcalib3D::execute() {
 
   for (unsigned int idx = 0; idx < hits2d->size(); idx++) {
     // WARNING assume same input order (sequential access)
-    auto& hit2d = hits2d->at(idx);
-    auto& waveform = waveforms->at(idx);
+    const auto& hit2d = hits2d->at(idx);
+    const auto& waveform = waveforms->at(idx);
 
     // sanity check for input order
-    auto& digiHit = digiHits->at(idx);
+    const auto& digiHit = digiHits->at(idx);
 
     if ( hit2d.getCellID()!=digiHit.getCellID() ) {
       error() << "Input order between DRcalo2dHits and DigiCalorimeterHits does not agree!" << endmsg;
