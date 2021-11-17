@@ -45,7 +45,7 @@ StatusCode DRcalib2D::execute() {
   edm4hep::CalorimeterHitCollection* caloHits = m_caloHits.createAndPut();
 
   for (unsigned int idx = 0; idx < digiHits->size(); idx++) {
-    auto& digiHit = digiHits->at(idx);
+    const auto& digiHit = digiHits->at(idx);
 
     auto cID = static_cast<dd4hep::DDSegmentation::CellID>( digiHit.getCellID() );
     int numEta = pSeg->numEta(cID);
