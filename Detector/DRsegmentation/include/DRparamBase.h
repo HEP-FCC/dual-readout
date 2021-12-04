@@ -24,6 +24,7 @@ namespace DDSegmentation {
 
     bool GetIsRHS() { return fIsRHS; }
     double GetCurrentInnerR() { return fCurrentInnerR; }
+    double GetTowerH() { return fTowerH; }
     double GetSipmHeight() { return fSipmHeight; }
     double GetH1() { return fCurrentInnerHalf; }
     double GetBl1() { return fV3.X()*std::tan(fPhiZRot/2.); }

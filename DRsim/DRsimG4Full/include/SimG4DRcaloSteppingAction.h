@@ -21,7 +21,10 @@ public:
 
   void setSegmentation(dd4hep::DDSegmentation::GridDRcalo* seg) { pSeg = seg; }
   void setEdepsCollection(edm4hep::SimCalorimeterHitCollection* data) { m_Edeps = data; }
+  void setEdeps3dCollection(edm4hep::SimCalorimeterHitCollection* data) { m_Edeps3d = data; }
   void setLeakagesCollection(edm4hep::MCParticleCollection* data) { m_Leakages = data; }
+
+  void setThreshold(const double thres) { m_thres = thres; }
 
 private:
   void accumulate(unsigned int &prev, dd4hep::DDSegmentation::CellID& id64, float edep);
@@ -36,7 +39,9 @@ private:
 
   // collections owned by SimG4DRcaloEventAction
   edm4hep::SimCalorimeterHitCollection* m_Edeps;
+  edm4hep::SimCalorimeterHitCollection* m_Edeps3d;
   edm4hep::MCParticleCollection* m_Leakages;
+  double m_thres;
 };
 }
 

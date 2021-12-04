@@ -14,9 +14,14 @@ public:
   virtual void Build() const final;
 
   void setSegmentation(dd4hep::DDSegmentation::GridDRcalo* seg) { pSeg = seg; }
+  void setThreshold(const double thres) { m_thres = thres; }
+  void setBirksConstant(const std::string scintName, const double birks);
 
 private:
   dd4hep::DDSegmentation::GridDRcalo* pSeg;
+  std::string m_scintName;
+  double m_birks;
+  double m_thres;
 };
 }
 

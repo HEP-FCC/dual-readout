@@ -26,6 +26,7 @@ public:
 
 private:
   DataHandle<edm4hep::SimCalorimeterHitCollection> m_Edeps{"SimCalorimeterHits", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::SimCalorimeterHitCollection> m_Edeps3d{"Sim3dCalorimeterHits", Gaudi::DataHandle::Writer, this};
   DataHandle<edm4hep::MCParticleCollection> m_Leakages{"Leakages", Gaudi::DataHandle::Writer, this};
 
   drc::SimG4DRcaloEventAction* m_eventAction;
