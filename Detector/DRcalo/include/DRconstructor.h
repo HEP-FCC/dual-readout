@@ -22,6 +22,7 @@ namespace ddDRcalo {
     void setDetElement(dd4hep::DetElement* drDet) { fDetElement = drDet; }
     void setSipmSurf(dd4hep::OpticalSurface* sipmSurf) { fSipmSurf = sipmSurf; }
     void setFilterSurf(dd4hep::OpticalSurface* filterSurf) { fFilterSurf = filterSurf; }
+    void setMirrorSurf(dd4hep::OpticalSurface* mirrorSurf) { fMirrorSurf = mirrorSurf; }
     void setSensDet(dd4hep::SensitiveDetector* sensDet) {
       fSensDet = sensDet;
       fSegmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( sensDet->readout().segmentation().segmentation() );
@@ -33,7 +34,8 @@ namespace ddDRcalo {
     void implementTowers(xml_comp_t& x_theta, dd4hep::DDSegmentation::DRparamBase* param);
     void implementFibers(xml_comp_t& x_theta, dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::DDSegmentation::DRparamBase* param);
     void implementFiber(dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::Position& pos, int col, int row,
-                        dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS);
+                        dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS,
+                        dd4hep::Volume& capC, dd4hep::Volume& capS);
     void implementSipms(dd4hep::Volume& sipmLayerVol);
     double calculateDistAtZ(TGeoTrap* rootTrap, dd4hep::Position& pos, double* norm, double z);
     float calculateFiberLen(TGeoTrap* rootTrap, dd4hep::Position& pos, double* norm, double z1, double diff, double towerHeight);
@@ -50,6 +52,8 @@ namespace ddDRcalo {
     xml_comp_t fX_coreC;
     xml_comp_t fX_coreS;
     xml_comp_t fX_hole;
+    xml_comp_t fX_dark;
+    xml_comp_t fX_mirror;
     dd4hep::Assembly* fExperimentalHall;
     dd4hep::Detector* fDescription;
     dd4hep::DDSegmentation::DRparamBarrel* fParamBarrel;
@@ -58,6 +62,7 @@ namespace ddDRcalo {
     dd4hep::SensitiveDetector* fSensDet;
     dd4hep::OpticalSurface* fSipmSurf;
     dd4hep::OpticalSurface* fFilterSurf;
+    dd4hep::OpticalSurface* fMirrorSurf;
     dd4hep::DDSegmentation::GridDRcalo* fSegmentation;
 
     bool fVis;

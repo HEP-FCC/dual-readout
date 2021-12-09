@@ -30,6 +30,7 @@ namespace ddDRcalo {
     dd4hep::OpticalSurfaceManager surfMgr = description.surfaceManager();
     dd4hep::OpticalSurface sipmSurfProp = surfMgr.opticalSurface("/world/"+name+"#SiPMSurf");
     dd4hep::OpticalSurface filterSurfProp = surfMgr.opticalSurface("/world/"+name+"#FilterSurf");
+    dd4hep::OpticalSurface mirrorSurfProp = surfMgr.opticalSurface("/world/"+name+"#MirrorSurf");
 
     auto segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( sensDet.readout().segmentation().segmentation() );
     segmentation->setGridSize( x_dim.distance() );
@@ -55,6 +56,7 @@ namespace ddDRcalo {
     constructor.setDetElement(&drDet);
     constructor.setSipmSurf(&sipmSurfProp);
     constructor.setFilterSurf(&filterSurfProp);
+    constructor.setMirrorSurf(&mirrorSurfProp);
     constructor.setSensDet(&sensDet);
 
     paramBarrel->SetIsRHS(true);
@@ -65,7 +67,8 @@ namespace ddDRcalo {
     paramEndcap->SetIsRHS(false);
     constructor.construct(); // left
 
-    dd4hep::PlacedVolume hallPlace = description.pickMotherVolume(drDet).placeVolume(experimentalHall);
+    dd4hep::Volume worldVol = description.pickMotherVolume(drDet);
+    dd4hep::PlacedVolume hallPlace = worldVol.placeVolume(experimentalHall);
     hallPlace.addPhysVolID("system",x_det.id());
     // connect placed volume and physical volume
     drDet.setPlacement( hallPlace );

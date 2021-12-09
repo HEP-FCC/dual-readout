@@ -11,7 +11,9 @@ ddDRcalo::DRconstructor::DRconstructor(xml_det_t& x_det)
   fX_cladC( fX_struct.child( _Unicode(cladC) ) ),
   fX_coreC( fX_struct.child( _Unicode(coreC) ) ),
   fX_coreS( fX_struct.child( _Unicode(coreS) ) ),
-  fX_hole( fX_struct.child( _Unicode(hole) ) ) {
+  fX_hole( fX_struct.child( _Unicode(hole) ) ),
+  fX_dark( fX_struct.child( _Unicode(dark) ) ),
+  fX_mirror( fX_struct.child( _Unicode(mirror) ) ) {
   fExperimentalHall = nullptr;
   fParamBarrel = nullptr;
   fDescription = nullptr;
@@ -19,6 +21,7 @@ ddDRcalo::DRconstructor::DRconstructor(xml_det_t& x_det)
   fSensDet = nullptr;
   fSipmSurf = nullptr;
   fFilterSurf = nullptr;
+  fMirrorSurf = nullptr;
   fSegmentation = nullptr;
   fVis = false;
   fNumx = 0;
@@ -106,8 +109,23 @@ void ddDRcalo::DRconstructor::implementTowers(xml_comp_t& x_theta, dd4hep::DDSeg
 
 void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::DDSegmentation::DRparamBase* param) {
   dd4hep::Tube fiber = dd4hep::Tube(0.,fX_cladC.rmax(),x_theta.height()/2.);
-  dd4hep::Tube fiberC = dd4hep::Tube(0.,fX_coreC.rmin(),x_theta.height()/2.);
-  dd4hep::Tube fiberS = dd4hep::Tube(0.,fX_coreS.rmin(),x_theta.height()/2.);
+  dd4hep::Tube fiberC = dd4hep::Tube(0.,fX_coreC.rmin(),x_theta.height()/2.-fX_mirror.height()/2.);
+  dd4hep::Tube fiberS = dd4hep::Tube(0.,fX_coreS.rmin(),x_theta.height()/2.-fX_mirror.height()/2.);
+
+  dd4hep::Tube cap = dd4hep::Tube(0.,fX_coreC.rmax(),fX_mirror.height()/2.);
+  dd4hep::Volume capC = dd4hep::Volume("capC", cap, fDescription->material(fX_hole.materialStr()));
+  dd4hep::Volume capS = dd4hep::Volume("capS", cap, fDescription->material(fX_hole.materialStr()));
+  if (fVis) capC.setVisAttributes(*fDescription, fX_dark.visStr());
+  if (fVis) capS.setVisAttributes(*fDescription, fX_dark.visStr());
+  dd4hep::Tube caphalf = dd4hep::Tube(0.,fX_coreC.rmax(),fX_mirror.height()/4.);
+  dd4hep::Volume caphalfC = dd4hep::Volume("caphalfC", caphalf, fDescription->material(fX_mirror.materialStr()));
+  dd4hep::Volume caphalfS = dd4hep::Volume("caphalfS", caphalf, fDescription->material(fX_dark.materialStr()));
+  dd4hep::SkinSurface(*fDescription, *fDetElement, "MirrorSurf_Tower"+std::to_string(fTowerNoLR), *fMirrorSurf, caphalfC);
+  capC.placeVolume(caphalfC, dd4hep::Position(0.,0.,-fX_mirror.height()/4.));
+  capS.placeVolume(caphalfS, dd4hep::Position(0.,0.,-fX_mirror.height()/4.));
+  if (fVis) caphalfC.setVisAttributes(*fDescription, fX_mirror.visStr());
+  if (fVis) caphalfS.setVisAttributes(*fDescription, fX_dark.visStr());
+
   auto rootTrap = trap.access();
 
   float sipmSize = fX_dim.dx();
@@ -131,7 +149,7 @@ void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volum
       dd4hep::Position pos = dd4hep::Position(localPosition);
 
       if ( std::abs(pos.x()) + fX_cladC.rmax() < rootTrap->GetBl1() && std::abs(pos.y()) + fX_cladC.rmax() < rootTrap->GetH1() ) {
-        implementFiber(towerVol, trap, pos, column, row, fiber, fiberC, fiberS); // full length fiber
+        implementFiber(towerVol, trap, pos, column, row, fiber, fiberC, fiberS, capC, capS); // full length fiber
         fFiberCoords.push_back( std::make_pair(column,row) );
       } else {
         // outside tower
@@ -165,10 +183,10 @@ void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volum
         dd4hep::Position centerPos( pos.x(),pos.y(),centerZ );
 
         dd4hep::Tube shortFiber = dd4hep::Tube(0.,fX_cladC.rmax(),fiberLen/2.);
-        dd4hep::Tube shortFiberC = dd4hep::Tube(0.,fX_coreC.rmin(),fiberLen/2.);
-        dd4hep::Tube shortFiberS = dd4hep::Tube(0.,fX_coreS.rmin(),fiberLen/2.);
+        dd4hep::Tube shortFiberC = dd4hep::Tube(0.,fX_coreC.rmin(),fiberLen/2.-fX_mirror.height()/2.);
+        dd4hep::Tube shortFiberS = dd4hep::Tube(0.,fX_coreS.rmin(),fiberLen/2.-fX_mirror.height()/2.);
 
-        implementFiber(towerVol, trap, centerPos, column, row, shortFiber, shortFiberC, shortFiberS);
+        implementFiber(towerVol, trap, centerPos, column, row, shortFiber, shortFiberC, shortFiberS, capC, capS);
         fFiberCoords.push_back( std::make_pair(column,row) );
       }
     }
@@ -176,7 +194,8 @@ void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volum
 }
 
 void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::Position& pos, int col, int row,
-                                             dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS) {
+                                             dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS,
+                                             dd4hep::Volume& capC, dd4hep::Volume& capS) {
   dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
   dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
 
@@ -199,7 +218,8 @@ void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::T
 
     dd4hep::Volume coreVol("coreC", fiberC, fDescription->material(fX_coreC.materialStr()));
     if (fVis) coreVol.setVisAttributes(*fDescription, fX_coreC.visStr());
-    cladVol.placeVolume( coreVol, fiberId32 );
+    cladVol.placeVolume( coreVol, fiberId32, dd4hep::Position(0.,0.,fX_mirror.height()/2.) );
+    cladVol.placeVolume( capC, fiberId32, dd4hep::Position(0.,0.,fX_mirror.height()/2.-fiber.dZ()) );
 
     coreVol.setRegion(*fDescription, fX_det.regionStr());
     cladVol.setRegion(*fDescription, fX_det.regionStr());
@@ -210,7 +230,8 @@ void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::T
 
     dd4hep::Volume coreVol("coreS", fiberS, fDescription->material(fX_coreS.materialStr()));
     if (fVis) coreVol.setVisAttributes(*fDescription, fX_coreS.visStr());
-    cladVol.placeVolume( coreVol, fiberId32 );
+    cladVol.placeVolume( coreVol, fiberId32, dd4hep::Position(0.,0.,fX_mirror.height()/2.) );
+    cladVol.placeVolume( capS, fiberId32, dd4hep::Position(0.,0.,fX_mirror.height()/2.-fiber.dZ()) );
 
     coreVol.setRegion(*fDescription, fX_det.regionStr());
     cladVol.setRegion(*fDescription, fX_det.regionStr());
