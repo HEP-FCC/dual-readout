@@ -8,17 +8,19 @@
 
 FastSimModelOpFiber::FastSimModelOpFiber(G4String name, G4Region* envelope)
 : G4VFastSimulationModel(name,envelope) {
-  fOpBoundaryProc = NULL;
+  pOpBoundaryProc = NULL;
   fCoreMaterial = NULL;
   fProcAssigned = false;
   fSafety = 2;
   fTrkLength = 0.;
   fNtransport = 0.;
-  fTransportUnit = 0.;
-  fFiberAxis = G4ThreeVector(0);
+  mTransportUnit = 0.;
+  mFiberAxis = G4ThreeVector(0);
+  mPrevDir = G4ThreeVector(0);
+  mCurrDir = G4ThreeVector(0);
   fKill = false;
   fNtotIntRefl = 0;
-  fTrackId = 0;
+  mTrackId = 0;
 
   DefineCommands();
 }
@@ -32,20 +34,22 @@ G4bool FastSimModelOpFiber::IsApplicable(const G4ParticleDefinition& type) {
 G4bool FastSimModelOpFiber::ModelTrigger(const G4FastTrack& fasttrack) {
   const G4Track* track = fasttrack.GetPrimaryTrack();
 
-  getCoreMaterial(track);
+  if ( mTrackId != track->GetTrackID() ) // reset when moving to the next track
+    reset();
 
+  if ( !checkTotalInternalReflection(track) )
+    return false; // nothing to do if the previous status is not total internal reflection
+
+  getCoreMaterial(track);
   auto matPropTable = fCoreMaterial->GetMaterialPropertiesTable();
 
-  if ( !matPropTable ) return false;
-
-  if ( !checkTotalInternalReflection(track) ) return false; // nothing to do if the previous status is not total internal reflection
+  if ( !matPropTable )
+    return false;
 
   G4TouchableHandle theTouchable = track->GetTouchableHandle();
   auto fiberPos = theTouchable->GetHistory()->GetTopTransform().Inverse().TransformPoint(G4ThreeVector(0.,0.,0.));
-  fFiberAxis = theTouchable->GetHistory()->GetTopTransform().Inverse().TransformAxis(G4ThreeVector(0.,0.,1.));
+  mFiberAxis = theTouchable->GetHistory()->GetTopTransform().Inverse().TransformAxis(G4ThreeVector(0.,0.,1.));
   fTrkLength = track->GetTrackLength();
-  G4Tubs* tubs = static_cast<G4Tubs*>(theTouchable->GetSolid());
-  G4double fiberLen = 2.*tubs->GetZHalfLength();
 
   if ( fTrkLength==0. ) { // kill stopped particle
     fKill = true;
@@ -53,19 +57,22 @@ G4bool FastSimModelOpFiber::ModelTrigger(const G4FastTrack& fasttrack) {
     return true;
   }
 
-  auto delta = track->GetMomentumDirection() * fTrkLength;
-  fTransportUnit = delta.dot(fFiberAxis);
+  // different propagation direction (e.g. mirror)
+  if ( mFiberAxis.dot(mCurrDir)*mFiberAxis.dot(mPrevDir) < 0 ) {
+    reset();
 
-  if ( fTransportUnit < 0. ) { // kill backward propagation
-    fKill = true;
-
-    return true;
+    return false;
   }
 
-  auto fiberEnd = fiberPos + fFiberAxis*fiberLen/2.;
+  auto delta = track->GetMomentumDirection() * fTrkLength;
+  mTransportUnit = delta.dot(mFiberAxis);
+
+  G4Tubs* tubs = static_cast<G4Tubs*>(theTouchable->GetSolid());
+  G4double fiberLen = 2.*tubs->GetZHalfLength();
+  auto fiberEnd = ( mTransportUnit > 0. ) ? fiberPos + mFiberAxis*fiberLen/2. : fiberPos - mFiberAxis*fiberLen/2.;
   auto toEnd = fiberEnd - track->GetPosition();
-  double toEndAxis = toEnd.dot(fFiberAxis);
-  double maxTransport = std::floor(toEndAxis/fTransportUnit);
+  double toEndAxis = toEnd.dot(mFiberAxis);
+  double maxTransport = std::floor(toEndAxis/mTransportUnit);
   fNtransport = maxTransport - fSafety;
 
   if ( fNtransport < 0. ) { // require at least n = fSafety of total internal reflections at the end
@@ -95,15 +102,15 @@ void FastSimModelOpFiber::DoIt(const G4FastTrack& fasttrack, G4FastStep& fastste
   auto track = fasttrack.GetPrimaryTrack();
 
   if (fKill) {
+    faststep.ProposeTotalEnergyDeposited(track->GetKineticEnergy());
     faststep.KillPrimaryTrack();
-    reset();
 
     return;
   }
 
   double velocity = CalculateVelocityForOpticalPhoton(track);
   double timeUnit = fTrkLength/velocity;
-  auto posShift = fTransportUnit*fNtransport*fFiberAxis;
+  auto posShift = mTransportUnit*fNtransport*mFiberAxis;
   double timeShift = timeUnit*fNtransport;
 
   faststep.ProposePrimaryTrackFinalPosition( track->GetPosition() + posShift, false );
@@ -118,23 +125,19 @@ void FastSimModelOpFiber::DoIt(const G4FastTrack& fasttrack, G4FastStep& fastste
 }
 
 bool FastSimModelOpFiber::checkTotalInternalReflection(const G4Track* track) {
-  if (!fProcAssigned) { // locate OpBoundaryProcess only once
+  if (!fProcAssigned) // locate OpBoundaryProcess only once
     setOpBoundaryProc(track);
-  }
 
   if ( track->GetTrackStatus()==fStopButAlive || track->GetTrackStatus()==fStopAndKill ) return false;
 
-  if ( fOpBoundaryProc->GetStatus()==G4OpBoundaryProcessStatus::TotalInternalReflection ) {
-    if ( fTrackId != track->GetTrackID() ) { // reset everything if when encountered a different track
-      reset();
-    }
-
-    fTrackId = track->GetTrackID();
+  if ( pOpBoundaryProc->GetStatus()==G4OpBoundaryProcessStatus::TotalInternalReflection ) {
+    mTrackId = track->GetTrackID();
+    mPrevDir = mCurrDir;
+    mCurrDir = track->GetMomentumDirection();
     fNtotIntRefl++;
 
-    if ( fNtotIntRefl > fSafety ) { // require at least n = fSafety of total internal reflections at the beginning
+    if ( fNtotIntRefl > fSafety ) // require at least n = fSafety of total internal reflections at the beginning
       return true;
-    }
   }
 
   return false;
@@ -144,12 +147,12 @@ void FastSimModelOpFiber::setOpBoundaryProc(const G4Track* track) {
   G4ProcessManager* pm = track->GetDefinition()->GetProcessManager();
   auto postStepProcessVector = pm->GetPostStepProcessVector();
 
-  for (int np = 0; np < postStepProcessVector->entries(); np++) {
+  for (unsigned int np = 0; np < postStepProcessVector->entries(); np++) {
     auto theProcess = (*postStepProcessVector)[np];
 
     if ( theProcess->GetProcessType()!=fOptical || theProcess->GetProcessSubType()!=G4OpProcessSubType::fOpBoundary ) continue;
 
-    fOpBoundaryProc = (G4OpBoundaryProcess*)theProcess;
+    pOpBoundaryProc = (G4OpBoundaryProcess*)theProcess;
     fProcAssigned = true;
 
     break;
@@ -199,11 +202,13 @@ void FastSimModelOpFiber::getCoreMaterial(const G4Track* track) {
 void FastSimModelOpFiber::reset() {
   fTrkLength = 0.;
   fNtransport = 0.;
-  fTransportUnit = 0.;
-  fFiberAxis = G4ThreeVector(0);
+  mTransportUnit = 0.;
+  mFiberAxis = G4ThreeVector(0);
   fKill = false;
   fNtotIntRefl = 0;
-  fTrackId = 0;
+  mTrackId = 0;
+  mPrevDir = G4ThreeVector(0);
+  mCurrDir = G4ThreeVector(0);
 }
 
 void FastSimModelOpFiber::DefineCommands() {
