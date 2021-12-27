@@ -34,7 +34,7 @@ namespace ddDRcalo {
     void implementTowers(xml_comp_t& x_theta, dd4hep::DDSegmentation::DRparamBase* param);
     void implementFibers(xml_comp_t& x_theta, dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::DDSegmentation::DRparamBase* param);
     void implementFiber(dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::Position& pos, int col, int row,
-                        dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS,
+                        dd4hep::Tube& fiberEnv, dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS,
                         dd4hep::Volume& capC, dd4hep::Volume& capS);
     void implementSipms(dd4hep::Volume& sipmLayerVol);
     double calculateDistAtZ(TGeoTrap* rootTrap, dd4hep::Position& pos, double* norm, double z);
