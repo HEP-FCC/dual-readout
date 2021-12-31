@@ -33,12 +33,13 @@ namespace ddDRcalo {
   private:
     void implementTowers(xml_comp_t& x_theta, dd4hep::DDSegmentation::DRparamBase* param);
     void implementFibers(xml_comp_t& x_theta, dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::DDSegmentation::DRparamBase* param);
-    void implementFiber(dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::Position& pos, int col, int row,
+    void implementFiber(dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::Position pos, int col, int row,
                         dd4hep::Tube& fiberEnv, dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS,
                         dd4hep::Volume& capC, dd4hep::Volume& capS);
     void implementSipms(dd4hep::Volume& sipmLayerVol);
     double calculateDistAtZ(TGeoTrap* rootTrap, dd4hep::Position& pos, double* norm, double z);
     float calculateFiberLen(TGeoTrap* rootTrap, dd4hep::Position& pos, double* norm, double z1, double diff, double towerHeight);
+    dd4hep::Box calculateFullBox(TGeoTrap* rootTrap, int& rmin, int& rmax, int& cmin, int& cmax);
     bool checkContained(TGeoTrap* rootTrap, dd4hep::Position& pos, double z, bool throwExcept=false);
     void getNormals(TGeoTrap* rootTrap, int numxBl2, double z, double* norm1, double* norm2, double* norm3, double* norm4);
 
