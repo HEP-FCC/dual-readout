@@ -7,10 +7,24 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "DD4hep/DD4hepUnits.h"
 
+#include "DD4hep/Detector.h"
+#include "DD4hep/OpticalSurfaces.h"
+#include "DDG4/Geant4Mapping.h"
+
 namespace drc {
 
 SimG4DRcaloSteppingAction::SimG4DRcaloSteppingAction()
-: G4UserSteppingAction(), fPrevTower(0), fPrevFiber(0) {}
+: G4UserSteppingAction(), fPrevTower(0), fPrevFiber(0), fPrevId(0) {
+  // get static methods
+  dd4hep::sim::Geant4GeometryInfo& info = dd4hep::sim::Geant4Mapping::instance().data();
+  dd4hep::Detector& description = dd4hep::Detector::getInstance();
+
+  dd4hep::OpticalSurfaceManager surfMgr = description.surfaceManager();
+  dd4hep::OpticalSurface filterSurfProp = surfMgr.opticalSurface("/world/DRcalo#FilterSurf");
+
+  if ( filterSurfProp.isValid() )
+    fFilterSurf = info.g4OpticalSurfaces[filterSurfProp.access()];
+}
 
 SimG4DRcaloSteppingAction::~SimG4DRcaloSteppingAction() {}
 
@@ -18,7 +32,29 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
   G4Track* track = step->GetTrack();
   G4ParticleDefinition* particle = track->GetDefinition();
 
-  if ( particle == G4OpticalPhoton::OpticalPhotonDefinition() ) return;
+  if ( particle == G4OpticalPhoton::OpticalPhotonDefinition() ) {
+    // apply yellow filter here to save CPU efficiency
+    // prevent double-counting filter efficiency
+    if ( fPrevId==track->GetTrackID() )
+      return;
+
+    auto* mpt = track->GetMaterial()->GetMaterialPropertiesTable();
+
+    // only applied to the scintillation channel
+    if ( mpt && mpt->ConstPropertyExists(kSCINTILLATIONYIELD) ) {
+      if ( fFilterSurf && fFilterSurf->GetMaterialPropertiesTable()->GetProperty(kTRANSMITTANCE) ) {
+        double photonMomentum = track->GetDynamicParticle()->GetTotalMomentum();
+        auto* transvec = fFilterSurf->GetMaterialPropertiesTable()->GetProperty(kTRANSMITTANCE);
+        double transmittance = transvec->Value(photonMomentum);
+        fPrevId = track->GetTrackID();
+
+        if ( G4UniformRand() > transmittance )
+          track->SetTrackStatus(G4TrackStatus::fStopAndKill);
+      }
+    }
+
+    return;
+  }
 
   G4StepPoint* presteppoint = step->GetPreStepPoint();
   G4StepPoint* poststeppoint = step->GetPostStepPoint();

@@ -14,6 +14,8 @@ gaudi_add_library(DRsimG4Full
   edm4dr
   ${Geant4_LIBRARIES}
   DRsegmentation
+  DD4hep::DDCore
+  DD4hep::DDG4
 )
 
 set_target_properties(DRsimG4Full PROPERTIES PUBLIC_HEADER "${libheaders}")
