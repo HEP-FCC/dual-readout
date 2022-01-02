@@ -20,7 +20,6 @@ ddDRcalo::DRconstructor::DRconstructor(xml_det_t& x_det)
   fDetElement = nullptr;
   fSensDet = nullptr;
   fSipmSurf = nullptr;
-  fFilterSurf = nullptr;
   fMirrorSurf = nullptr;
   fSegmentation = nullptr;
   fVis = false;
@@ -269,53 +268,22 @@ void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::T
 void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
   xml_comp_t x_glass ( fX_sipmDim.child( _Unicode(sipmGlass) ) );
   xml_comp_t x_wafer ( fX_sipmDim.child( _Unicode(sipmWafer) ) );
-  xml_comp_t x_filter ( fX_sipmDim.child( _Unicode(filter) ) );
 
   float sipmSize = fX_dim.dx();
-  double windowHeight = fX_sipmDim.height() - x_filter.height() - x_wafer.height();
+  double windowHeight = fX_sipmDim.height() - x_wafer.height();
 
   // Glass box
   dd4hep::Box sipmEnvelop(sipmSize/2., sipmSize/2., windowHeight/2.);
   dd4hep::Volume sipmEnvelopVol( "sipmEnvelop", sipmEnvelop, fDescription->material(x_glass.materialStr()) );
   if (fVis) sipmEnvelopVol.setVisAttributes(*fDescription, fX_sipmDim.visStr());
 
-  // Kodak filter
-  dd4hep::Box filterBox( sipmSize/2., sipmSize/2., x_filter.height()/2. );
-  dd4hep::Volume filterVol( "filter", filterBox, fDescription->material(x_filter.materialStr()) );
-  if (fVis) filterVol.setVisAttributes(*fDescription, x_filter.visStr());
-  dd4hep::SkinSurface(*fDescription, *fDetElement, "FilterSurf_Tower"+std::to_string(fTowerNoLR), *fFilterSurf, filterVol);
-
-  // dummy Box placed at C channel (instead of Kodak filter at S channel)
-  dd4hep::Box dummyBox( sipmSize/2., sipmSize/2., x_filter.height()/2. );
-  dd4hep::Volume dummyVol( "dummy", dummyBox, fDescription->material(x_glass.materialStr()) );
-  if (fVis) dummyVol.setVisAttributes(*fDescription, fX_sipmDim.visStr());
-
-  int sipmNo = 0;
-  for (unsigned iFiber = 0; iFiber < fFiberCoords.size(); iFiber++, sipmNo++) {
+  for (unsigned iFiber = 0; iFiber < fFiberCoords.size(); iFiber++) {
     int column = fFiberCoords.at(iFiber).first;
     int row = fFiberCoords.at(iFiber).second;
-
     auto localPosition = fSegmentation->localPosition(fNumx,fNumy,column,row);
-    auto sipmId64 = fSegmentation->setCellID(fTowerNoLR, 0, column, row);
-    int sipmId32 = fSegmentation->getLast32bits(sipmId64);
 
-    dd4hep::RotationZYX rot = dd4hep::RotationZYX(M_PI, 0., 0.); // AdHoc rotation, potentially bug
-    dd4hep::Position pos = dd4hep::Position(localPosition.x(),localPosition.y(),x_filter.height()/2.);
-    dd4hep::Transform3D trans = dd4hep::Transform3D(rot,pos);
-
-    sipmLayerVol.placeVolume( sipmEnvelopVol, trans );
-
-    if ( !fSegmentation->IsCerenkov(column,row) ) { //s channel
-      dd4hep::Position posFilter = dd4hep::Position(localPosition.x(),localPosition.y(),-windowHeight/2.);
-      dd4hep::Transform3D transFilter = dd4hep::Transform3D(rot,posFilter);
-
-      sipmLayerVol.placeVolume( filterVol, transFilter );
-    } else { // c channel
-      dd4hep::Position posDummy = dd4hep::Position(localPosition.x(),localPosition.y(),-windowHeight/2.);
-      dd4hep::Transform3D transDummy = dd4hep::Transform3D(rot,posDummy);
-
-      sipmLayerVol.placeVolume( dummyVol, sipmId32, transDummy );
-    }
+    dd4hep::Position pos = dd4hep::Position(localPosition.x(),localPosition.y(),0.);
+    sipmLayerVol.placeVolume( sipmEnvelopVol, pos );
   }
 
   // clear fiber coordinate vector

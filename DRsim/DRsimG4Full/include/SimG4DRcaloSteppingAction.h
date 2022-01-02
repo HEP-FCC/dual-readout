@@ -6,6 +6,7 @@
 #include "G4UserSteppingAction.hh"
 #include "G4Track.hh"
 #include "G4StepPoint.hh"
+#include "G4OpticalSurface.hh"
 
 // Data model
 #include "edm4hep/MCParticleCollection.h"
@@ -34,7 +35,9 @@ private:
 
   unsigned int fPrevTower;
   unsigned int fPrevFiber;
+  int fPrevId;
 
+  G4OpticalSurface* fFilterSurf;
   dd4hep::DDSegmentation::GridDRcalo* pSeg;
 
   // collections owned by SimG4DRcaloEventAction

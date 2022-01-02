@@ -55,7 +55,6 @@ namespace ddDRcalo {
     constructor.setDescription(&description);
     constructor.setDetElement(&drDet);
     constructor.setSipmSurf(&sipmSurfProp);
-    constructor.setFilterSurf(&filterSurfProp);
     constructor.setMirrorSurf(&mirrorSurfProp);
     constructor.setSensDet(&sensDet);
 

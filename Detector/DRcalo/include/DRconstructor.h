@@ -21,7 +21,6 @@ namespace ddDRcalo {
     void setDescription(dd4hep::Detector* description) { fDescription = description; }
     void setDetElement(dd4hep::DetElement* drDet) { fDetElement = drDet; }
     void setSipmSurf(dd4hep::OpticalSurface* sipmSurf) { fSipmSurf = sipmSurf; }
-    void setFilterSurf(dd4hep::OpticalSurface* filterSurf) { fFilterSurf = filterSurf; }
     void setMirrorSurf(dd4hep::OpticalSurface* mirrorSurf) { fMirrorSurf = mirrorSurf; }
     void setSensDet(dd4hep::SensitiveDetector* sensDet) {
       fSensDet = sensDet;
@@ -62,7 +61,6 @@ namespace ddDRcalo {
     dd4hep::DetElement* fDetElement;
     dd4hep::SensitiveDetector* fSensDet;
     dd4hep::OpticalSurface* fSipmSurf;
-    dd4hep::OpticalSurface* fFilterSurf;
     dd4hep::OpticalSurface* fMirrorSurf;
     dd4hep::DDSegmentation::GridDRcalo* fSegmentation;
 

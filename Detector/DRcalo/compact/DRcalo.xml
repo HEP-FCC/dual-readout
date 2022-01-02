@@ -395,29 +395,29 @@
     <!-- Optical surface is activated twice, apply sqrt to exterimental filter efficiency -->
     <!-- Kodak Wratten #9 -->
     <matrix name="filterEff" coldim="2" values="
-      1.37760*eV 0.950
-      1.45864*eV 0.950
-      1.54980*eV 0.950
-      1.65312*eV 0.950
-      1.71013*eV 0.950
-      1.77120*eV 0.950
-      1.83680*eV 0.950
-      1.90745*eV 0.949
-      1.98375*eV 0.948
-      2.06640*eV 0.946
-      2.10143*eV 0.945
-      2.13766*eV 0.944
-      2.17516*eV 0.942
-      2.21400*eV 0.940
-      2.25426*eV 0.933
-      2.29600*eV 0.915
-      2.33932*eV 0.872
-      2.38431*eV 0.787
-      2.43106*eV 0.699
-      2.47968*eV 0.587
-      2.53029*eV 0.455
-      2.58300*eV 0.288
-      2.63796*eV 0.134
+      1.37760*eV 0.903
+      1.45864*eV 0.903
+      1.54980*eV 0.903
+      1.65312*eV 0.903
+      1.71013*eV 0.903
+      1.77120*eV 0.903
+      1.83680*eV 0.902
+      1.90745*eV 0.901
+      1.98375*eV 0.898
+      2.06640*eV 0.895
+      2.10143*eV 0.893
+      2.13766*eV 0.891
+      2.17516*eV 0.888
+      2.21400*eV 0.883
+      2.25426*eV 0.87
+      2.29600*eV 0.838
+      2.33932*eV 0.76
+      2.38431*eV 0.62
+      2.43106*eV 0.488
+      2.47968*eV 0.345
+      2.53029*eV 0.207
+      2.58300*eV 0.083
+      2.63796*eV 0.018
       2.69531*eV 0.
       2.75520*eV 0.
       2.81782*eV 0.
@@ -459,39 +459,6 @@
       3.09960*eV 0.
       3.54241*eV 0.
       4.13281*eV 0.
-    "/>
-    <matrix name="RI_gel" coldim="2" values="
-      1.37760*eV 1.52
-      1.45864*eV 1.52
-      1.54980*eV 1.52
-      1.65312*eV 1.52
-      1.71013*eV 1.52
-      1.77120*eV 1.52
-      1.83680*eV 1.52
-      1.90745*eV 1.52
-      1.98375*eV 1.52
-      2.06640*eV 1.52
-      2.10143*eV 1.52
-      2.13766*eV 1.52
-      2.17516*eV 1.52
-      2.21400*eV 1.52
-      2.25426*eV 1.52
-      2.29600*eV 1.52
-      2.33932*eV 1.52
-      2.38431*eV 1.52
-      2.43106*eV 1.52
-      2.47968*eV 1.52
-      2.53029*eV 1.52
-      2.58300*eV 1.52
-      2.63796*eV 1.52
-      2.69531*eV 1.52
-      2.75520*eV 1.52
-      2.81782*eV 1.52
-      2.88335*eV 1.52
-      2.95200*eV 1.52
-      3.09960*eV 1.52
-      3.54241*eV 1.52
-      4.13281*eV 1.52
     "/>
     <matrix name="mirrorRef" coldim="2" values="
       1.37760*eV 0.9
@@ -593,14 +560,6 @@
       <property name="RINDEX" ref="RI_PMMA"/>
       <property name="ABSLENGTH" ref="AbsLen_PMMA"/>
     </material>
-    <material name="Gelatin">
-      <D value="1.27" unit="g/cm3"/>
-      <composite n="102" ref="C"/>
-      <composite n="151" ref="H"/>
-      <composite n="31" ref="N"/>
-      <composite n="39" ref="O"/>
-      <property name="RINDEX" ref="RI_gel"/>
-    </material>
     <material name="PolyvinylChloride">
       <D value="1.3" unit="g/cm3"/>
       <fraction n="0.04838" ref="H"/>
@@ -646,7 +605,6 @@
     <vis name="GenericVis" alpha="0.8" r="0.5" g="0.5" b="0.5" showDaughters="false" visible="false"/>
     <vis name="GlassVis" alpha="0.5" r="0.0" g="0.1" b="0.9" showDaughters="false" visible="false"/>
     <vis name="WaferVis" alpha="1." r="0.0" g="0.9" b="0.2" showDaughters="false" visible="false"/>
-    <vis name="filterVis" alpha="0.5" r="0.9" g="0.8" b="0.1" showDaughters="false" visible="false"/>
   </display>
 
   <!-- this is where we actually define our detector: -->
@@ -656,7 +614,6 @@
       <sipmDim height="0.3*mm" material="PolyvinylChloride" vis="GenericVis">
         <sipmGlass material="DR_PyrexGlass" vis="GlassVis"/>
         <sipmWafer height="0.01*mm" material="Silicon" vis="WaferVis" sensitive="true"/>
-        <filter height="0.01*mm" material="Gelatin" vis="filterVis"/>
       </sipmDim>
       <structure>
         <dim distance="1.5*mm" dx="1.2*mm"/>
