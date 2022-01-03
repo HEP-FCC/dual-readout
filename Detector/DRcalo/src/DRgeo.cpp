@@ -29,8 +29,8 @@ namespace ddDRcalo {
 
     dd4hep::OpticalSurfaceManager surfMgr = description.surfaceManager();
     dd4hep::OpticalSurface sipmSurfProp = surfMgr.opticalSurface("/world/"+name+"#SiPMSurf");
-    dd4hep::OpticalSurface filterSurfProp = surfMgr.opticalSurface("/world/"+name+"#FilterSurf");
     dd4hep::OpticalSurface mirrorSurfProp = surfMgr.opticalSurface("/world/"+name+"#MirrorSurf");
+    surfMgr.opticalSurface("/world/"+name+"#FilterSurf"); // actual filtering applied in the stepping action
 
     auto segmentation = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( sensDet.readout().segmentation().segmentation() );
     segmentation->setGridSize( x_dim.distance() );
