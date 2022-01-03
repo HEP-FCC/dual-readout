@@ -25,7 +25,6 @@ ddDRcalo::DRconstructor::DRconstructor(xml_det_t& x_det)
   fVis = false;
   fNumx = 0;
   fNumy = 0;
-  fTowerNoLR = -999;
   fFiberCoords.reserve(100000);
 }
 
@@ -43,13 +42,14 @@ void ddDRcalo::DRconstructor::implementTowers(xml_comp_t& x_theta, dd4hep::DDSeg
   for (xml_coll_t x_dThetaColl(x_theta,_U(deltatheta)); x_dThetaColl; ++x_dThetaColl, ++towerNo ) {
     xml_comp_t x_deltaTheta = x_dThetaColl;
 
+    // always use RHS for the reference
+    param->SetIsRHS(true);
     param->SetDeltaTheta(x_deltaTheta.deltatheta());
 
     double currentToC = currentTheta + x_deltaTheta.deltatheta()/2.;
     currentTheta += x_deltaTheta.deltatheta();
     param->SetThetaOfCenter(currentToC);
     param->init();
-    fTowerNoLR = param->signedTowerNo(towerNo);
 
     dd4hep::Trap assemblyEnvelop( (x_theta.height()+param->GetSipmHeight())/2., 0., 0., param->GetH1(), param->GetBl1(), param->GetTl1(), 0.,
                                   param->GetH2sipm(), param->GetBl2sipm(), param->GetTl2sipm(), 0. );
@@ -60,7 +60,7 @@ void ddDRcalo::DRconstructor::implementTowers(xml_comp_t& x_theta, dd4hep::DDSeg
     dd4hep::Volume towerVol( "tower", tower, fDescription->material(x_theta.materialStr()) );
     towerVol.setVisAttributes(*fDescription, x_theta.visStr());
 
-    implementFibers(x_theta, towerVol, tower, param);
+    implementFibers(x_theta, towerVol, tower, param, towerNo);
 
     xml_comp_t x_wafer ( fX_sipmDim.child( _Unicode(sipmWafer) ) );
 
@@ -75,7 +75,7 @@ void ddDRcalo::DRconstructor::implementTowers(xml_comp_t& x_theta, dd4hep::DDSeg
                                param->GetH2(), param->GetBl2(), param->GetTl2(), 0. );
     dd4hep::Volume sipmWaferVol( "sipmWafer", sipmWaferBox, fDescription->material(x_wafer.materialStr()) );
     if (fVis) sipmWaferVol.setVisAttributes(*fDescription, x_wafer.visStr());
-    dd4hep::SkinSurface(*fDescription, *fDetElement, "SiPMSurf_Tower"+std::to_string(fTowerNoLR), *fSipmSurf, sipmWaferVol);
+    dd4hep::SkinSurface(*fDescription, *fDetElement, "SiPMSurf_Tower"+std::to_string(towerNo), *fSipmSurf, sipmWaferVol);
 
     if (x_wafer.isSensitive()) {
       sipmWaferVol.setSensitiveDetector(*fSensDet);
@@ -84,21 +84,10 @@ void ddDRcalo::DRconstructor::implementTowers(xml_comp_t& x_theta, dd4hep::DDSeg
     implementSipms(sipmLayerVol, tower);
 
     for (int nPhi = 0; nPhi < x_theta.nphi(); nPhi++) {
-      auto towerId64 = fSegmentation->setVolumeID( fTowerNoLR, nPhi );
-      int towerId32 = fSegmentation->getFirst32bits(towerId64);
+      placeAssembly(x_theta,x_wafer,param,assemblyEnvelop,towerVol,sipmLayerVol,sipmWaferVol,towerNo,nPhi);
 
-      // copy number of assemblyVolume is unpredictable, use dummy volume to make use of copy number of afterwards
-      dd4hep::Volume assemblyEnvelopVol( "assembly", assemblyEnvelop, fDescription->material("Vacuum") );
-      fExperimentalHall->placeVolume( assemblyEnvelopVol, param->GetAssembleTransform3D(nPhi) );
-
-      assemblyEnvelopVol.placeVolume( towerVol, towerId32, dd4hep::Position(0.,0.,-param->GetSipmHeight()/2.) );
-
-      assemblyEnvelopVol.placeVolume( sipmLayerVol, towerId32, dd4hep::Position(0.,0.,(x_theta.height()-x_wafer.height())/2.) );
-
-      dd4hep::PlacedVolume sipmWaferPhys = assemblyEnvelopVol.placeVolume( sipmWaferVol, towerId32, dd4hep::Position(0.,0.,(x_theta.height()+param->GetSipmHeight()-x_wafer.height())/2.) );
-      sipmWaferPhys.addPhysVolID("eta", fTowerNoLR);
-      sipmWaferPhys.addPhysVolID("phi", nPhi);
-      sipmWaferPhys.addPhysVolID("module", 0);
+      if ( fX_det.reflect() )
+        placeAssembly(x_theta,x_wafer,param,assemblyEnvelop,towerVol,sipmLayerVol,sipmWaferVol,towerNo,nPhi,false);
     }
   }
 
@@ -106,7 +95,31 @@ void ddDRcalo::DRconstructor::implementTowers(xml_comp_t& x_theta, dd4hep::DDSeg
   param->SetTotTowerNum( towerNo - x_theta.start() );
 }
 
-void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::DDSegmentation::DRparamBase* param) {
+void ddDRcalo::DRconstructor::placeAssembly(xml_comp_t& x_theta, xml_comp_t& x_wafer, dd4hep::DDSegmentation::DRparamBase* param,
+                                            dd4hep::Trap& assemblyEnvelop, dd4hep::Volume& towerVol, dd4hep::Volume& sipmLayerVol, dd4hep::Volume& sipmWaferVol,
+                                            int towerNo, int nPhi, bool isRHS) {
+  param->SetIsRHS(isRHS);
+  int towerNoLR = param->signedTowerNo(towerNo);
+  auto towerId64 = fSegmentation->setVolumeID( towerNoLR, nPhi );
+  int towerId32 = fSegmentation->getFirst32bits(towerId64);
+
+  // copy number of assemblyVolume is unpredictable, use dummy volume to make use of copy number of afterwards
+  dd4hep::Volume assemblyEnvelopVol( std::string("assembly") + (isRHS ? "" : "_refl") , assemblyEnvelop, fDescription->material("Vacuum") );
+  fExperimentalHall->placeVolume( assemblyEnvelopVol, param->GetAssembleTransform3D(nPhi) );
+
+  assemblyEnvelopVol.placeVolume( towerVol, towerId32, dd4hep::Position(0.,0.,-param->GetSipmHeight()/2.) );
+
+  assemblyEnvelopVol.placeVolume( sipmLayerVol, towerId32, dd4hep::Position(0.,0.,(x_theta.height()-x_wafer.height())/2.) );
+
+  dd4hep::PlacedVolume sipmWaferPhys = assemblyEnvelopVol.placeVolume( sipmWaferVol, towerId32, dd4hep::Position(0.,0.,(x_theta.height()+param->GetSipmHeight()-x_wafer.height())/2.) );
+  sipmWaferPhys.addPhysVolID("eta", towerNoLR);
+  sipmWaferPhys.addPhysVolID("phi", nPhi);
+  sipmWaferPhys.addPhysVolID("module", 0);
+
+  return;
+}
+
+void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volume& towerVol, dd4hep::Trap& trap, dd4hep::DDSegmentation::DRparamBase* param, int towerNo) {
   dd4hep::Tube fiberEnv = dd4hep::Tube(0.,fX_cladC.rmax(),x_theta.height()/2.);
   dd4hep::Tube fiber = dd4hep::Tube(0.,fX_cladC.rmax(),x_theta.height()/2.-fX_mirror.height()/2.);
   dd4hep::Tube fiberC = dd4hep::Tube(0.,fX_coreC.rmin(),x_theta.height()/2.-fX_mirror.height()/2.);
@@ -115,7 +128,7 @@ void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volum
   dd4hep::Tube cap = dd4hep::Tube(0.,fX_coreC.rmax(),fX_mirror.height()/2.);
   dd4hep::Volume capC = dd4hep::Volume("capC", cap, fDescription->material(fX_mirror.materialStr()));
   dd4hep::Volume capS = dd4hep::Volume("capS", cap, fDescription->material(fX_dark.materialStr()));
-  dd4hep::SkinSurface(*fDescription, *fDetElement, "MirrorSurf_Tower"+std::to_string(fTowerNoLR), *fMirrorSurf, capC);
+  dd4hep::SkinSurface(*fDescription, *fDetElement, "MirrorSurf_Tower"+std::to_string(towerNo), *fMirrorSurf, capC);
   if (fVis) capC.setVisAttributes(*fDescription, fX_mirror.visStr());
   if (fVis) capS.setVisAttributes(*fDescription, fX_dark.visStr());
 
