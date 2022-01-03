@@ -57,14 +57,7 @@ namespace ddDRcalo {
     constructor.setSipmSurf(&sipmSurfProp);
     constructor.setMirrorSurf(&mirrorSurfProp);
     constructor.setSensDet(&sensDet);
-
-    paramBarrel->SetIsRHS(true);
-    paramEndcap->SetIsRHS(true);
     constructor.construct(); // right
-
-    paramBarrel->SetIsRHS(false);
-    paramEndcap->SetIsRHS(false);
-    constructor.construct(); // left
 
     dd4hep::Volume worldVol = description.pickMotherVolume(drDet);
     dd4hep::PlacedVolume hallPlace = worldVol.placeVolume(experimentalHall);
