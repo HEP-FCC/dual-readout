@@ -81,7 +81,7 @@ void ddDRcalo::DRconstructor::implementTowers(xml_comp_t& x_theta, dd4hep::DDSeg
       sipmWaferVol.setSensitiveDetector(*fSensDet);
     }
 
-    implementSipms(sipmLayerVol);
+    implementSipms(sipmLayerVol, tower);
 
     for (int nPhi = 0; nPhi < x_theta.nphi(); nPhi++) {
       auto towerId64 = fSegmentation->setVolumeID( fTowerNoLR, nPhi );
@@ -134,7 +134,7 @@ void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volum
 
   // full length fibers
   int rmin = 0, rmax = 0, cmin = 0, cmax = 0;
-  dd4hep::Box fullBox = calculateFullBox(rootTrap,rmin,rmax,cmin,cmax);
+  dd4hep::Box fullBox = calculateFullBox(rootTrap,rmin,rmax,cmin,cmax,rootTrap->GetDz());
   dd4hep::Volume fullBoxVol("fullBox",fullBox,fDescription->material(x_theta.materialStr()));
   fullBoxVol.setVisAttributes(*fDescription, x_theta.visStr());
 
@@ -149,17 +149,9 @@ void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volum
   implementFiber(unitBoxVol, trap, dd4hep::Position(-gridSize/2.,gridSize/2.,0.), cmin, rmin+1, fiberEnv, fiber, fiberC, fiberS, capC, capS);
   implementFiber(unitBoxVol, trap, dd4hep::Position(gridSize/2.,gridSize/2.,0.), cmin+1, rmin+1, fiberEnv, fiber, fiberC, fiberS, capC, capS);
 
-  for (int row = rmin; row < rmax; row+=2) {
-    for (int col = cmin; col < cmax; col+=2) {
-      auto pos0 = dd4hep::Position( fSegmentation->localPosition(fNumx,fNumy,col,row) );
-      auto pos3 = dd4hep::Position( fSegmentation->localPosition(fNumx,fNumy,col+1,row+1) );
-      fullBoxVol.placeVolume(unitBoxVol,(pos0+pos3)/2.);
-    }
-  }
-
+  bool isEvenRow = false, isEvenCol = false;
+  placeUnitBox(fullBoxVol,unitBoxVol,rmin,rmax,cmin,cmax,isEvenRow,isEvenCol);
   towerVol.placeVolume(fullBoxVol);
-  bool isEvenRow = (rmax-rmin+1)%2==0;
-  bool isEvenCol = (cmax-cmin+1)%2==0;
 
   // get normals to each side
   double norm1[3] = {0.,0.,0.}, norm2[3] = {0.,0.,0.}, norm3[3] = {0.,0.,0.}, norm4[3] = {0.,0.,0.};
@@ -175,11 +167,11 @@ void ddDRcalo::DRconstructor::implementFibers(xml_comp_t& x_theta, dd4hep::Volum
           double pos_[3] = {pos.x(),pos.y(),-fullBox.z()+TGeoShape::Tolerance()};
           bool check = fullBox.access()->Contains(pos_);
 
-          if (check)
+          if (check) {
             implementFiber(fullBoxVol, trap, pos, column, row, fiberEnv, fiber, fiberC, fiberS, capC, capS);
+            fFiberCoords.push_back( std::make_pair(column,row) );
+          }
         }
-
-        fFiberCoords.push_back( std::make_pair(column,row) );
       } else {
         // outside tower
         if (!checkContained(rootTrap,pos,z1)) continue;
@@ -227,7 +219,7 @@ void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::T
                                              dd4hep::Tube& fiberEnv, dd4hep::Tube& fiber, dd4hep::Tube& fiberC, dd4hep::Tube& fiberS,
                                              dd4hep::Volume& capC, dd4hep::Volume& capS) {
   // punch air hole
-  if ( pos.z() > TGeoShape::Tolerance() ) {
+  if ( fX_hole.gap() && pos.z() > TGeoShape::Tolerance() ) {
     dd4hep::Tube airHoleTube = dd4hep::Tube(0.,fX_cladC.rmax(),pos.z());
     dd4hep::Position airPos( pos.x(), pos.y(), -fiberEnv.dZ() );
     dd4hep::IntersectionSolid airHole = dd4hep::IntersectionSolid(trap,airHoleTube,airPos);
@@ -265,25 +257,55 @@ void ddDRcalo::DRconstructor::implementFiber(dd4hep::Volume& towerVol, dd4hep::T
   }
 }
 
-void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol) {
+void ddDRcalo::DRconstructor::implementSipms(dd4hep::Volume& sipmLayerVol, dd4hep::Trap& trap) {
   xml_comp_t x_glass ( fX_sipmDim.child( _Unicode(sipmGlass) ) );
   xml_comp_t x_wafer ( fX_sipmDim.child( _Unicode(sipmWafer) ) );
 
   float sipmSize = fX_dim.dx();
   double windowHeight = fX_sipmDim.height() - x_wafer.height();
 
+  int rmin = 0, rmax = 0, cmin = 0, cmax = 0;
+  auto rootTrap = trap.access();
+  dd4hep::Box sipmFullBox = calculateFullBox(rootTrap,rmin,rmax,cmin,cmax,windowHeight/2.);
+  dd4hep::Volume sipmFullBoxVol("sipmFullBox",sipmFullBox,fDescription->material(fX_sipmDim.materialStr()));
+
+  float gridSize = fX_dim.distance();
+  dd4hep::Box sipmUnitBox = dd4hep::Box(gridSize,gridSize,windowHeight/2.);
+  dd4hep::Volume sipmUnitBoxVol("sipmUnitBox",sipmUnitBox,fDescription->material(fX_sipmDim.materialStr()));
+
   // Glass box
   dd4hep::Box sipmEnvelop(sipmSize/2., sipmSize/2., windowHeight/2.);
   dd4hep::Volume sipmEnvelopVol( "sipmEnvelop", sipmEnvelop, fDescription->material(x_glass.materialStr()) );
-  if (fVis) sipmEnvelopVol.setVisAttributes(*fDescription, fX_sipmDim.visStr());
+
+  if (fVis) {
+    sipmFullBoxVol.setVisAttributes(*fDescription, fX_sipmDim.visStr());
+    sipmUnitBoxVol.setVisAttributes(*fDescription, fX_sipmDim.visStr());
+    sipmEnvelopVol.setVisAttributes(*fDescription, fX_sipmDim.visStr());
+  }
+
+  sipmUnitBoxVol.placeVolume( sipmEnvelopVol, dd4hep::Position(-gridSize/2.,-gridSize/2.,0.) );
+  sipmUnitBoxVol.placeVolume( sipmEnvelopVol, dd4hep::Position(gridSize/2.,-gridSize/2.,0.) );
+  sipmUnitBoxVol.placeVolume( sipmEnvelopVol, dd4hep::Position(-gridSize/2.,gridSize/2.,0.) );
+  sipmUnitBoxVol.placeVolume( sipmEnvelopVol, dd4hep::Position(gridSize/2.,gridSize/2.,0.) );
+
+  bool isEvenRow = false, isEvenCol = false;
+  placeUnitBox(sipmFullBoxVol,sipmUnitBoxVol,rmin,rmax,cmin,cmax,isEvenRow,isEvenCol);
+  sipmLayerVol.placeVolume(sipmFullBoxVol);
 
   for (unsigned iFiber = 0; iFiber < fFiberCoords.size(); iFiber++) {
     int column = fFiberCoords.at(iFiber).first;
     int row = fFiberCoords.at(iFiber).second;
     auto localPosition = fSegmentation->localPosition(fNumx,fNumy,column,row);
 
-    dd4hep::Position pos = dd4hep::Position(localPosition.x(),localPosition.y(),0.);
-    sipmLayerVol.placeVolume( sipmEnvelopVol, pos );
+    if ( row >= rmin && row <= rmax && column >= cmin && column <= cmax ) {
+      if ( ( !isEvenRow && row==rmax ) || ( !isEvenCol && column==cmax ) ) {
+        dd4hep::Position pos = dd4hep::Position(localPosition.x(),localPosition.y(),0.);
+        sipmFullBoxVol.placeVolume( sipmEnvelopVol, pos );
+      }
+    } else {
+      dd4hep::Position pos = dd4hep::Position(localPosition.x(),localPosition.y(),0.);
+      sipmLayerVol.placeVolume( sipmEnvelopVol, pos );
+    }
   }
 
   // clear fiber coordinate vector
@@ -343,7 +365,7 @@ void ddDRcalo::DRconstructor::getNormals(TGeoTrap* rootTrap, int numxBl2, double
   norm4[2] = 0.;
 }
 
-dd4hep::Box ddDRcalo::DRconstructor::calculateFullBox(TGeoTrap* rootTrap, int& rmin, int& rmax, int& cmin, int& cmax) {
+dd4hep::Box ddDRcalo::DRconstructor::calculateFullBox(TGeoTrap* rootTrap, int& rmin, int& rmax, int& cmin, int& cmax, double dz) {
   float gridSize = fX_dim.distance();
   double zmin = -rootTrap->GetDz() + TGeoShape::Tolerance();
   float xmin = 0., ymin = 0., ymax = 0.;
@@ -386,5 +408,20 @@ dd4hep::Box ddDRcalo::DRconstructor::calculateFullBox(TGeoTrap* rootTrap, int& r
   if ( std::abs(ymax+ymin) > TGeoShape::Tolerance() )
     throw std::runtime_error("Envelop of full length fibers (fullBox) is not located at the centre of the tower!");
 
-  return dd4hep::Box( (xmax-xmin)/2., (ymax-ymin)/2., rootTrap->GetDz() );
+  return dd4hep::Box( (xmax-xmin)/2., (ymax-ymin)/2., dz );
+}
+
+void ddDRcalo::DRconstructor::placeUnitBox(dd4hep::Volume& fullBox, dd4hep::Volume& unitBox, int rmin, int rmax, int cmin, int cmax, bool& isEvenRow, bool& isEvenCol) {
+  for (int row = rmin; row < rmax; row+=2) {
+    for (int col = cmin; col < cmax; col+=2) {
+      auto pos0 = dd4hep::Position( fSegmentation->localPosition(fNumx,fNumy,col,row) );
+      auto pos3 = dd4hep::Position( fSegmentation->localPosition(fNumx,fNumy,col+1,row+1) );
+      fullBox.placeVolume(unitBox,(pos0+pos3)/2.);
+    }
+  }
+
+  isEvenRow = (rmax-rmin+1)%2==0;
+  isEvenCol = (cmax-cmin+1)%2==0;
+
+  return;
 }
