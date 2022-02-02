@@ -94,7 +94,7 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
 void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, dd4hep::DDSegmentation::CellID& id64, float edep) {
   // search for the element
   bool found = false;
-  edm4hep::SimCalorimeterHit* thePtr = nullptr;
+  edm4hep::MutableSimCalorimeterHit* thePtr = nullptr;
 
   if ( m_Edeps->size() > prev ) { // check previous element
     auto element = m_Edeps->at(prev);
