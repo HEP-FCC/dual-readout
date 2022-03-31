@@ -9,7 +9,7 @@ cd $SCRIPT_DIR/..
 if [ ! -d SimSiPM ]; then
   git clone https://github.com/EdoPro98/SimSiPM
   cd SimSiPM
-  git checkout v1.2.3-beta
+  git checkout v2.0.2
   mkdir build install
   cd build
   cmake -DCMAKE_INSTALL_PREFIX=../install .. && \

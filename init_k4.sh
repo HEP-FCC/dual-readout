@@ -10,7 +10,7 @@ if [ ! -d k4FWCore ]; then
   # FIXME LCG100 does not support k4FWCore and HSF spackages do not support ivy-bridge :(
   git clone https://github.com/key4hep/k4FWCore
   cd k4FWCore
-  git checkout 38d1f2347c36a85f75d84baff144395a553c6bbd
+  git checkout v01-00pre14
   mkdir build install
   cd build
   cmake -DCMAKE_INSTALL_PREFIX=../install .. && \
@@ -32,7 +32,7 @@ cd $SCRIPT_DIR/..
 if [ ! -d k4SimGeant4 ]; then
   git clone https://github.com/HEP-FCC/k4SimGeant4
   cd k4SimGeant4
-  git checkout v0.1.0pre06
+  git checkout v0.1.0pre09
   mkdir build install
   cd build
   cmake .. -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17
@@ -53,7 +53,7 @@ cd $SCRIPT_DIR/..
 if [ ! -d k4Gen ]; then
   git clone https://github.com/HEP-FCC/k4Gen
   cd k4Gen
-  git checkout b7c735e401298a8c72915819dc0404a83f46a0fe
+  git checkout v0.1pre07
   mkdir build install
   cd build
   cmake -DCMAKE_INSTALL_PREFIX=../install .. && \
