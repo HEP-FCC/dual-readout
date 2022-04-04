@@ -574,9 +574,9 @@
       <composite n="21" ref="H"/>
       <property name="RINDEX" ref="RI_PS"/>
       <property name="ABSLENGTH" ref="AbsLen_PS"/>
-      <property name="FASTCOMPONENT" ref="scintFast_PS"/>
+      <property name="SCINTILLATIONCOMPONENT1" ref="scintFast_PS"/>
       <constant name="SCINTILLATIONYIELD" value="13.9/keV"/>
-      <constant name="FASTTIMECONSTANT" value="2.8*ns"/>
+      <constant name="SCINTILLATIONTIMECONSTANT1" value="2.8*ns"/>
       <constant name="RESOLUTIONSCALE" value="1."/>
     </material>
     <material name="DR_PyrexGlass">
