@@ -2,7 +2,16 @@
 # installed podio
 find_package(EDM4HEP REQUIRED)
 
-PODIO_GENERATE_DATAMODEL(edm4hep ../edm4dr.yaml headers sources IO_BACKEND_HANDLERS ${PODIO_IO_HANDLERS})
+# Use the EDM4HEP_DATA_DIR to derive extended data model
+message(STATUS "${EDM4HEP_DATA_DIR}")
+if ("${EDM4HEP_DATA_DIR}" STREQUAL "")
+  message(WARNING "Unable to extend data model since no installed yaml file found.")
+else()
+  message(STATUS "Current EDM4HEP data model is available at ${EDM4HEP_DATA_DIR}.")
+PODIO_GENERATE_DATAMODEL(edm4hep ../edm4dr.yaml headers sources
+                        UPSTREAM_EDM edm4hep:${EDM4HEP_DATA_DIR}/edm4hep.yaml
+                        IO_BACKEND_HANDLERS ${PODIO_IO_HANDLERS})
+endif()
 
 # use customized library linking instead of PODIO_ADD_DATAMODEL_CORE_LIB(edm4dr "${headers}" "${sources}")
 
