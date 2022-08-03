@@ -4,18 +4,6 @@ options:
   exposePODMembers: False
   includeSubfolder: True
 
-components:
-  #------ ObjectID helper struct for references/relations
-  edm4hep::ObjectID: # FIXME already lives in edm4hep, error handling in podio should be improved
-    Members:
-      - int index
-      - int collectionID
-    ExtraCode :
-      includes: "#include <podio/ObjectID.h>\n"
-      declaration: "
-      ObjectID() = default;\n
-      ObjectID(const podio::ObjectID& id ): index(id.index), collectionID(id.collectionID) {}\n
-    "
 
 datatypes :
   edm4hep::SparseVector:
