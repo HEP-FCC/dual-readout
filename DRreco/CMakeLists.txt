@@ -8,6 +8,8 @@ file(GLOB headers
   ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
+find_package(CLHEP)
+
 gaudi_add_module(DRreco
   SOURCES ${sources}
   LINK
@@ -15,6 +17,7 @@ gaudi_add_module(DRreco
   DRsegmentation
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore
+  CLHEP::CLHEP
 )
 
 target_include_directories(DRreco PUBLIC
