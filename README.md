@@ -6,7 +6,7 @@ Repository for GEANT4 simulation &amp; analysis of the dual-readout calorimeter.
 After fetching the repository, do
 
 ```sh
-source init_lcg.sh # init_hsf.sh for /cvmfs/sw.hsf.org/key4hep
+source init_hsf.sh
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=<path_to_install_directory> ..
@@ -114,7 +114,7 @@ k4run runDRcalib.py
 This requires the ROOT file generated from `runDRcalib.py`. Assuming the name of the file `<filename.root>`,
 
     ./bin/analysis <filename.root> <histogram lower edge in [GeV]> <histogram higher edge in [GeV]>
-    
+
 Note that the `analysis` is a mere example based on only `ROOT`, `podio` and `edm4hep`. Please make sure that you have implemented desired plots based on your needs and physics process.
 
 ### Precaution

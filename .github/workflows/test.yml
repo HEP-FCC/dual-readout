@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        SETUP: ['init_lcg.sh', 'init_hsf.sh']
+        SETUP: ['init_hsf.sh']
     steps:
     - uses: actions/checkout@v2
     - uses: cvmfs-contrib/github-action-cvmfs@v2

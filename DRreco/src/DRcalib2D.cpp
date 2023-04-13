@@ -3,7 +3,7 @@
 #include "GridDRcalo.h"
 
 #include "DD4hep/DD4hepUnits.h"
-#include "CLHEP/Units/SystemOfUnits.h"
+#include "G4SystemOfUnits.hh"
 
 #include <cmath>
 

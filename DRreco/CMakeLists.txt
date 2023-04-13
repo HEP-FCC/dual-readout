@@ -15,6 +15,7 @@ gaudi_add_module(DRreco
   DRsegmentation
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore
+  ${Geant4_LIBRARIES}
 )
 
 target_include_directories(DRreco PUBLIC
