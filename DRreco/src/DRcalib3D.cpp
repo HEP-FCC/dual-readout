@@ -1,7 +1,7 @@
 #include "DRcalib3D.h"
 
 #include "DD4hep/DD4hepUnits.h"
-#include "G4SystemOfUnits.hh"
+#include "CLHEP/Units/SystemOfUnits.h"
 
 #include "TH1D.h"
 #include "TVirtualFFT.h"
