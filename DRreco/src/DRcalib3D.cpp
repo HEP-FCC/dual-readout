@@ -45,11 +45,11 @@ StatusCode DRcalib3D::initialize() {
 }
 
 StatusCode DRcalib3D::execute() {
-  const edm4hep::RawCalorimeterHitCollection* digiHits = m_digiHits.get();
+  const edm4hep::CalorimeterHitCollection* digiHits = m_digiHits.get();
   const edm4hep::CalorimeterHitCollection* hits2d = m_2dHits.get();
-  const edm4hep::SparseVectorCollection* waveforms = m_waveforms.get();
+  const edm4hep::TimeSeriesCollection* waveforms = m_waveforms.get();
   edm4hep::CalorimeterHitCollection* caloHits = m_caloHits.createAndPut();
-  edm4hep::SparseVectorCollection* postprocTimes = m_postprocTime.createAndPut();
+  edm4hep::TimeSeriesCollection* postprocTimes = m_postprocTime.createAndPut();
 
   for (unsigned int idx = 0; idx < hits2d->size(); idx++) {
     // WARNING assume same input order (sequential access)
@@ -64,10 +64,26 @@ StatusCode DRcalib3D::execute() {
       return StatusCode::FAILURE;
     }
 
+    if ( m_gateStart!=waveform.getTime() ) {
+      error() << "Gate start is not equal to the starting time of the waveform! waveform.getTime() = " << waveform.getTime() << endmsg;
+      return StatusCode::FAILURE;
+    }
+
+    if ( m_sampling!=waveform.getInterval() ) {
+      error() << "Sampling rate is different! waveform.getInterval() = " << waveform.getInterval() << endmsg;
+      return StatusCode::FAILURE;
+    }
+
+    if ( m_nbins!=waveform.amplitude_size() ) {
+      error() << "Gate length is different! waveform.amplitude_size() = " << waveform.amplitude_size() << endmsg;
+      return StatusCode::FAILURE;
+    }
+
     auto postprocTime = postprocTimes->create(); // create an object even if integral is 0 to match the order with other collections
-    postprocTime.setSampling( waveform.getSampling() );
-    postprocTime.setAssocObj( waveform.getAssocObj() );
-    double amplitude = static_cast<double>(digiHit.getAmplitude());
+    postprocTime.setInterval( waveform.getInterval() );
+    postprocTime.setCellID( waveform.getCellID() );
+    postprocTime.setTime( waveform.getTime() );
+    double amplitude = static_cast<double>(digiHit.getEnergy());
 
     if (amplitude <= 0.)
       continue;
@@ -94,17 +110,17 @@ StatusCode DRcalib3D::execute() {
 
     // create a histogram to do FFT and fill it
     std::unique_ptr<TH1D> waveHist = std::make_unique<TH1D>("waveHist","waveHist",m_nbins,m_gateStart,m_gateStart+m_gateL);
+    float sampling = waveform.getInterval();
+    float startTime = waveform.getTime();
 
-    for (unsigned int bin = 0; bin < waveform.centers_size(); bin++) {
-      float timeBin = waveform.getCenters(bin);
-      waveHist->Fill(timeBin,waveform.getContents(bin));
+    for (unsigned int bin = 0; bin < waveform.amplitude_size(); bin++) {
+      float timeBin = startTime + (static_cast<float>(bin)+0.5)*sampling;
+      waveHist->Fill(timeBin,waveform.getAmplitude(bin));
     }
 
     // Fast Fourier Transform (Z-transform)
     std::unique_ptr<TH1> waveProcessed( processFFT(waveHist.get()) );
     double integral = waveProcessed->Integral();
-    double peak = waveProcessed->GetMaximum();
-    double thres = peak*m_zero.value()*amplitude/integral;
     double toaProc = m_gateStart + m_gateL*waveProcessed->GetBinCenter(waveProcessed->FindFirstBinAbove(0.))/static_cast<double>(m_nbins.value());
 
     if ( integral > 0. ) {
@@ -112,10 +128,10 @@ StatusCode DRcalib3D::execute() {
         double con = waveProcessed->GetBinContent(bin)*amplitude/integral;
         double cen = m_gateStart + m_gateL*waveProcessed->GetBinCenter(bin)/static_cast<double>(m_nbins.value());
 
-        if (con < thres) continue;
+        postprocTime.addToAmplitude( con );
 
-        postprocTime.addToContents( con );
-        postprocTime.addToCenters( cen );
+        if (con==0.)
+          continue;
 
         // scale effective velocity
         double veloScaled = pSeg->IsCerenkov(cID) ? m_veloC->Interpolate(cen-toaProc) : m_veloS->Interpolate(cen-toaProc);

@@ -11,7 +11,7 @@ file(GLOB libheaders
 gaudi_add_library(DRsimG4Full
   SOURCES ${libsrc}
   LINK
-  edm4dr
+  EDM4HEP::edm4hep
   ${Geant4_LIBRARIES}
   DRsegmentation
   DD4hep::DDCore

@@ -21,22 +21,6 @@ FastFiberData::FastFiberData(G4int id, G4double en, G4double globTime, G4double 
   mStepLengthInterval = 0.;
 }
 
-FastFiberData& FastFiberData::operator=(const FastFiberData &right) {
-  trackID = right.trackID;
-  kineticEnergy = right.kineticEnergy;
-  globalTime = right.globalTime;
-  pathLength = right.pathLength;
-  globalPosition = right.globalPosition;
-  momentumDirection = right.momentumDirection;
-  polarization = right.polarization;
-  mOpBoundaryStatus = right.mOpBoundaryStatus;
-  mOpAbsorptionNumIntLenLeft = right.mOpAbsorptionNumIntLenLeft;
-  mOpWLSNumIntLenLeft = right.mOpWLSNumIntLenLeft;
-  mStepLengthInterval = right.mStepLengthInterval;
-
-  return *this;
-}
-
 G4bool FastFiberData::checkRepetitive(const FastFiberData theData, G4bool checkInterval) {
   if ( this->trackID!=theData.trackID )
     return false;

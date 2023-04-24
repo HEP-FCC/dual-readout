@@ -41,7 +41,7 @@ StatusCode DRcalib2D::initialize() {
 }
 
 StatusCode DRcalib2D::execute() {
-  const edm4hep::RawCalorimeterHitCollection* digiHits = m_digiHits.get();
+  const edm4hep::CalorimeterHitCollection* digiHits = m_digiHits.get();
   edm4hep::CalorimeterHitCollection* caloHits = m_caloHits.createAndPut();
 
   for (unsigned int idx = 0; idx < digiHits->size(); idx++) {
@@ -56,12 +56,12 @@ StatusCode DRcalib2D::execute() {
     auto caloHit = caloHits->create();
     caloHit.setPosition( getPosition(cID) );
     caloHit.setCellID( digiHit.getCellID() );
-    caloHit.setTime( static_cast<double>(digiHit.getTimeStamp())*m_sampling );
+    caloHit.setTime( digiHit.getTime() );
 
     bool isCeren = pSeg->IsCerenkov(cID);
     float calib = isCeren ? m_calibs.at(absNumEta).first : m_calibs.at(absNumEta).second;
     caloHit.setType( static_cast<int>( isCeren ) );
-    caloHit.setEnergy( static_cast<float>(digiHit.getAmplitude())/calib );
+    caloHit.setEnergy( static_cast<float>(digiHit.getEnergy())/calib );
   }
 
   return StatusCode::SUCCESS;

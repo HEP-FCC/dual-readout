@@ -14,6 +14,7 @@ include(GNUInstallDirs)
 find_package(ROOT REQUIRED)
 find_package(podio REQUIRED HINTS $ENV{PODIO})
 find_package(Gaudi REQUIRED)
+find_package(EDM4HEP)
 find_package(k4FWCore REQUIRED)
 find_package(sipm REQUIRED)
 
@@ -41,7 +42,6 @@ dd4hep_configure_output()
 
 set(BOOST_ROOT "$ENV{BOOST_ROOT}")
 
-add_subdirectory(edm4dr)
 add_subdirectory(Detector)
 add_subdirectory(DRsim)
 add_subdirectory(DRdigi)

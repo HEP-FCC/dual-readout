@@ -13,7 +13,7 @@ find_package(CLHEP)
 gaudi_add_module(DRreco
   SOURCES ${sources}
   LINK
-  edm4dr
+  EDM4HEP::edm4hep
   DRsegmentation
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore

@@ -5,7 +5,7 @@
 
 // Data model
 #include "edm4hep/RawCalorimeterHitCollection.h"
-#include "edm4hep/SparseVectorCollection.h"
+#include "edm4hep/RawTimeSeriesCollection.h"
 
 #include "GaudiAlg/GaudiTool.h"
 #include "k4FWCore/DataHandle.h"
@@ -31,8 +31,8 @@ private:
   Gaudi::Property<std::vector<std::string>> m_readoutNames{this, "readoutNames", {"DRcaloSiPMreadout"}, "Name of the readouts (hits collections) to save"};
 
   DataHandle<edm4hep::RawCalorimeterHitCollection> mRawCaloHits{"RawCalorimeterHits", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::SparseVectorCollection> mTimeStruct{"RawTimeStructs", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::SparseVectorCollection> mWavlenStruct{"RawWavlenStructs", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::RawTimeSeriesCollection> mTimeStruct{"RawTimeStructs", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::RawTimeSeriesCollection> mWavlenStruct{"RawWavlenStructs", Gaudi::DataHandle::Writer, this};
 };
 
 #endif

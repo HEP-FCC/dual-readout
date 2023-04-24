@@ -33,22 +33,28 @@ StatusCode DigiSiPM::initialize() {
 }
 
 StatusCode DigiSiPM::execute() {
-  const edm4hep::SparseVectorCollection* timeStructs = m_timeStruct.get();
+  const edm4hep::RawTimeSeriesCollection* timeStructs = m_timeStruct.get();
   const edm4hep::RawCalorimeterHitCollection* rawHits = m_rawHits.get();
 
-  edm4hep::SparseVectorCollection* waveforms = m_waveforms.createAndPut();
-  edm4hep::RawCalorimeterHitCollection* digiHits = m_digiHits.createAndPut();
+  edm4hep::TimeSeriesCollection* waveforms = m_waveforms.createAndPut();
+  edm4hep::CalorimeterHitCollection* digiHits = m_digiHits.createAndPut();
 
   for (unsigned int idx = 0; idx < timeStructs->size(); idx++) {
     const auto& timeStruct = timeStructs->at(idx);
-    const auto& rawhit = rawHits->at(timeStruct.getAssocObj().index);
+    const auto& rawhit = rawHits->at(idx);
+
+    if (timeStruct.getCellID()!=rawhit.getCellID()) {
+      error() << "CellIDs of RawCalorimeterHits & RawTimeSeries are different! "
+              << "This should never happen." << endmsg;
+      return StatusCode::FAILURE;
+    }
 
     std::vector<double> times;
     times.reserve( rawhit.getAmplitude() );
 
-    for (unsigned int bin = 0; bin < timeStruct.contents_size(); bin++) {
-      int counts = static_cast<int>( timeStruct.getContents(bin) );
-      double timeBin = timeStruct.getCenters(bin);
+    for (unsigned int bin = 0; bin < timeStruct.adcCounts_size(); bin++) {
+      int counts = static_cast<int>( timeStruct.getAdcCounts(bin) );
+      double timeBin = timeStruct.getTime() + timeStruct.getInterval()*(static_cast<float>(bin)+0.5);
 
       for (int num = 0; num < counts; num++)
         times.emplace_back(timeBin);
@@ -67,24 +73,25 @@ StatusCode DigiSiPM::execute() {
     const double integral = anaSignal.integral(m_gateStart,m_gateL,m_thres); // (intStart, intGate, threshold)
     const double toa = anaSignal.toa(m_gateStart,m_gateL,m_thres);           // (intStart, intGate, threshold)
 
-    digiHit.setAmplitude( integral );
+    digiHit.setEnergy( integral );
     digiHit.setCellID( rawhit.getCellID() );
     // Toa and m_gateStart are in ns
-    digiHit.setTimeStamp( static_cast<int>((toa+m_gateStart)/m_sampling) );
-    waveform.setAssocObj( edm4hep::ObjectID( digiHit.getObjectID() ) );
-    waveform.setSampling( m_sampling );
+    digiHit.setTime( toa+m_gateStart );
+    waveform.setInterval( m_sampling );
+    waveform.setTime( timeStruct.getTime() );
+    waveform.setCellID( timeStruct.getCellID() );
 
     // sipm::SiPMAnalogSignal can be iterated as an std::vector<double>
     for (unsigned bin = 0; bin < anaSignal.size(); bin++) {
       double amp = anaSignal[bin];
 
-      if (amp < m_thres) continue;
-
       double tStart = static_cast<double>(bin)*m_sampling;
       double tEnd = static_cast<double>(bin+1)*m_sampling;
 
-      waveform.addToContents( amp );
-      waveform.addToCenters( (tStart+tEnd)/2. );
+      if ( (tStart+tEnd)/2. < timeStruct.getTime() )
+        continue;
+
+      waveform.addToAmplitude( amp );
     }
   }
 
