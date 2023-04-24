@@ -13,7 +13,7 @@ gaudi_add_module(DRsimG4Components
   LINK
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore
-  edm4dr
+  EDM4HEP::edm4hep
   DRsensitive
   DRsimG4Full
 )

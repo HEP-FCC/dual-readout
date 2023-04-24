@@ -11,7 +11,7 @@ file(GLOB headers
 gaudi_add_module(DRdigi
   SOURCES ${sources}
   LINK
-  edm4dr
+  EDM4HEP::edm4hep
   sipm::sipm
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore

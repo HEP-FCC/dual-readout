@@ -4,7 +4,8 @@
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/RawCalorimeterHitCollection.h"
 #include "edm4hep/CalorimeterHitCollection.h"
-#include "edm4hep/SparseVectorCollection.h"
+#include "edm4hep/TimeSeriesCollection.h"
+#include "edm4hep/RawTimeSeriesCollection.h"
 
 #include "podio/ROOTReader.h"
 #include "podio/EventStore.h"
@@ -62,13 +63,13 @@ int main(int , char* argv[]) {
     if (iEvt % 100 == 0) printf("Analyzing %dth event ...\n", iEvt);
 
     auto& edepHits = pStore->get<edm4hep::SimCalorimeterHitCollection>("SimCalorimeterHits");
-    auto& rawTimeStructs = pStore->get<edm4hep::SparseVectorCollection>("RawTimeStructs");
-    auto& rawWavlenStructs = pStore->get<edm4hep::SparseVectorCollection>("RawWavlenStructs");
-    auto& digiWaveforms = pStore->get<edm4hep::SparseVectorCollection>("DigiWaveforms");
+    auto& rawTimeStructs = pStore->get<edm4hep::RawTimeSeriesCollection>("RawTimeStructs");
+    auto& rawWavlenStructs = pStore->get<edm4hep::RawTimeSeriesCollection>("RawWavlenStructs");
+    auto& digiWaveforms = pStore->get<edm4hep::TimeSeriesCollection>("DigiWaveforms");
     auto& caloHits = pStore->get<edm4hep::CalorimeterHitCollection>("DRcalo2dHits");
     auto& rawHits = pStore->get<edm4hep::RawCalorimeterHitCollection>("RawCalorimeterHits");
     auto& digiHits = pStore->get<edm4hep::RawCalorimeterHitCollection>("DigiCalorimeterHits");
-    auto& procTimes = pStore->get<edm4hep::SparseVectorCollection>("DRpostprocTime");
+    auto& procTimes = pStore->get<edm4hep::TimeSeriesCollection>("DRpostprocTime");
 
     float Edep = 0.;
     for (unsigned int iEdep = 0; iEdep < edepHits.size(); iEdep++)
@@ -105,24 +106,24 @@ int main(int , char* argv[]) {
       if ( digiHit.getAmplitude() > 0 )
         tInt->Fill(static_cast<double>(digiHit.getAmplitude()));
 
-      for (unsigned int bin = 0; bin < timeStruct.centers_size(); bin++) {
-        float timeBin = timeStruct.getCenters(bin);
-        tT->Fill(timeBin,timeStruct.getContents(bin));
+      for (unsigned int bin = 0; bin < timeStruct.adcCounts_size(); bin++) {
+        int con = timeStruct.getAdcCounts(bin);
+        tT->Fill(timeStruct.getTime()+static_cast<float>(bin)*timeStruct.getInterval(),static_cast<float>(con));
       }
 
-      for (unsigned int bin = 0; bin < wavlenStruct.centers_size(); bin++) {
-        float wavlenBin = wavlenStruct.getCenters(bin);
-        tWav->Fill(wavlenBin,wavlenStruct.getContents(bin));
+      for (unsigned int bin = 0; bin < wavlenStruct.adcCounts_size(); bin++) {
+        int con = wavlenStruct.getAdcCounts(bin);
+        tWav->Fill(wavlenStruct.getTime()+static_cast<float>(bin)*wavlenStruct.getInterval(),static_cast<float>(con));
       }
 
-      for (unsigned int bin = 0; bin < waveform.centers_size(); bin++) {
-        float timeBin = waveform.getCenters(bin);
-        tD->Fill(timeBin,waveform.getContents(bin));
+      for (unsigned int bin = 0; bin < waveform.amplitude_size(); bin++) {
+        float con = waveform.getAmplitude(bin);
+        tD->Fill(waveform.getTime()+static_cast<float>(bin)*waveform.getInterval(),con);
       }
 
-      for (unsigned int bin = 0; bin < procTime.centers_size(); bin++) {
-        float timeBin = procTime.getCenters(bin);
-        tProc->Fill(timeBin,procTime.getContents(bin));
+      for (unsigned int bin = 0; bin < procTime.amplitude_size(); bin++) {
+        float con = procTime.getAmplitude(bin);
+        tProc->Fill(procTime.getTime()+static_cast<float>(bin)*procTime.getInterval(),con);
       }
     }
 

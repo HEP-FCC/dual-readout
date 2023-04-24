@@ -2,7 +2,9 @@
 #define DigiSiPM_h 1
 
 #include "edm4hep/RawCalorimeterHitCollection.h"
-#include "edm4hep/SparseVectorCollection.h"
+#include "edm4hep/CalorimeterHitCollection.h"
+#include "edm4hep/RawTimeSeriesCollection.h"
+#include "edm4hep/TimeSeriesCollection.h"
 #include "edm4hep/EventHeaderCollection.h"
 
 #include "k4FWCore/DataHandle.h"
@@ -23,10 +25,10 @@ public:
 
 private:
   DataHandle<edm4hep::RawCalorimeterHitCollection> m_rawHits{"RawCalorimeterHits", Gaudi::DataHandle::Reader, this};
-  DataHandle<edm4hep::SparseVectorCollection> m_timeStruct{"RawTimeStructs", Gaudi::DataHandle::Reader, this};
+  DataHandle<edm4hep::RawTimeSeriesCollection> m_timeStruct{"RawTimeStructs", Gaudi::DataHandle::Reader, this};
 
-  DataHandle<edm4hep::RawCalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::SparseVectorCollection> m_waveforms{"DigiWaveforms", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::TimeSeriesCollection> m_waveforms{"DigiWaveforms", Gaudi::DataHandle::Writer, this};
 
   std::unique_ptr<sipm::SiPMSensor> m_sensor;
 

@@ -43,6 +43,18 @@ namespace drc {
     float GetSamplingTime() { return mTimeSampling; }
     float GetSamplingWavlen() { return mWavSampling; }
 
+    float GetTimeStart() { return fTimeStart; }
+    void SetTimeStart(float val) { fTimeStart = val; }
+
+    float GetTimeEnd() { return fTimeEnd; }
+    void SetTimeEnd(float val) { fTimeEnd = val; }
+
+    float GetWavlenMax() { return fWavlenMax; }
+    void SetWavlenMax(float val) { fWavlenMax = val; }
+
+    float GetWavlenMin() { return fWavlenMin; }
+    void SetWavlenMin(float val) { fWavlenMin = val; }
+
   private:
     dd4hep::DDSegmentation::CellID fSiPMnum;
     unsigned long fPhotons;
@@ -50,6 +62,10 @@ namespace drc {
     DRsimTimeStruct fTimeStruct;
     float mWavSampling;
     float mTimeSampling;
+    float fWavlenMax;
+    float fWavlenMin;
+    float fTimeStart;
+    float fTimeEnd;
   };
 
   typedef G4THitsCollection<DRcaloSiPMHit> DRcaloSiPMHitsCollection;

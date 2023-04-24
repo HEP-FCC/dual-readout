@@ -48,8 +48,8 @@ StatusCode SimG4SaveDRcaloHits::saveOutput(const G4Event& aEvent) {
 
   if (collections != nullptr) {
     edm4hep::RawCalorimeterHitCollection* caloHits = mRawCaloHits.createAndPut();
-    edm4hep::SparseVectorCollection* timeStructs = mTimeStruct.createAndPut();
-    edm4hep::SparseVectorCollection* wavStructs = mWavlenStruct.createAndPut();
+    edm4hep::RawTimeSeriesCollection* timeStructs = mTimeStruct.createAndPut();
+    edm4hep::RawTimeSeriesCollection* wavStructs = mWavlenStruct.createAndPut();
 
     for (int iter_coll = 0; iter_coll < collections->GetNumberOfCollections(); iter_coll++) {
       collect = collections->GetHC(iter_coll);
@@ -60,38 +60,66 @@ StatusCode SimG4SaveDRcaloHits::saveOutput(const G4Event& aEvent) {
         for (size_t iter_hit = 0; iter_hit < n_hit; iter_hit++) {
           hit = dynamic_cast<drc::DRcaloSiPMHit*>(collect->GetHit(iter_hit));
 
+          uint64_t cellID = static_cast<unsigned long long>(hit->GetSiPMnum());
+
           auto caloHit = caloHits->create();
           auto timeStruct = timeStructs->create();
           auto wavStruct = wavStructs->create();
 
+          float samplingT = hit->GetSamplingTime();
+          float timeStart = hit->GetTimeStart();
+          float timeEnd = hit->GetTimeEnd();
+          auto& timemap = hit->GetTimeStruct();
+          timeStruct.setInterval(samplingT);
+          timeStruct.setTime(timeStart);
+          timeStruct.setCharge( static_cast<float>(hit->GetPhotonCount()) );
+          timeStruct.setCellID( cellID );
+
+          // abuse time series for saving wavelength spectrum (for R&D purpose)
+          float samplingW = hit->GetSamplingWavlen();
+          float wavMax = hit->GetWavlenMax();
+          float wavMin = hit->GetWavlenMin();
+          auto& wavmap = hit->GetWavlenSpectrum();
+          wavStruct.setInterval(samplingW);
+          wavStruct.setTime(wavMin);
+          wavStruct.setCharge( static_cast<float>(hit->GetPhotonCount()) );
+          wavStruct.setCellID( cellID );
+
+          unsigned nbinTime = static_cast<unsigned>(std::floor((timeEnd-timeStart)/samplingT));
+          unsigned nbinWav = static_cast<unsigned>(std::floor((wavMax-wavMin)/samplingW));
           float peakTime = 0.;
           int peakVal = 0;
-          float samplingT = hit->GetSamplingTime();
-          for (auto& i_timeStruct : hit->GetTimeStruct()) {
-            timeStruct.addToContents(i_timeStruct.second);
-            timeStruct.addToCenters( i_timeStruct.first );
 
-            int candidate = std::max( peakVal, i_timeStruct.second );
+          for (unsigned itime = 0; itime < nbinTime; itime++) {
+            float cen = timeStart + static_cast<float>(itime)*samplingT/2.;
+            int count = 0;
+
+            if ( timemap.find(cen)!=timemap.end() )
+              count = timemap.at(cen);
+
+            int candidate = std::max( peakVal, count );
 
             if ( peakVal < candidate ) {
               peakVal = candidate;
-              peakTime = i_timeStruct.first;
+              peakTime = cen;
             }
+
+            timeStruct.addToAdcCounts(count);
           }
 
-          caloHit.setCellID( static_cast<unsigned long long>(hit->GetSiPMnum()) );
+          for (unsigned iwav = 0; iwav < nbinWav; iwav++) {
+            float cen = wavMin + static_cast<float>(iwav)*samplingW/2.;
+            int count = 0;
+
+            if ( wavmap.find(cen)!=wavmap.end() )
+              count = wavmap.at(cen);
+
+            wavStruct.addToAdcCounts(count);
+          }
+
+          caloHit.setCellID( cellID );
           caloHit.setAmplitude( hit->GetPhotonCount() );
           caloHit.setTimeStamp( static_cast<int>( peakTime / samplingT ) );
-          timeStruct.setSampling( samplingT );
-          timeStruct.setAssocObj( edm4hep::ObjectID( caloHit.getObjectID() ) );
-
-          float samplingW = hit->GetSamplingWavlen();
-          for (auto& i_wavlen : hit->GetWavlenSpectrum()) {
-            wavStruct.addToContents(i_wavlen.second);
-            wavStruct.addToCenters( i_wavlen.first );
-          }
-          wavStruct.setSampling( samplingW );
-          wavStruct.setAssocObj( edm4hep::ObjectID( caloHit.getObjectID() ) );
         }
       }
     }

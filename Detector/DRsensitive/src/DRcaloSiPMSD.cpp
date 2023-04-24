@@ -61,6 +61,10 @@ G4bool drc::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
   if (hit==NULL) {
     hit = new DRcaloSiPMHit(fWavlenStep,fTimeStep);
     hit->SetSiPMnum(cID);
+    hit->SetTimeStart(fTimeStart);
+    hit->SetTimeEnd(fTimeEnd);
+    hit->SetWavlenMax(fWavlenStart);
+    hit->SetWavlenMin(fWavlenEnd);
 
     fHitCollection->insert(hit);
   }

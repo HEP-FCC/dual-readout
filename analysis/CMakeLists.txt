@@ -14,8 +14,7 @@ target_link_libraries(
   analysis
   ${ROOT_LIBRARIES}
   podio::podioRootIO
-  edm4dr
-  edm4dr::edm4drDict
+  EDM4HEP::edm4hep
 )
 
 target_include_directories(analysis PUBLIC
