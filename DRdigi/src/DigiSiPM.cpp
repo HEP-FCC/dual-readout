@@ -72,6 +72,7 @@ StatusCode DigiSiPM::execute() {
 
     const double integral = anaSignal.integral(m_gateStart,m_gateL,m_thres); // (intStart, intGate, threshold)
     const double toa = anaSignal.toa(m_gateStart,m_gateL,m_thres);           // (intStart, intGate, threshold)
+    const double gateEnd = m_gateStart + m_gateL;
 
     digiHit.setEnergy( integral );
     digiHit.setCellID( rawhit.getCellID() );
@@ -87,8 +88,12 @@ StatusCode DigiSiPM::execute() {
 
       double tStart = static_cast<double>(bin)*m_sampling;
       double tEnd = static_cast<double>(bin+1)*m_sampling;
+      double center = (tStart+tEnd)/2.;
 
-      if ( (tStart+tEnd)/2. < timeStruct.getTime() )
+      if ( center < timeStruct.getTime() )
+        continue;
+
+      if ( center > gateEnd )
         continue;
 
       waveform.addToAmplitude( amp );

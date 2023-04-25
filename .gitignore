@@ -8,12 +8,6 @@
 *.dat
 *.gdml
 
-# edm4dr datamodel generated files
-edm4dr/edm4hep/
-edm4dr/podio_generated_files.cmake
-edm4dr/src/
-
-
 *.log
 build*
 build.*.log
