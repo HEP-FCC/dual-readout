@@ -64,17 +64,17 @@ StatusCode DRcalib3D::execute() {
       return StatusCode::FAILURE;
     }
 
-    if ( m_gateStart!=waveform.getTime() ) {
+    if ( static_cast<float>(m_gateStart)!=waveform.getTime() ) {
       error() << "Gate start is not equal to the starting time of the waveform! waveform.getTime() = " << waveform.getTime() << endmsg;
       return StatusCode::FAILURE;
     }
 
-    if ( m_sampling!=waveform.getInterval() ) {
+    if ( static_cast<float>(m_sampling)!=waveform.getInterval() ) {
       error() << "Sampling rate is different! waveform.getInterval() = " << waveform.getInterval() << endmsg;
       return StatusCode::FAILURE;
     }
 
-    if ( m_nbins!=waveform.amplitude_size() ) {
+    if ( static_cast<unsigned>(m_nbins)!=waveform.amplitude_size() ) {
       error() << "Gate length is different! waveform.amplitude_size() = " << waveform.amplitude_size() << endmsg;
       return StatusCode::FAILURE;
     }
