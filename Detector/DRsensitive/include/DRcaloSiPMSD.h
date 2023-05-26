@@ -36,8 +36,8 @@ namespace drc {
 
     G4double wavToE(G4double wav) { return h_Planck*c_light/wav; }
 
-    float findWavCenter(G4double en);
-    float findTimeCenter(G4double stepTime);
+    int findWavBin(G4double en);
+    int findTimeBin(G4double stepTime);
   };
 }
 

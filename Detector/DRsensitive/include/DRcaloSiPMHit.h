@@ -12,8 +12,8 @@
 namespace drc {
   class DRcaloSiPMHit : public G4VHit {
   public:
-    typedef std::map<float, int> DRsimTimeStruct;
-    typedef std::map<float, int> DRsimWavlenSpectrum;
+    typedef std::map<int, int> DRsimTimeStruct;
+    typedef std::map<int, int> DRsimWavlenSpectrum;
 
     DRcaloSiPMHit(float wavSampling, float timeSampling);
     DRcaloSiPMHit(const DRcaloSiPMHit &right);
@@ -34,10 +34,10 @@ namespace drc {
     void SetSiPMnum(dd4hep::DDSegmentation::CellID n) { fSiPMnum = n; }
     const dd4hep::DDSegmentation::CellID& GetSiPMnum() const { return fSiPMnum; }
 
-    void CountWavlenSpectrum(float center);
+    void CountWavlenSpectrum(int ibin);
     const DRsimWavlenSpectrum& GetWavlenSpectrum() const { return fWavlenSpectrum; }
 
-    void CountTimeStruct(float center);
+    void CountTimeStruct(int ibin);
     const DRsimTimeStruct& GetTimeStruct() const { return fTimeStruct; }
 
     float GetSamplingTime() { return mTimeSampling; }

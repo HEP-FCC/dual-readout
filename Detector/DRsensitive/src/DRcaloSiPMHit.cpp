@@ -36,14 +36,20 @@ G4bool drc::DRcaloSiPMHit::operator==(const drc::DRcaloSiPMHit &right) const {
   return (fSiPMnum==right.fSiPMnum);
 }
 
-void drc::DRcaloSiPMHit::CountWavlenSpectrum(float center) {
-  auto it = fWavlenSpectrum.find(center);
-  if (it==fWavlenSpectrum.end()) fWavlenSpectrum.insert(std::make_pair(center,1));
-  else it->second++;
+void drc::DRcaloSiPMHit::CountWavlenSpectrum(int ibin) {
+  auto it = fWavlenSpectrum.find(ibin);
+
+  if (it==fWavlenSpectrum.end())
+    fWavlenSpectrum.insert(std::make_pair(ibin,1));
+  else
+    it->second++;
 }
 
-void drc::DRcaloSiPMHit::CountTimeStruct(float center) {
-  auto it = fTimeStruct.find(center);
-  if (it==fTimeStruct.end()) fTimeStruct.insert(std::make_pair(center,1));
-  else it->second++;
+void drc::DRcaloSiPMHit::CountTimeStruct(int ibin) {
+  auto it = fTimeStruct.find(ibin);
+
+  if (it==fTimeStruct.end())
+    fTimeStruct.insert(std::make_pair(ibin,1));
+  else
+    it->second++;
 }

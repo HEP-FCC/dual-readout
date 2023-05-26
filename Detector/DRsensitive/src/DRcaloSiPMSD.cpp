@@ -14,7 +14,7 @@
 
 drc::DRcaloSiPMSD::DRcaloSiPMSD(const std::string aName, const std::string aReadoutName, const dd4hep::Segmentation& aSeg)
 : G4VSensitiveDetector(aName), fHitCollection(0), fHCID(-1),
-fWavBin(120), fTimeBin(600), fWavlenStart(900.), fWavlenEnd(300.), fTimeStart(10.), fTimeEnd(70.)
+fWavBin(120), fTimeBin(650), fWavlenStart(900.), fWavlenEnd(300.), fTimeStart(5.), fTimeEnd(70.)
 {
   collectionName.insert(aReadoutName);
   fSeg = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>( aSeg.segmentation() );
@@ -71,35 +71,31 @@ G4bool drc::DRcaloSiPMSD::ProcessHits(G4Step* step, G4TouchableHistory*) {
 
   hit->photonCount();
 
-  float wavCenter = findWavCenter(energy);
-  hit->CountWavlenSpectrum(wavCenter);
+  int wavBin = findWavBin(energy);
+  hit->CountWavlenSpectrum(wavBin);
 
-  float timeCenter = findTimeCenter(hitTime);
-  hit->CountTimeStruct(timeCenter);
+  int timeBin = findTimeBin(hitTime);
+  hit->CountTimeStruct(timeBin);
 
   return true;
 }
 
-float drc::DRcaloSiPMSD::findWavCenter(G4double en) {
+int drc::DRcaloSiPMSD::findWavBin(G4double en) {
   int i = 0;
   for ( ; i < fWavBin+1; i++) {
-    if ( en < wavToE( (fWavlenStart - static_cast<float>(i)*fWavlenStep)*nm ) ) break;
+    if ( en < wavToE( (fWavlenStart - static_cast<float>(i)*fWavlenStep)*nm ) )
+      break;
   }
 
-  if (i==0) return (fWavlenStart + 0.5*fWavlenStep);
-  else if (i==fWavBin+1) return (fWavlenEnd - 0.5*fWavlenStep);
-
-  return ( fWavlenStart-static_cast<float>(i)*fWavlenStep + fWavlenStart-static_cast<float>(i-1)*fWavlenStep )/2.;
+  return fWavBin+1-i;
 }
 
-float drc::DRcaloSiPMSD::findTimeCenter(G4double stepTime) {
+int drc::DRcaloSiPMSD::findTimeBin(G4double stepTime) {
   int i = 0;
   for ( ; i < fTimeBin+1; i++) {
-    if ( stepTime < ( (fTimeStart + static_cast<float>(i)*fTimeStep)*CLHEP::ns ) ) break;
+    if ( stepTime < ( (fTimeStart + static_cast<float>(i)*fTimeStep)*CLHEP::ns ) )
+      break;
   }
 
-  if (i==0) return (fTimeStart - 0.5*fTimeStep);
-  else if (i==fTimeBin+1) return (fTimeEnd + 0.5*fTimeStep);
-
-  return ( fTimeStart+static_cast<float>(i-1)*fTimeStep + fTimeStart+static_cast<float>(i)*fTimeStep )/2.;
+  return i;
 }

@@ -115,7 +115,9 @@ StatusCode DRcalib3D::execute() {
 
     for (unsigned int bin = 0; bin < waveform.amplitude_size(); bin++) {
       float timeBin = startTime + (static_cast<float>(bin)+0.5)*sampling;
-      waveHist->Fill(timeBin,waveform.getAmplitude(bin));
+
+      if ( waveform.getAmplitude(bin) > 0. )
+        waveHist->Fill(timeBin,waveform.getAmplitude(bin));
     }
 
     // Fast Fourier Transform (Z-transform)
@@ -163,15 +165,15 @@ StatusCode DRcalib3D::execute() {
 StatusCode DRcalib3D::finalize() { return GaudiAlgorithm::finalize(); }
 
 TH1* DRcalib3D::processFFT(TH1* waveHist) {
-  int firstBin = waveHist->FindFirstBinAbove(0.);
-  int lastBin = 0;
+  int firstBin = waveHist->FindFirstBinAbove( m_zero.value()*waveHist->GetMaximum() );
+  int lastBin = firstBin;
 
   // define the signal range
-  for (int bin = firstBin; bin <= waveHist->GetNbinsX(); bin++) {
+  for (int bin = waveHist->GetNbinsX(); bin > firstBin; bin--) {
     double con = waveHist->GetBinContent(bin);
 
-    if (con==0.) {
-      lastBin = bin-1;
+    if ( con > m_zero.value()*waveHist->GetMaximum() ) {
+      lastBin = bin;
       break;
     }
   }
@@ -245,7 +247,7 @@ TH1* DRcalib3D::processFFT(TH1* waveHist) {
     if (bin < firstBin)
       zAns->SetBinContent(bin,0.);
 
-    if (bin >= lastBin)
+    if (bin > lastBin)
       zAns->SetBinContent(bin,0.);
   }
 

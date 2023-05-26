@@ -45,10 +45,10 @@ private:
   Gaudi::Property<std::string> m_scintProf{this, "scintProf", "VeloS_pfx", "scintillation velocity profile name"};
 
   Gaudi::Property<double> m_sampling{this, "sampling", 0.1, "SiPM sampling rate in ns"};
-  Gaudi::Property<double> m_gateStart{this, "gateStart", 10., "Integration gate starting time in ns"};
-  Gaudi::Property<double> m_gateL{this, "gateLength", 90., "Integration gate length in ns"};
-  Gaudi::Property<double> m_zero{this, "threshold", 0.01, "FFT postprocessing threshold (ratio to the peak)"};
-  Gaudi::Property<int> m_nbins{this, "nbins", 900, "number of bins for FFT"};
+  Gaudi::Property<double> m_gateStart{this, "gateStart", 5., "Integration gate starting time in ns"};
+  Gaudi::Property<double> m_gateL{this, "gateLength", 95., "Integration gate length in ns"};
+  Gaudi::Property<double> m_zero{this, "threshold", 0.2, "FFT postprocessing threshold (ratio to the peak)"};
+  Gaudi::Property<int> m_nbins{this, "nbins", 950, "number of bins for FFT"};
 
   Gaudi::Property<double> m_scintScale{this, "scintScale", 1.232, "Scintillation longitudinal scale"};
   Gaudi::Property<double> m_cherenScale{this, "cherenScale", 1.125, "Cherenkov longitudinal scale"};

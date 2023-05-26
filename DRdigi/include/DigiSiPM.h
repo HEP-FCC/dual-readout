@@ -43,11 +43,11 @@ private:
   Gaudi::Property<double> m_afterpulse{this, "afterpulse", 0.03, "afterpulse probability"};
   Gaudi::Property<double> m_falltimeFast{this, "falltimeFast", 6.5, "signal fast component decay time in ns"};
   Gaudi::Property<double> m_risetime{this, "risetime", 1., "signal rise time in ns"};
-  Gaudi::Property<double> m_snr{this, "SNR", 30., "SNR value in dB"};
+  Gaudi::Property<double> m_snr{this, "SNR", 20., "SNR value in dB"};
 
   // integration parameters
-  Gaudi::Property<double> m_gateStart{this, "gateStart", 10., "Integration gate starting time in ns"};
-  Gaudi::Property<double> m_gateL{this, "gateLength", 90., "Integration gate length in ns"};  // Should be approx 5 times fallTimeFast (see above)
+  Gaudi::Property<double> m_gateStart{this, "gateStart", 5., "Integration gate starting time in ns"};
+  Gaudi::Property<double> m_gateL{this, "gateLength", 95., "Integration gate length in ns"};  // Should be approx 5 times fallTimeFast (see above)
   Gaudi::Property<double> m_thres{this, "threshold", 1.5, "Integration threshold"};  // Threshold in pe (1.5 to suppress DCR)
 };
 

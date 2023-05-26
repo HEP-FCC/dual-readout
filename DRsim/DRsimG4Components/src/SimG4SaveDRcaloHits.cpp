@@ -85,41 +85,40 @@ StatusCode SimG4SaveDRcaloHits::saveOutput(const G4Event& aEvent) {
           wavStruct.setCharge( static_cast<float>(hit->GetPhotonCount()) );
           wavStruct.setCellID( cellID );
 
-          unsigned nbinTime = static_cast<unsigned>(std::floor((timeEnd-timeStart)/samplingT));
-          unsigned nbinWav = static_cast<unsigned>(std::floor((wavMax-wavMin)/samplingW));
-          float peakTime = 0.;
+          unsigned nbinTime = static_cast<unsigned>((timeEnd-timeStart)/samplingT);
+          unsigned nbinWav = static_cast<unsigned>((wavMax-wavMin)/samplingW);
+          int peakTime = 0.;
           int peakVal = 0;
 
-          for (unsigned itime = 0; itime < nbinTime; itime++) {
-            float cen = timeStart + static_cast<float>(itime)*samplingT/2.;
+          // same as the ROOT TH1 binning scheme (0: underflow, nbin+1:overflow)
+          for (unsigned itime = 1; itime < nbinTime+1; itime++) {
             int count = 0;
 
-            if ( timemap.find(cen)!=timemap.end() )
-              count = timemap.at(cen);
+            if ( timemap.find(itime)!=timemap.end() )
+              count = timemap.at(itime);
 
             int candidate = std::max( peakVal, count );
 
             if ( peakVal < candidate ) {
               peakVal = candidate;
-              peakTime = cen;
+              peakTime = itime;
             }
 
             timeStruct.addToAdcCounts(count);
           }
 
-          for (unsigned iwav = 0; iwav < nbinWav; iwav++) {
-            float cen = wavMin + static_cast<float>(iwav)*samplingW/2.;
+          for (unsigned iwav = 1; iwav < nbinWav+1; iwav++) {
             int count = 0;
 
-            if ( wavmap.find(cen)!=wavmap.end() )
-              count = wavmap.at(cen);
+            if ( wavmap.find(iwav)!=wavmap.end() )
+              count = wavmap.at(iwav);
 
             wavStruct.addToAdcCounts(count);
           }
 
           caloHit.setCellID( cellID );
           caloHit.setAmplitude( hit->GetPhotonCount() );
-          caloHit.setTimeStamp( static_cast<int>( peakTime / samplingT ) );
+          caloHit.setTimeStamp( peakTime-1 + static_cast<int>(timeStart/samplingT) );
         }
       }
     }
