@@ -111,11 +111,11 @@ k4run runDRcalib.py
 ```
 
 ### Analysis
-This requires the ROOT file generated from `runDRcalib.py`. Assuming the name of the file `<filename.root>`,
+This requires the ROOT file generated from `runDRcalib.py`.
 
-    ./bin/analysis <filename.root> <histogram lower edge in [GeV]> <histogram higher edge in [GeV]>
+    ./bin/analysis <histogram lower edge in [GeV]> <histogram higher edge in [GeV]> <file_*.root>
 
 Note that the `analysis` is a mere example based on only `ROOT`, `podio` and `edm4hep`. Please make sure that you have implemented desired plots based on your needs and physics process.
 
 ### Precaution
-Since the `GEANT4` simulation takes a very large amount of time per an event, it is assumed to run a few dozens of events per run. It can be run on parallel using `torque` or `condor`, and can be merged before analysis step using `hadd` from `ROOT`.
+Since the `GEANT4` simulation takes a very large amount of time per an event, it is assumed to run a few dozens of events per run. It can be run on parallel using `torque` or `condor`.
