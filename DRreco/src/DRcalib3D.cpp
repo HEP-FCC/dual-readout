@@ -30,7 +30,7 @@ StatusCode DRcalib3D::initialize() {
     return StatusCode::FAILURE;
   }
 
-  pSeg = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->lcdd()->readout(m_readoutName).segmentation().segmentation());
+  pSeg = dynamic_cast<dd4hep::DDSegmentation::GridDRcalo*>(m_geoSvc->getDetector()->readout(m_readoutName).segmentation().segmentation());
 
   auto veloFile = std::make_unique<TFile>(m_veloFile.value().c_str(),"READ");
   m_veloC.reset( static_cast<TH1D*>(veloFile->Get(m_cherenProf.value().c_str())) );
