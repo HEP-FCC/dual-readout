@@ -25,8 +25,8 @@ StatusCode SimG4SaveDRcaloHits::initialize() {
     return StatusCode::FAILURE;
   }
 
-  auto lcdd = m_geoSvc->lcdd();
-  auto allReadouts = lcdd->readouts();
+  auto det = m_geoSvc->getDetector();
+  auto allReadouts = det->readouts();
   for (auto& readoutName : m_readoutNames) {
     if (allReadouts.find(readoutName) == allReadouts.end()) {
       error() << "Readout " << readoutName << " not found! Please check tool configuration." << endmsg;
