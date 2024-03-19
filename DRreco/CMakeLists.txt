@@ -15,6 +15,7 @@ gaudi_add_module(DRreco
   LINK
   EDM4HEP::edm4hep
   DRsegmentation
+  Gaudi::GaudiAlgLib
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore
   CLHEP::CLHEP
