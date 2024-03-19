@@ -13,6 +13,7 @@ gaudi_add_module(DRdigi
   LINK
   EDM4HEP::edm4hep
   sipm::sipm
+  Gaudi::GaudiAlgLib
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore
 )
