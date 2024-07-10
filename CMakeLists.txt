@@ -12,6 +12,7 @@ set(CMAKE_MODULE_PATH
 include(GNUInstallDirs)
 
 find_package(ROOT REQUIRED)
+find_package(Python 3.10 EXACT)#Find python version according to root
 find_package(podio REQUIRED HINTS $ENV{PODIO})
 find_package(Gaudi REQUIRED)
 find_package(EDM4HEP)
