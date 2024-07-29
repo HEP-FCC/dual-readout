@@ -29,7 +29,7 @@ private:
 
   ServiceHandle<IGeoSvc> m_geoSvc;
   dd4hep::DDSegmentation::GridDRcalo* pSeg;
-  muable dd4hep::DDSegmentation::DRparamBase* pParamBase;
+  mutable dd4hep::DDSegmentation::DRparamBase* pParamBase;
 
   mutable DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Reader, this};
   mutable DataHandle<edm4hep::CalorimeterHitCollection> m_caloHits{"DRcalo2dHits", Gaudi::DataHandle::Writer, this};
