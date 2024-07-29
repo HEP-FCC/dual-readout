@@ -73,7 +73,7 @@ StatusCode DRcalib2D::finalize() {
   return Gaudi::Algorithm::finalize();
 }
 
-edm4hep::Vector3f DRcalib2D::getPosition(dd4hep::DDSegmentation::CellID& cID) {
+edm4hep::Vector3f DRcalib2D::getPosition(dd4hep::DDSegmentation::CellID& cID) const {
   auto globalPos = pSeg->position( cID );
   return { static_cast<float>( globalPos.x() * CLHEP::millimeter/dd4hep::millimeter ),
            static_cast<float>( globalPos.y() * CLHEP::millimeter/dd4hep::millimeter ),

@@ -164,7 +164,7 @@ StatusCode DRcalib3D::execute(const EventContext&) const {
 
 StatusCode DRcalib3D::finalize() { return Gaudi::Algorithm::finalize(); }
 
-TH1* DRcalib3D::processFFT(TH1* waveHist) {
+TH1* DRcalib3D::processFFT(TH1* waveHist) const {
   int firstBin = waveHist->FindFirstBinAbove( m_zero.value()*waveHist->GetMaximum() );
   int lastBin = firstBin;
 

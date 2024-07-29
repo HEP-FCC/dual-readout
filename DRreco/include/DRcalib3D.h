@@ -24,12 +24,12 @@ public:
   StatusCode execute(const EventContext&) const;
   StatusCode finalize();
 
-  TH1* processFFT(TH1* waveHist);
+  TH1* processFFT(TH1* waveHist) const;
 
 private:
   ServiceHandle<IGeoSvc> m_geoSvc;
   dd4hep::DDSegmentation::GridDRcalo* pSeg;
-  dd4hep::DDSegmentation::DRparamBase* pParamBase;
+  mutable dd4hep::DDSegmentation::DRparamBase* pParamBase;
   std::unique_ptr<TH1D> m_veloC;
   std::unique_ptr<TH1D> m_veloS;
 
