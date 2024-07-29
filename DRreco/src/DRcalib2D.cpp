@@ -9,7 +9,7 @@
 
 DECLARE_COMPONENT(DRcalib2D)
 
-DRcalib2D::DRcalib2D(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc), m_geoSvc("GeoSvc", aName) {
+DRcalib2D::DRcalib2D(const std::string& aName, ISvcLocator* aSvcLoc) : Gaudi::Algorithm(aName, aSvcLoc), m_geoSvc("GeoSvc", aName) {
   declareProperty("GeoSvc", m_geoSvc);
 
   pSeg = nullptr;
@@ -17,7 +17,7 @@ DRcalib2D::DRcalib2D(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgo
 }
 
 StatusCode DRcalib2D::initialize() {
-  StatusCode sc = GaudiAlgorithm::initialize();
+  StatusCode sc = Gaudi::Algorithm::initialize();
 
   if (sc.isFailure()) return sc;
 
@@ -40,7 +40,7 @@ StatusCode DRcalib2D::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode DRcalib2D::execute() {
+StatusCode DRcalib2D::execute(const EventContext&) const {
   const edm4hep::CalorimeterHitCollection* digiHits = m_digiHits.get();
   edm4hep::CalorimeterHitCollection* caloHits = m_caloHits.createAndPut();
 
@@ -70,7 +70,7 @@ StatusCode DRcalib2D::execute() {
 StatusCode DRcalib2D::finalize() {
   m_calibs.clear();
 
-  return GaudiAlgorithm::finalize();
+  return Gaudi::Algorithm::finalize();
 }
 
 edm4hep::Vector3f DRcalib2D::getPosition(dd4hep::DDSegmentation::CellID& cID) {

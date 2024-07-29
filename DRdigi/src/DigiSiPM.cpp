@@ -5,10 +5,10 @@
 
 DECLARE_COMPONENT(DigiSiPM)
 
-DigiSiPM::DigiSiPM(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {}
+DigiSiPM::DigiSiPM(const std::string& aName, ISvcLocator* aSvcLoc) : Gaudi::Algorithm(aName, aSvcLoc) {}
 
 StatusCode DigiSiPM::initialize() {
-  StatusCode sc = GaudiAlgorithm::initialize();
+  StatusCode sc = Gaudi::Algorithm::initialize();
 
   if (sc.isFailure()) return sc;
 
@@ -32,7 +32,7 @@ StatusCode DigiSiPM::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode DigiSiPM::execute() {
+StatusCode DigiSiPM::execute(const EventContext&) const {
   const edm4hep::RawTimeSeriesCollection* timeStructs = m_timeStruct.get();
   const edm4hep::RawCalorimeterHitCollection* rawHits = m_rawHits.get();
 
@@ -104,5 +104,5 @@ StatusCode DigiSiPM::execute() {
 }
 
 StatusCode DigiSiPM::finalize() {
-  return GaudiAlgorithm::finalize();
+  return Gaudi::Algorithm::finalize();
 }
