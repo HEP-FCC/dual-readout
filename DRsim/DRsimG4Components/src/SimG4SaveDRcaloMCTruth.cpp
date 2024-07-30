@@ -5,14 +5,14 @@
 DECLARE_COMPONENT(SimG4SaveDRcaloMCTruth)
 
 SimG4SaveDRcaloMCTruth::SimG4SaveDRcaloMCTruth(const std::string& aType, const std::string& aName, const IInterface* aParent)
-: GaudiTool(aType, aName, aParent), m_geantSvc("SimG4Svc", aName) {
+: AlgTool(aType, aName, aParent), m_geantSvc("SimG4Svc", aName) {
   declareInterface<ISimG4SaveOutputTool>(this);
 }
 
 SimG4SaveDRcaloMCTruth::~SimG4SaveDRcaloMCTruth() {}
 
 StatusCode SimG4SaveDRcaloMCTruth::initialize() {
-  if (GaudiTool::initialize().isFailure())
+  if (AlgTool::initialize().isFailure())
     return StatusCode::FAILURE;
 
   if (!m_geantSvc) {
@@ -33,7 +33,7 @@ StatusCode SimG4SaveDRcaloMCTruth::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SimG4SaveDRcaloMCTruth::finalize() { return GaudiTool::finalize(); }
+StatusCode SimG4SaveDRcaloMCTruth::finalize() { return AlgTool::finalize(); }
 
 StatusCode SimG4SaveDRcaloMCTruth::saveOutput(const G4Event&) {
   auto* edeps = m_eventAction->getEdepsCollection();

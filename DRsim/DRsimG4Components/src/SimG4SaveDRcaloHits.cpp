@@ -9,14 +9,14 @@
 DECLARE_COMPONENT(SimG4SaveDRcaloHits)
 
 SimG4SaveDRcaloHits::SimG4SaveDRcaloHits(const std::string& aType, const std::string& aName, const IInterface* aParent)
-: GaudiTool(aType, aName, aParent), m_geoSvc("GeoSvc", aName) {
+: AlgTool(aType, aName, aParent), m_geoSvc("GeoSvc", aName) {
   declareInterface<ISimG4SaveOutputTool>(this);
 }
 
 SimG4SaveDRcaloHits::~SimG4SaveDRcaloHits() {}
 
 StatusCode SimG4SaveDRcaloHits::initialize() {
-  if (GaudiTool::initialize().isFailure())
+  if (AlgTool::initialize().isFailure())
     return StatusCode::FAILURE;
 
   if (!m_geoSvc) {
@@ -39,7 +39,7 @@ StatusCode SimG4SaveDRcaloHits::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SimG4SaveDRcaloHits::finalize() { return GaudiTool::finalize(); }
+StatusCode SimG4SaveDRcaloHits::finalize() { return AlgTool::finalize(); }
 
 StatusCode SimG4SaveDRcaloHits::saveOutput(const G4Event& aEvent) {
   G4HCofThisEvent* collections = aEvent.GetHCofThisEvent();

@@ -9,26 +9,26 @@
 
 #include "k4FWCore/DataHandle.h"
 
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "SiPMSensor.h"
 
-class DigiSiPM : public GaudiAlgorithm {
+class DigiSiPM : public Gaudi::Algorithm {
 public:
   DigiSiPM(const std::string& name, ISvcLocator* svcLoc);
   virtual ~DigiSiPM() {};
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext&) const;
   StatusCode finalize();
 
 private:
-  DataHandle<edm4hep::RawCalorimeterHitCollection> m_rawHits{"RawCalorimeterHits", Gaudi::DataHandle::Reader, this};
-  DataHandle<edm4hep::RawTimeSeriesCollection> m_timeStruct{"RawTimeStructs", Gaudi::DataHandle::Reader, this};
+  mutable DataHandle<edm4hep::RawCalorimeterHitCollection> m_rawHits{"RawCalorimeterHits", Gaudi::DataHandle::Reader, this};
+  mutable DataHandle<edm4hep::RawTimeSeriesCollection> m_timeStruct{"RawTimeStructs", Gaudi::DataHandle::Reader, this};
 
-  DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::TimeSeriesCollection> m_waveforms{"DigiWaveforms", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::TimeSeriesCollection> m_waveforms{"DigiWaveforms", Gaudi::DataHandle::Writer, this};
 
   std::unique_ptr<sipm::SiPMSensor> m_sensor;
 

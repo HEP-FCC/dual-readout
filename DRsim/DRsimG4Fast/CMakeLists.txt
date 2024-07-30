@@ -11,7 +11,6 @@ file(GLOB headers
 gaudi_add_module(DRsimG4Fast
   SOURCES ${sources}
   LINK
-  Gaudi::GaudiAlgLib
   Gaudi::GaudiKernel
   k4FWCore::k4FWCore
   ${Geant4_LIBRARIES}

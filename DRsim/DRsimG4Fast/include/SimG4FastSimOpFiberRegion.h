@@ -9,7 +9,7 @@
 
 #include "G4LogicalVolume.hh"
 
-#include "GaudiAlg/GaudiTool.h"
+#include "GaudiKernel/AlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "k4Interface/ISimG4RegionTool.h"
 
@@ -17,7 +17,7 @@
 class G4VFastSimulationModel;
 class G4Region;
 
-class SimG4FastSimOpFiberRegion : public GaudiTool, virtual public ISimG4RegionTool {
+class SimG4FastSimOpFiberRegion : public AlgTool, virtual public ISimG4RegionTool {
 public:
   explicit SimG4FastSimOpFiberRegion(const std::string& type, const std::string& name, const IInterface* parent);
   virtual ~SimG4FastSimOpFiberRegion();

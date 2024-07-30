@@ -8,20 +8,20 @@
 DECLARE_COMPONENT(SimG4FastSimOpFiberRegion)
 
 SimG4FastSimOpFiberRegion::SimG4FastSimOpFiberRegion(const std::string& type, const std::string& name, const IInterface* parent)
-: GaudiTool(type, name, parent) {
+: AlgTool(type, name, parent) {
   declareInterface<ISimG4RegionTool>(this);
 }
 
 SimG4FastSimOpFiberRegion::~SimG4FastSimOpFiberRegion() {}
 
 StatusCode SimG4FastSimOpFiberRegion::initialize() {
-  if (GaudiTool::initialize().isFailure())
+  if (AlgTool::initialize().isFailure())
     return StatusCode::FAILURE;
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode SimG4FastSimOpFiberRegion::finalize() { return GaudiTool::finalize(); }
+StatusCode SimG4FastSimOpFiberRegion::finalize() { return AlgTool::finalize(); }
 
 StatusCode SimG4FastSimOpFiberRegion::create() {
   auto* regionStore = G4RegionStore::GetInstance();
