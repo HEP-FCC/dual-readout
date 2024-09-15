@@ -109,7 +109,7 @@ StatusCode DRcalib3D::execute(const EventContext&) const {
     double scale = pSeg->IsCerenkov(cID) ? m_cherenScale.value() : m_scintScale.value();
 
     // create a histogram to do FFT and fill it
-    std::unique_ptr<TH1D> waveHist = std::make_unique<TH1D>("waveHist","waveHist",m_nbins,m_gateStart,m_gateStart+m_gateL);
+    std::unique_ptr<TH1D> waveHist = std::make_unique<TH1D>("waveHist","waveHist",m_nbins,m_gateStart,m_gateStart.value()+m_gateL.value());
     float sampling = waveform.getInterval();
     float startTime = waveform.getTime();
 

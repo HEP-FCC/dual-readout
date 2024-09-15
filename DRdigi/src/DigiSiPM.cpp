@@ -72,7 +72,7 @@ StatusCode DigiSiPM::execute(const EventContext&) const {
 
     const double integral = anaSignal.integral(m_gateStart,m_gateL,m_thres); // (intStart, intGate, threshold)
     const double toa = anaSignal.toa(m_gateStart,m_gateL,m_thres);           // (intStart, intGate, threshold)
-    const double gateEnd = m_gateStart + m_gateL;
+    const double gateEnd = m_gateStart.value() + m_gateL.value();
 
     digiHit.setEnergy( integral );
     digiHit.setCellID( rawhit.getCellID() );
