@@ -7,7 +7,7 @@
 #include "edm4hep/TimeSeriesCollection.h"
 #include "edm4hep/RawTimeSeriesCollection.h"
 
-#include "podio/ROOTFrameReader.h"
+#include "podio/ROOTReader.h"
 #include "podio/Frame.h"
 
 #include "TROOT.h"
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
   std::vector<float> E_Ss,E_Cs;
 
-  auto reader = podio::ROOTFrameReader();
+  auto reader = podio::ROOTReader();
   reader.openFiles(filenames);
 
   unsigned int entries = reader.getEntries("events");
