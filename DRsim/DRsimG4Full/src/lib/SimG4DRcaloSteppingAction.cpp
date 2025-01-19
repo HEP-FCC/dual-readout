@@ -128,10 +128,11 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, dd4hep::DDSegment
                            static_cast<float>(pos.z()*CLHEP::millimeter/dd4hep::millimeter) } );
     prev = m_Edeps->size();
     thePtr = &simEdep;
+
+    auto edepPrev = thePtr->getEnergy();
+    thePtr->setEnergy( edepPrev + edep );
   }
 
-  auto edepPrev = thePtr->getEnergy();
-  thePtr->setEnergy( edepPrev + edep );
 }
 
 bool SimG4DRcaloSteppingAction::checkId(edm4hep::SimCalorimeterHit edep, dd4hep::DDSegmentation::CellID& id64) {
