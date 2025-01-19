@@ -30,15 +30,9 @@ else()
   find_package(Geant4 REQUIRED)
 endif()
 
-IF(NOT TARGET DD4hep::DDCore)
-  find_package ( DD4hep REQUIRED )
-  include ( ${DD4hep_DIR}/cmake/DD4hep.cmake )
-  include ( ${DD4hep_DIR}/cmake/DD4hepBuild.cmake )
-  dd4hep_configure_output()
-ENDIF()
-
+find_package ( DD4hep REQUIRED )
 dd4hep_set_compiler_flags()
-dd4hep_configure_output()
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 set(BOOST_ROOT "$ENV{BOOST_ROOT}")
 
