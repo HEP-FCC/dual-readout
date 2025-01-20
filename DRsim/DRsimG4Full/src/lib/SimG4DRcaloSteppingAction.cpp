@@ -94,12 +94,12 @@ void SimG4DRcaloSteppingAction::UserSteppingAction(const G4Step* step) {
 void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, dd4hep::DDSegmentation::CellID& id64, float edep) {
   // search for the element
   bool found = false;
-  edm4hep::MutableSimCalorimeterHit* thePtr = nullptr;
+  size_t index = -1;
 
   if ( m_Edeps->size() > prev ) { // check previous element
     auto element = m_Edeps->at(prev);
     if ( checkId(element, id64) ) {
-      thePtr = &element;
+      index = prev;
       found = true;
     }
   }
@@ -110,7 +110,7 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, dd4hep::DDSegment
       if ( checkId(element, id64) ) {
         found = true;
         prev = iElement;
-        thePtr = &element;
+        index = iElement;
 
         break;
       }
@@ -127,12 +127,10 @@ void SimG4DRcaloSteppingAction::accumulate(unsigned int &prev, dd4hep::DDSegment
                            static_cast<float>(pos.y()*CLHEP::millimeter/dd4hep::millimeter),
                            static_cast<float>(pos.z()*CLHEP::millimeter/dd4hep::millimeter) } );
     prev = m_Edeps->size();
-    thePtr = &simEdep;
-
-    auto edepPrev = thePtr->getEnergy();
-    thePtr->setEnergy( edepPrev + edep );
+    index = prev - 1;
   }
 
+  m_Edeps->at(index).setEnergy(m_Edeps->at(index).getEnergy() + edep);
 }
 
 bool SimG4DRcaloSteppingAction::checkId(edm4hep::SimCalorimeterHit edep, dd4hep::DDSegmentation::CellID& id64) {
