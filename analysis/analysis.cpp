@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
     float leakage = 0.;
 
     for (unsigned int iLeak = 0; iLeak < leakages->size(); iLeak++) {
-      auto& momentum = (*leakages)[iLeak].getMomentum();
+      auto momentum = (*leakages)[iLeak].getMomentum();
       ROOT::Math::XYZVectorF vec(momentum.x, momentum.y, momentum.z);
       leakage += std::sqrt(vec.Mag2());
     }
