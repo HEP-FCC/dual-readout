@@ -11,13 +11,6 @@ set(CMAKE_MODULE_PATH
 # Use GNU-style hierarchy for installing build products
 include(GNUInstallDirs)
 
-find_package(ROOT REQUIRED)
-find_package(podio REQUIRED HINTS $ENV{PODIO})
-find_package(Gaudi REQUIRED)
-find_package(EDM4HEP)
-find_package(k4FWCore REQUIRED)
-find_package(sipm REQUIRED)
-
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
@@ -30,15 +23,17 @@ else()
   find_package(Geant4 REQUIRED)
 endif()
 
-IF(NOT TARGET DD4hep::DDCore)
-  find_package ( DD4hep REQUIRED )
-  include ( ${DD4hep_DIR}/cmake/DD4hep.cmake )
-  include ( ${DD4hep_DIR}/cmake/DD4hepBuild.cmake )
-  dd4hep_configure_output()
-ENDIF()
-
+find_package ( DD4hep REQUIRED )
 dd4hep_set_compiler_flags()
-dd4hep_configure_output()
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+
+
+find_package(ROOT REQUIRED)
+find_package(podio REQUIRED HINTS $ENV{PODIO})
+find_package(Gaudi REQUIRED)
+find_package(EDM4HEP)
+find_package(k4FWCore REQUIRED)
+find_package(sipm REQUIRED)
 
 set(BOOST_ROOT "$ENV{BOOST_ROOT}")
 
