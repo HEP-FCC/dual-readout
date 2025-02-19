@@ -25,7 +25,7 @@ jobs:
         source ${{ matrix.SETUP }};\
         mkdir build install;\
         cd build;\
-        cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17 ..;"
+        cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=20 ..;"
     - name: Compile
       run: |
         docker exec CI_container /bin/bash -c "cd ./Package;\
