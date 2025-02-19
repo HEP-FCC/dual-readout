@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 cmake_policy(SET CMP0074 NEW)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-project(dual-readout)
+project(dual-readout LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH}
@@ -10,6 +8,7 @@ set(CMAKE_MODULE_PATH
 
 # Use GNU-style hierarchy for installing build products
 include(GNUInstallDirs)
+include(cmake/Key4hepConfig.cmake)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
