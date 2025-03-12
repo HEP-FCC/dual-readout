@@ -12,7 +12,11 @@
 #include "Gaudi/Algorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
+#if __has_include("SiPMSensor.h")
 #include "SiPMSensor.h"
+#elif __has_include("sipm/SiPMSensor.h")
+#include "sipm/SiPMSensor.h"
+#endif
 
 class DigiSiPM : public Gaudi::Algorithm {
 public:
