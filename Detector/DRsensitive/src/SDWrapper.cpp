@@ -7,8 +7,9 @@ namespace dd4hep {
 namespace sim {
   static G4VSensitiveDetector* create_DRcaloSiPM_sd(const std::string& aDetectorName, dd4hep::Detector& aDet) {
     std::string readoutName = aDet.sensitiveDetector(aDetectorName).readout().name();
-    return new drc::DRcaloSiPMSD(aDetectorName,readoutName,aDet.sensitiveDetector(aDetectorName).readout().segmentation());
+    return new drc::DRcaloSiPMSD(aDetectorName, readoutName,
+                                 aDet.sensitiveDetector(aDetectorName).readout().segmentation());
   }
-}
-}
-DECLARE_EXTERNAL_GEANT4SENSITIVEDETECTOR(DRcaloSiPMSD,dd4hep::sim::create_DRcaloSiPM_sd)
+} // namespace sim
+} // namespace dd4hep
+DECLARE_EXTERNAL_GEANT4SENSITIVEDETECTOR(DRcaloSiPMSD, dd4hep::sim::create_DRcaloSiPM_sd)

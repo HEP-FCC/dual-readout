@@ -3,10 +3,10 @@
 
 #include "GridDRcalo.h"
 
-#include "G4UserSteppingAction.hh"
-#include "G4Track.hh"
-#include "G4StepPoint.hh"
 #include "G4OpticalSurface.hh"
+#include "G4StepPoint.hh"
+#include "G4Track.hh"
+#include "G4UserSteppingAction.hh"
 
 // Data model
 #include "edm4hep/MCParticleCollection.h"
@@ -28,7 +28,7 @@ public:
   void setThreshold(const double thres) { m_thres = thres; }
 
 private:
-  void accumulate(unsigned int &prev, dd4hep::DDSegmentation::CellID& id64, float edep);
+  void accumulate(unsigned int& prev, dd4hep::DDSegmentation::CellID& id64, float edep);
   bool checkId(edm4hep::SimCalorimeterHit edep, dd4hep::DDSegmentation::CellID& id64);
 
   void saveLeakage(G4Track* track, G4StepPoint* pre);
@@ -46,6 +46,6 @@ private:
   edm4hep::MCParticleCollection* m_Leakages;
   double m_thres;
 };
-}
+} // namespace drc
 
 #endif

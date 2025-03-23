@@ -1,9 +1,9 @@
 #ifndef SimG4FastSimOpFiberRegion_h
 #define SimG4FastSimOpFiberRegion_h 1
 
-#include <vector>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 #include "FastSimModelOpFiber.h"
 

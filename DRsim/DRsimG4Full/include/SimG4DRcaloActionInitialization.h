@@ -23,6 +23,6 @@ private:
   double m_birks;
   double m_thres;
 };
-}
+} // namespace drc
 
 #endif

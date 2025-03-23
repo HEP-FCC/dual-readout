@@ -10,7 +10,8 @@ DigiSiPM::DigiSiPM(const std::string& aName, ISvcLocator* aSvcLoc) : Gaudi::Algo
 StatusCode DigiSiPM::initialize() {
   StatusCode sc = Gaudi::Algorithm::initialize();
 
-  if (sc.isFailure()) return sc;
+  if (sc.isFailure())
+    return sc;
 
   sipm::SiPMProperties properties;
   properties.setSignalLength(m_sigLength);
@@ -43,18 +44,18 @@ StatusCode DigiSiPM::execute(const EventContext&) const {
     const auto& timeStruct = timeStructs->at(idx);
     const auto& rawhit = rawHits->at(idx);
 
-    if (timeStruct.getCellID()!=rawhit.getCellID()) {
+    if (timeStruct.getCellID() != rawhit.getCellID()) {
       error() << "CellIDs of RawCalorimeterHits & RawTimeSeries are different! "
               << "This should never happen." << endmsg;
       return StatusCode::FAILURE;
     }
 
     std::vector<double> times;
-    times.reserve( rawhit.getAmplitude() );
+    times.reserve(rawhit.getAmplitude());
 
     for (unsigned int bin = 0; bin < timeStruct.adcCounts_size(); bin++) {
-      int counts = static_cast<int>( timeStruct.getAdcCounts(bin) );
-      double timeBin = timeStruct.getTime() + timeStruct.getInterval()*(static_cast<float>(bin)+0.5);
+      int counts = static_cast<int>(timeStruct.getAdcCounts(bin));
+      double timeBin = timeStruct.getTime() + timeStruct.getInterval() * (static_cast<float>(bin) + 0.5);
 
       for (int num = 0; num < counts; num++)
         times.emplace_back(timeBin);
@@ -70,39 +71,37 @@ StatusCode DigiSiPM::execute(const EventContext&) const {
     // Using only analog signal (ADC conversion is still experimental)
     const sipm::SiPMAnalogSignal anaSignal = m_sensor->signal();
 
-    const double integral = anaSignal.integral(m_gateStart,m_gateL,m_thres); // (intStart, intGate, threshold)
-    const double toa = anaSignal.toa(m_gateStart,m_gateL,m_thres);           // (intStart, intGate, threshold)
+    const double integral = anaSignal.integral(m_gateStart, m_gateL, m_thres); // (intStart, intGate, threshold)
+    const double toa = anaSignal.toa(m_gateStart, m_gateL, m_thres);           // (intStart, intGate, threshold)
     const double gateEnd = m_gateStart.value() + m_gateL.value();
 
-    digiHit.setEnergy( integral );
-    digiHit.setCellID( rawhit.getCellID() );
+    digiHit.setEnergy(integral);
+    digiHit.setCellID(rawhit.getCellID());
     // Toa and m_gateStart are in ns
-    digiHit.setTime( toa+m_gateStart );
-    waveform.setInterval( m_sampling );
-    waveform.setTime( timeStruct.getTime() );
-    waveform.setCellID( timeStruct.getCellID() );
+    digiHit.setTime(toa + m_gateStart);
+    waveform.setInterval(m_sampling);
+    waveform.setTime(timeStruct.getTime());
+    waveform.setCellID(timeStruct.getCellID());
 
     // sipm::SiPMAnalogSignal can be iterated as an std::vector<double>
     for (unsigned bin = 0; bin < anaSignal.size(); bin++) {
       double amp = anaSignal[bin];
 
-      double tStart = static_cast<double>(bin)*m_sampling;
-      double tEnd = static_cast<double>(bin+1)*m_sampling;
-      double center = (tStart+tEnd)/2.;
+      double tStart = static_cast<double>(bin) * m_sampling;
+      double tEnd = static_cast<double>(bin + 1) * m_sampling;
+      double center = (tStart + tEnd) / 2.;
 
-      if ( center < timeStruct.getTime() )
+      if (center < timeStruct.getTime())
         continue;
 
-      if ( center > gateEnd )
+      if (center > gateEnd)
         continue;
 
-      waveform.addToAmplitude( amp );
+      waveform.addToAmplitude(amp);
     }
   }
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode DigiSiPM::finalize() {
-  return Gaudi::Algorithm::finalize();
-}
+StatusCode DigiSiPM::finalize() { return Gaudi::Algorithm::finalize(); }

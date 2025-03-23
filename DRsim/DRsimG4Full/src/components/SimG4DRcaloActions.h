@@ -1,8 +1,8 @@
 #ifndef SimG4DRcaloActions_h
 #define SimG4DRcaloActions_h 1
 
-#include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/SimCalorimeterHitCollection.h"
 
 #include "GaudiKernel/AlgTool.h"
 #include "GaudiKernel/SystemOfUnits.h"

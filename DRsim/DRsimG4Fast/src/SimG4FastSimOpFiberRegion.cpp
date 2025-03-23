@@ -7,8 +7,9 @@
 
 DECLARE_COMPONENT(SimG4FastSimOpFiberRegion)
 
-SimG4FastSimOpFiberRegion::SimG4FastSimOpFiberRegion(const std::string& type, const std::string& name, const IInterface* parent)
-: AlgTool(type, name, parent) {
+SimG4FastSimOpFiberRegion::SimG4FastSimOpFiberRegion(const std::string& type, const std::string& name,
+                                                     const IInterface* parent)
+    : AlgTool(type, name, parent) {
   declareInterface<ISimG4RegionTool>(this);
 }
 
@@ -25,9 +26,9 @@ StatusCode SimG4FastSimOpFiberRegion::finalize() { return AlgTool::finalize(); }
 
 StatusCode SimG4FastSimOpFiberRegion::create() {
   auto* regionStore = G4RegionStore::GetInstance();
-  auto* region = regionStore->GetRegion( static_cast<std::string>(m_regionName) );
+  auto* region = regionStore->GetRegion(static_cast<std::string>(m_regionName));
 
-  m_model = std::make_unique<FastSimModelOpFiber>("FastSimModelOpFiber",region);
+  m_model = std::make_unique<FastSimModelOpFiber>("FastSimModelOpFiber", region);
 
   info() << "Creating FastSimModelOpFiber model with the region " << m_regionName << endmsg;
 

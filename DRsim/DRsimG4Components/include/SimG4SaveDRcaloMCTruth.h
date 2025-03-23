@@ -7,8 +7,8 @@
 
 #include "GaudiKernel/AlgTool.h"
 #include "k4FWCore/DataHandle.h"
-#include "k4Interface/ISimG4Svc.h"
 #include "k4Interface/ISimG4SaveOutputTool.h"
+#include "k4Interface/ISimG4Svc.h"
 
 #include "SimG4DRcaloEventAction.h"
 
@@ -25,8 +25,10 @@ public:
   virtual StatusCode saveOutput(const G4Event& aEvent) final;
 
 private:
-  mutable DataHandle<edm4hep::SimCalorimeterHitCollection> m_Edeps{"SimCalorimeterHits", Gaudi::DataHandle::Writer, this};
-  mutable DataHandle<edm4hep::SimCalorimeterHitCollection> m_Edeps3d{"Sim3dCalorimeterHits", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::SimCalorimeterHitCollection> m_Edeps{"SimCalorimeterHits", Gaudi::DataHandle::Writer,
+                                                                   this};
+  mutable DataHandle<edm4hep::SimCalorimeterHitCollection> m_Edeps3d{"Sim3dCalorimeterHits", Gaudi::DataHandle::Writer,
+                                                                     this};
   mutable DataHandle<edm4hep::MCParticleCollection> m_Leakages{"Leakages", Gaudi::DataHandle::Writer, this};
 
   drc::SimG4DRcaloEventAction* m_eventAction;

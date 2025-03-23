@@ -9,7 +9,7 @@
 DECLARE_COMPONENT(SimG4SaveDRcaloHits)
 
 SimG4SaveDRcaloHits::SimG4SaveDRcaloHits(const std::string& aType, const std::string& aName, const IInterface* aParent)
-: AlgTool(aType, aName, aParent), m_geoSvc("GeoSvc", aName) {
+    : AlgTool(aType, aName, aParent), m_geoSvc("GeoSvc", aName) {
   declareInterface<ISimG4SaveOutputTool>(this);
 }
 
@@ -72,8 +72,8 @@ StatusCode SimG4SaveDRcaloHits::saveOutput(const G4Event& aEvent) {
           auto& timemap = hit->GetTimeStruct();
           timeStruct.setInterval(samplingT);
           timeStruct.setTime(timeStart);
-          timeStruct.setCharge( static_cast<float>(hit->GetPhotonCount()) );
-          timeStruct.setCellID( cellID );
+          timeStruct.setCharge(static_cast<float>(hit->GetPhotonCount()));
+          timeStruct.setCellID(cellID);
 
           // abuse time series for saving wavelength spectrum (for R&D purpose)
           float samplingW = hit->GetSamplingWavlen();
@@ -82,24 +82,24 @@ StatusCode SimG4SaveDRcaloHits::saveOutput(const G4Event& aEvent) {
           auto& wavmap = hit->GetWavlenSpectrum();
           wavStruct.setInterval(samplingW);
           wavStruct.setTime(wavMin);
-          wavStruct.setCharge( static_cast<float>(hit->GetPhotonCount()) );
-          wavStruct.setCellID( cellID );
+          wavStruct.setCharge(static_cast<float>(hit->GetPhotonCount()));
+          wavStruct.setCellID(cellID);
 
-          unsigned nbinTime = static_cast<unsigned>((timeEnd-timeStart)/samplingT);
-          unsigned nbinWav = static_cast<unsigned>((wavMax-wavMin)/samplingW);
+          unsigned nbinTime = static_cast<unsigned>((timeEnd - timeStart) / samplingT);
+          unsigned nbinWav = static_cast<unsigned>((wavMax - wavMin) / samplingW);
           int peakTime = 0.;
           int peakVal = 0;
 
           // same as the ROOT TH1 binning scheme (0: underflow, nbin+1:overflow)
-          for (unsigned itime = 1; itime < nbinTime+1; itime++) {
+          for (unsigned itime = 1; itime < nbinTime + 1; itime++) {
             int count = 0;
 
-            if ( timemap.find(itime)!=timemap.end() )
+            if (timemap.find(itime) != timemap.end())
               count = timemap.at(itime);
 
-            int candidate = std::max( peakVal, count );
+            int candidate = std::max(peakVal, count);
 
-            if ( peakVal < candidate ) {
+            if (peakVal < candidate) {
               peakVal = candidate;
               peakTime = itime;
             }
@@ -107,18 +107,18 @@ StatusCode SimG4SaveDRcaloHits::saveOutput(const G4Event& aEvent) {
             timeStruct.addToAdcCounts(count);
           }
 
-          for (unsigned iwav = 1; iwav < nbinWav+1; iwav++) {
+          for (unsigned iwav = 1; iwav < nbinWav + 1; iwav++) {
             int count = 0;
 
-            if ( wavmap.find(iwav)!=wavmap.end() )
+            if (wavmap.find(iwav) != wavmap.end())
               count = wavmap.at(iwav);
 
             wavStruct.addToAdcCounts(count);
           }
 
-          caloHit.setCellID( cellID );
-          caloHit.setAmplitude( hit->GetPhotonCount() );
-          caloHit.setTimeStamp( peakTime-1 + static_cast<int>(timeStart/samplingT) );
+          caloHit.setCellID(cellID);
+          caloHit.setAmplitude(hit->GetPhotonCount());
+          caloHit.setTimeStamp(peakTime - 1 + static_cast<int>(timeStart / samplingT));
         }
       }
     }

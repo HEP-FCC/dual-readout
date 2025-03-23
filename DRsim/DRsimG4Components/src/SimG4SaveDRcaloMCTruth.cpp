@@ -4,8 +4,9 @@
 
 DECLARE_COMPONENT(SimG4SaveDRcaloMCTruth)
 
-SimG4SaveDRcaloMCTruth::SimG4SaveDRcaloMCTruth(const std::string& aType, const std::string& aName, const IInterface* aParent)
-: AlgTool(aType, aName, aParent), m_geantSvc("SimG4Svc", aName) {
+SimG4SaveDRcaloMCTruth::SimG4SaveDRcaloMCTruth(const std::string& aType, const std::string& aName,
+                                               const IInterface* aParent)
+    : AlgTool(aType, aName, aParent), m_geantSvc("SimG4Svc", aName) {
   declareInterface<ISimG4SaveOutputTool>(this);
 }
 

@@ -33,7 +33,8 @@ private:
   std::unique_ptr<TH1D> m_veloC;
   std::unique_ptr<TH1D> m_veloS;
 
-  mutable DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Reader, this};
+  mutable DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Reader,
+                                                                   this};
   mutable DataHandle<edm4hep::TimeSeriesCollection> m_waveforms{"DigiWaveforms", Gaudi::DataHandle::Reader, this};
   mutable DataHandle<edm4hep::CalorimeterHitCollection> m_2dHits{"DRcalo2dHits", Gaudi::DataHandle::Reader, this};
   mutable DataHandle<edm4hep::CalorimeterHitCollection> m_caloHits{"DRcalo3dHits", Gaudi::DataHandle::Writer, this};

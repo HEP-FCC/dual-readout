@@ -1,10 +1,10 @@
 #include "SimG4DRcaloActionInitialization.h"
-#include "SimG4DRcaloSteppingAction.h"
-#include "SimG4DRcaloEventAction.h"
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "SimG4DRcaloEventAction.h"
+#include "SimG4DRcaloSteppingAction.h"
 
 namespace drc {
-SimG4DRcaloActionInitialization::SimG4DRcaloActionInitialization(): G4VUserActionInitialization() {}
+SimG4DRcaloActionInitialization::SimG4DRcaloActionInitialization() : G4VUserActionInitialization() {}
 
 SimG4DRcaloActionInitialization::~SimG4DRcaloActionInitialization() {}
 
@@ -23,6 +23,8 @@ void SimG4DRcaloActionInitialization::Build() const {
   eventAction->setSteppingAction(steppingAction);
   SetUserAction(eventAction);
 
-  G4Material::GetMaterial(m_scintName)->GetIonisation()->SetBirksConstant(m_birks*CLHEP::millimeter/CLHEP::MeV); // makeshift for DD4hep
+  G4Material::GetMaterial(m_scintName)
+      ->GetIonisation()
+      ->SetBirksConstant(m_birks * CLHEP::millimeter / CLHEP::MeV); // makeshift for DD4hep
 }
-}
+} // namespace drc

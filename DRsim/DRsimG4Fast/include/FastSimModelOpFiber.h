@@ -1,17 +1,17 @@
 #ifndef FastSimModelOpFiber_h
 #define FastSimModelOpFiber_h 1
 
-#include "G4VFastSimulationModel.hh"
-#include "G4OpBoundaryProcess.hh"
 #include "G4GenericMessenger.hh"
-#include "G4OpBoundaryProcess.hh"
-#include "G4OpAbsorption.hh"
-#include "G4OpWLS.hh"
 #include "G4Material.hh"
+#include "G4OpAbsorption.hh"
+#include "G4OpBoundaryProcess.hh"
+#include "G4OpWLS.hh"
+#include "G4VFastSimulationModel.hh"
 
 struct FastFiberData {
 public:
-  FastFiberData(G4int, G4double, G4double, G4double, G4ThreeVector, G4ThreeVector, G4ThreeVector, G4int status=G4OpBoundaryProcessStatus::Undefined);
+  FastFiberData(G4int, G4double, G4double, G4double, G4ThreeVector, G4ThreeVector, G4ThreeVector,
+                G4int status = G4OpBoundaryProcessStatus::Undefined);
   ~FastFiberData() {}
 
   void reset();
@@ -28,7 +28,7 @@ public:
   G4double GetStepLengthInterval() { return mStepLengthInterval; }
   void AddStepLengthInterval(G4double in) { mStepLengthInterval += in; }
 
-  G4bool checkRepetitive(const FastFiberData, G4bool checkInterval=true);
+  G4bool checkRepetitive(const FastFiberData, G4bool checkInterval = true);
 
   G4int trackID;
   G4double kineticEnergy;
@@ -37,6 +37,7 @@ public:
   G4ThreeVector globalPosition;
   G4ThreeVector momentumDirection;
   G4ThreeVector polarization;
+
 private:
   G4int mOpBoundaryStatus;
   G4double mOpAbsorptionNumIntLenLeft;

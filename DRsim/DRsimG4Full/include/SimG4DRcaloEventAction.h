@@ -1,8 +1,8 @@
 #ifndef SimG4DRcaloEventAction_h
 #define SimG4DRcaloEventAction_h 1
 
-#include "G4UserEventAction.hh"
 #include "G4Event.hh"
+#include "G4UserEventAction.hh"
 
 #include "SimG4DRcaloSteppingAction.h"
 
@@ -32,6 +32,6 @@ private:
   edm4hep::SimCalorimeterHitCollection* m_Edeps3d;
   edm4hep::MCParticleCollection* m_Leakages;
 };
-}
+} // namespace drc
 
 #endif

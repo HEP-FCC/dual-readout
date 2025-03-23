@@ -3,11 +3,11 @@
 
 #include "DRparamBase.h"
 
-#include "TVector3.h"
 #include "DD4hep/DetFactoryHelper.h"
+#include "TVector3.h"
 
-#include <vector>
 #include <cmath>
+#include <vector>
 
 namespace dd4hep {
 namespace DDSegmentation {
@@ -21,7 +21,7 @@ namespace DDSegmentation {
 
     virtual void init() override;
   };
-}
-}
+} // namespace DDSegmentation
+} // namespace dd4hep
 
 #endif

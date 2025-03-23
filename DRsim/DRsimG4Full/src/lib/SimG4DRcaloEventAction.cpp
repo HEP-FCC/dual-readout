@@ -3,7 +3,7 @@
 #include "G4RunManager.hh"
 
 namespace drc {
-SimG4DRcaloEventAction::SimG4DRcaloEventAction(): G4UserEventAction() {}
+SimG4DRcaloEventAction::SimG4DRcaloEventAction() : G4UserEventAction() {}
 
 SimG4DRcaloEventAction::~SimG4DRcaloEventAction() {}
 
