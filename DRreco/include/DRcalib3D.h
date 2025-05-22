@@ -12,6 +12,7 @@
 #include "GridDRcalo.h"
 #include "k4Interface/IGeoSvc.h"
 
+class TH1;
 class TH1D;
 class IGeoSvc;
 
