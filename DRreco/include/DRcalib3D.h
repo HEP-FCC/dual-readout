@@ -34,12 +34,16 @@ private:
   std::unique_ptr<TH1D> m_veloC;
   std::unique_ptr<TH1D> m_veloS;
 
-  mutable DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Reader,
-                                                                   this};
-  mutable DataHandle<edm4hep::TimeSeriesCollection> m_waveforms{"DigiWaveforms", Gaudi::DataHandle::Reader, this};
-  mutable DataHandle<edm4hep::CalorimeterHitCollection> m_2dHits{"DRcalo2dHits", Gaudi::DataHandle::Reader, this};
-  mutable DataHandle<edm4hep::CalorimeterHitCollection> m_caloHits{"DRcalo3dHits", Gaudi::DataHandle::Writer, this};
-  mutable DataHandle<edm4hep::TimeSeriesCollection> m_postprocTime{"DRpostprocTime", Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits",
+                                                                             Gaudi::DataHandle::Reader, this};
+  mutable k4FWCore::DataHandle<edm4hep::TimeSeriesCollection> m_waveforms{"DigiWaveforms", Gaudi::DataHandle::Reader,
+                                                                          this};
+  mutable k4FWCore::DataHandle<edm4hep::CalorimeterHitCollection> m_2dHits{"DRcalo2dHits", Gaudi::DataHandle::Reader,
+                                                                           this};
+  mutable k4FWCore::DataHandle<edm4hep::CalorimeterHitCollection> m_caloHits{"DRcalo3dHits", Gaudi::DataHandle::Writer,
+                                                                             this};
+  mutable k4FWCore::DataHandle<edm4hep::TimeSeriesCollection> m_postprocTime{"DRpostprocTime",
+                                                                             Gaudi::DataHandle::Writer, this};
 
   Gaudi::Property<std::string> m_readoutName{this, "readoutName", "DRcaloSiPMreadout", "readout name of DRcalo"};
   Gaudi::Property<std::string> m_veloFile{this, "veloFile", "share/velo.root", "velocity profile file name"};

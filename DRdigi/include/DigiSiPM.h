@@ -28,13 +28,15 @@ public:
   StatusCode finalize();
 
 private:
-  mutable DataHandle<edm4hep::RawCalorimeterHitCollection> m_rawHits{"RawCalorimeterHits", Gaudi::DataHandle::Reader,
-                                                                     this};
-  mutable DataHandle<edm4hep::RawTimeSeriesCollection> m_timeStruct{"RawTimeStructs", Gaudi::DataHandle::Reader, this};
+  mutable k4FWCore::DataHandle<edm4hep::RawCalorimeterHitCollection> m_rawHits{"RawCalorimeterHits",
+                                                                               Gaudi::DataHandle::Reader, this};
+  mutable k4FWCore::DataHandle<edm4hep::RawTimeSeriesCollection> m_timeStruct{"RawTimeStructs",
+                                                                              Gaudi::DataHandle::Reader, this};
 
-  mutable DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Writer,
-                                                                   this};
-  mutable DataHandle<edm4hep::TimeSeriesCollection> m_waveforms{"DigiWaveforms", Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits",
+                                                                             Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::TimeSeriesCollection> m_waveforms{"DigiWaveforms", Gaudi::DataHandle::Writer,
+                                                                          this};
 
   std::unique_ptr<sipm::SiPMSensor> m_sensor;
 
