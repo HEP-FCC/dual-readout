@@ -31,9 +31,10 @@ private:
   dd4hep::DDSegmentation::GridDRcalo* pSeg;
   mutable dd4hep::DDSegmentation::DRparamBase* pParamBase;
 
-  mutable DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits", Gaudi::DataHandle::Reader,
-                                                                   this};
-  mutable DataHandle<edm4hep::CalorimeterHitCollection> m_caloHits{"DRcalo2dHits", Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::CalorimeterHitCollection> m_digiHits{"DigiCalorimeterHits",
+                                                                             Gaudi::DataHandle::Reader, this};
+  mutable k4FWCore::DataHandle<edm4hep::CalorimeterHitCollection> m_caloHits{"DRcalo2dHits", Gaudi::DataHandle::Writer,
+                                                                             this};
 
   Gaudi::Property<std::string> m_calibPath{this, "calibPath", "share/calib.csv",
                                            "relative path to calibration csv file"};

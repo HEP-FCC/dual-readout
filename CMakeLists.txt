@@ -31,7 +31,7 @@ find_package(ROOT REQUIRED)
 find_package(podio REQUIRED HINTS $ENV{PODIO})
 find_package(Gaudi REQUIRED)
 find_package(EDM4HEP)
-find_package(k4FWCore REQUIRED)
+find_package(k4FWCore 1.3 REQUIRED)
 find_package(sipm REQUIRED)
 
 set(BOOST_ROOT "$ENV{BOOST_ROOT}")

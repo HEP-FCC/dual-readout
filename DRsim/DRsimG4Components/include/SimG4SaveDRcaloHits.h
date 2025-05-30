@@ -31,11 +31,12 @@ private:
   Gaudi::Property<std::vector<std::string>> m_readoutNames{
       this, "readoutNames", {"DRcaloSiPMreadout"}, "Name of the readouts (hits collections) to save"};
 
-  mutable DataHandle<edm4hep::RawCalorimeterHitCollection> mRawCaloHits{"RawCalorimeterHits", Gaudi::DataHandle::Writer,
-                                                                        this};
-  mutable DataHandle<edm4hep::RawTimeSeriesCollection> mTimeStruct{"RawTimeStructs", Gaudi::DataHandle::Writer, this};
-  mutable DataHandle<edm4hep::RawTimeSeriesCollection> mWavlenStruct{"RawWavlenStructs", Gaudi::DataHandle::Writer,
-                                                                     this};
+  mutable k4FWCore::DataHandle<edm4hep::RawCalorimeterHitCollection> mRawCaloHits{"RawCalorimeterHits",
+                                                                                  Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::RawTimeSeriesCollection> mTimeStruct{"RawTimeStructs",
+                                                                             Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::RawTimeSeriesCollection> mWavlenStruct{"RawWavlenStructs",
+                                                                               Gaudi::DataHandle::Writer, this};
 };
 
 #endif
